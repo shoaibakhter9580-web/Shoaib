@@ -6,6 +6,8 @@
   <title>Shoaib Akhter — Admin Management</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- PDF.js for reading uploaded quiz PDFs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
     body { font-family: 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at 50% 0%, #ece2fb 0%, #f6f3fb 35%, #fbfafc 100%); color: #1e1b2e; min-height: 100vh; }
@@ -32,13 +34,16 @@
       </div>
 
       <div class="flex items-center gap-2 sm:gap-3">
-        <!-- Files / Folders Toggle -->
+        <!-- Files / Folders / Quiz Navigation Toggle -->
         <div class="flex bg-slate-200/60 p-1 rounded-xl text-xs font-semibold text-slate-600">
           <button id="tabFilesBtn" onclick="switchPortalTab('files')" class="px-3.5 py-1.5 rounded-lg bg-white text-purple-900 shadow-sm transition">
             <i class="fa-regular fa-file-lines mr-1.5"></i> Files
           </button>
           <button id="tabFoldersBtn" onclick="switchPortalTab('folders')" class="px-3.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition">
             <i class="fa-regular fa-folder mr-1.5"></i> Folders
+          </button>
+          <button id="tabQuizBtn" onclick="switchPortalTab('quiz')" class="px-3.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition">
+            <i class="fa-regular fa-circle-question mr-1.5"></i> Quiz
           </button>
         </div>
 
@@ -116,8 +121,49 @@
       </div>
 
       <!-- Dynamic Folders Container -->
-      <div id="foldersGridContainer" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5 pt-2">
-        <!-- Rendered by JavaScript -->
+      <div id="foldersGridContainer" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5 pt-2"></div>
+    </section>
+
+    <!-- QUIZ TAB SECTION -->
+    <section id="tabQuizContent" class="space-y-6 hidden">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-2xl font-serif-title font-bold text-slate-900">Quiz Manager</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Upload MCQ Question PDFs for students (Right answers marked with a dot '.')</p>
+        </div>
+        <!-- Hidden file input & Upload button -->
+        <input type="file" id="quizFileInput" accept=".pdf,.txt" class="hidden" onchange="processQuizUpload(event)" />
+        <button onclick="document.getElementById('quizFileInput').click()" class="px-4 py-2.5 rounded-xl bg-purple-900 hover:bg-purple-800 text-white text-xs font-semibold flex items-center gap-2 shadow-sm transition">
+          <i class="fa-solid fa-file-circle-plus text-sm"></i>
+          <span>Upload Quiz PDF</span>
+        </button>
+      </div>
+
+      <!-- Active Quiz Card -->
+      <div class="soft-card p-5 rounded-2xl border border-purple-100/80">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-purple-50">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <h3 id="currentQuizTitle" class="text-sm font-bold text-slate-900">No active quiz uploaded</h3>
+            </div>
+            <p id="currentQuizMeta" class="text-xs text-slate-500 mt-0.5">Upload a PDF to publish an MCQ test to studenton/quiz.html</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <a href="quiz.html" target="_blank" class="px-3.5 py-1.5 rounded-lg border border-purple-200 text-purple-700 hover:bg-purple-50 text-xs font-semibold flex items-center gap-1.5 transition">
+              <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> View Student Quiz
+            </a>
+            <button onclick="clearCurrentQuiz()" class="px-3.5 py-1.5 rounded-lg border border-rose-100 bg-rose-50/50 hover:bg-rose-100 text-rose-600 text-xs font-semibold transition">
+              <i class="fa-solid fa-trash-can text-[10px] mr-1"></i> Delete
+            </button>
+          </div>
+        </div>
+
+        <!-- Questions Preview -->
+        <div class="pt-4">
+          <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Questions in current test</h4>
+          <div id="quizPreviewContainer" class="space-y-2.5 max-h-96 overflow-y-auto pr-1"></div>
+        </div>
       </div>
     </section>
   </div>
@@ -156,9 +202,7 @@
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Folder</label>
-            <select id="fileFolderDest" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-800 focus:outline-none">
-              <!-- Dynamically populated -->
-            </select>
+            <select id="fileFolderDest" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-800 focus:outline-none"></select>
           </div>
 
           <div>
@@ -215,6 +259,9 @@
   </div>
 
   <script>
+    // PDF.js configuration
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
     let db;
     let currentFilter = 'all';
 
@@ -319,7 +366,7 @@
       const filesInFolder = all.filter(f => f.folder === folderName);
 
       const msg = filesInFolder.length > 0
-        ? `"${folderName}" folder me ${filesInFolder.length} files hain. Kya aap sach me ise delete karna chahte hain? (Files retain rahengi par category hat jayegi)`
+        ? `"${folderName}" folder me ${filesInFolder.length} files hain. Kya aap sach me ise delete karna chahte hain?`
         : `Kya aap "${folderName}" folder ko delete karna chahte hain?`;
 
       if (confirm(msg)) {
@@ -348,7 +395,6 @@
         card.onclick = () => openFolder(folder);
 
         card.innerHTML = `
-          <!-- Delete Folder Button -->
           <button onclick="event.stopPropagation(); deleteFolder('${folder}')" 
                   title="Delete Folder" 
                   class="absolute top-2.5 right-2.5 w-6 h-6 rounded-lg bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white flex items-center justify-center text-[10px] transition opacity-0 group-hover:opacity-100 shadow-xs">
@@ -549,23 +595,38 @@
       renderFilesList(currentFilter, document.getElementById("fileSearchInput").value);
     }
 
+    // TAB CONTROLS (Files / Folders / Quiz)
     function switchPortalTab(tab) {
       const filesSec = document.getElementById("tabFilesContent");
       const foldersSec = document.getElementById("tabFoldersContent");
+      const quizSec = document.getElementById("tabQuizContent");
+
       const btnFiles = document.getElementById("tabFilesBtn");
       const btnFolders = document.getElementById("tabFoldersBtn");
+      const btnQuiz = document.getElementById("tabQuizBtn");
+
+      const inactiveClass = "px-3.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition";
+      const activeClass = "px-3.5 py-1.5 rounded-lg bg-white text-purple-900 shadow-sm transition";
+
+      filesSec.classList.add("hidden");
+      foldersSec.classList.add("hidden");
+      quizSec.classList.add("hidden");
+
+      btnFiles.className = inactiveClass;
+      btnFolders.className = inactiveClass;
+      btnQuiz.className = inactiveClass;
 
       if (tab === 'files') {
         filesSec.classList.remove("hidden");
-        foldersSec.classList.add("hidden");
-        btnFiles.className = "px-3.5 py-1.5 rounded-lg bg-white text-purple-900 shadow-sm transition";
-        btnFolders.className = "px-3.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition";
-      } else {
-        filesSec.classList.add("hidden");
+        btnFiles.className = activeClass;
+      } else if (tab === 'folders') {
         foldersSec.classList.remove("hidden");
-        btnFolders.className = "px-3.5 py-1.5 rounded-lg bg-white text-purple-900 shadow-sm transition";
-        btnFiles.className = "px-3.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition";
+        btnFolders.className = activeClass;
         renderFolders();
+      } else if (tab === 'quiz') {
+        quizSec.classList.remove("hidden");
+        btnQuiz.className = activeClass;
+        renderQuizPreview();
       }
     }
 
@@ -583,6 +644,146 @@
       if (confirm("Log out from Management mode?")) {
         sessionStorage.removeItem("shoaib_admin_auth");
         window.location.href = "nitrence.html";
+      }
+    }
+
+    // ==========================================
+    // QUIZ PDF PARSER (WITH DOT . DETECTION)
+    // ==========================================
+    async function processQuizUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      let extractedText = "";
+
+      try {
+        if (file.type === "application/pdf" || file.name.endsWith('.pdf')) {
+          const arrayBuffer = await file.arrayBuffer();
+          const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+          for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const textContent = await page.getTextContent();
+            const pageStr = textContent.items.map(item => item.str).join(' ');
+            extractedText += pageStr + "\n";
+          }
+        } else {
+          extractedText = await file.text();
+        }
+
+        const questions = parseMCQWithDotRule(extractedText);
+        if (questions.length === 0) {
+          alert("Could not detect MCQ format. Make sure questions start with numbers (e.g., '1.') and options with letters (e.g., 'A)', 'B)'), with a full stop '.' marking the correct answer.");
+          return;
+        }
+
+        const quizName = file.name.replace(/\.[^/.]+$/, "");
+        localStorage.setItem("classroom_quiz_questions", JSON.stringify(questions));
+        localStorage.setItem("quiz_title", quizName);
+
+        alert(`✅ Success! ${questions.length} questions parsed. Quiz is now LIVE on studenton.html / quiz.html!`);
+        renderQuizPreview();
+      } catch (err) {
+        console.error(err);
+        alert("Failed to read file: " + err.message);
+      } finally {
+        event.target.value = "";
+      }
+    }
+
+    // Parser: Detects MCQs and identifies the right option if it ends with a dot '.'
+    function parseMCQWithDotRule(rawText) {
+      const lines = rawText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      const parsed = [];
+      let currentQ = null;
+
+      for (let line of lines) {
+        // Question header: e.g., "1. What is..." or "Q1: What is..."
+        const qMatch = line.match(/^(?:Q\d+[\.:]|\d+[\.:])\s*(.+)/i);
+        if (qMatch) {
+          if (currentQ && currentQ.options.length >= 2) {
+            parsed.push(currentQ);
+          }
+          currentQ = {
+            question: qMatch[1].trim(),
+            options: [],
+            answer: 0
+          };
+          continue;
+        }
+
+        // Option line: e.g. "A) Answer." or "(B) Answer" or "C. Answer"
+        const optMatch = line.match(/^[\(\[]?([A-Da-d0-4])[\)\].:-]\s*(.+)/);
+        if (optMatch && currentQ) {
+          let optText = optMatch[2].trim();
+          let isCorrect = false;
+
+          // Check if option ends with a dot (.) or has special symbol
+          if (optText.endsWith('.') || optText.endsWith('•') || optText.endsWith('*')) {
+            isCorrect = true;
+            // Clean dot so student portal doesn't spoil answer
+            optText = optText.replace(/[\.\*•]$/, '').trim();
+          }
+
+          const optIndex = currentQ.options.length;
+          currentQ.options.push(optText);
+          if (isCorrect) {
+            currentQ.answer = optIndex;
+          }
+        }
+      }
+
+      if (currentQ && currentQ.options.length >= 2) {
+        parsed.push(currentQ);
+      }
+      return parsed;
+    }
+
+    function renderQuizPreview() {
+      const container = document.getElementById("quizPreviewContainer");
+      const titleElem = document.getElementById("currentQuizTitle");
+      const metaElem = document.getElementById("currentQuizMeta");
+
+      const stored = localStorage.getItem("classroom_quiz_questions");
+      const title = localStorage.getItem("quiz_title") || "Untitled Quiz";
+
+      if (!stored) {
+        titleElem.innerText = "No active quiz uploaded";
+        metaElem.innerText = "Upload a PDF above to create an MCQ quiz.";
+        container.innerHTML = `<p class="text-xs text-slate-400 py-6 text-center">No questions found.</p>`;
+        return;
+      }
+
+      const questions = JSON.parse(stored);
+      titleElem.innerText = title;
+      metaElem.innerText = `${questions.length} questions live on student portal`;
+
+      container.innerHTML = "";
+      questions.forEach((q, qIdx) => {
+        const item = document.createElement("div");
+        item.className = "p-3 bg-purple-50/50 rounded-xl border border-purple-100/70 text-xs";
+        
+        let optsHtml = q.options.map((opt, oIdx) => {
+          const isAns = oIdx === q.answer;
+          return `<div class="flex items-center gap-2 mt-1 ${isAns ? 'font-bold text-emerald-700' : 'text-slate-600'}">
+                    <span>${String.fromCharCode(65 + oIdx)})</span>
+                    <span>${opt}</span>
+                    ${isAns ? '<span class="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold">CORRECT (has dot)</span>' : ''}
+                  </div>`;
+        }).join("");
+
+        item.innerHTML = `
+          <p class="font-bold text-slate-900">${qIdx + 1}. ${q.question}</p>
+          <div class="mt-1 pl-2 border-l-2 border-purple-200">${optsHtml}</div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function clearCurrentQuiz() {
+      if (confirm("Are you sure you want to remove the current quiz from student portal?")) {
+        localStorage.removeItem("classroom_quiz_questions");
+        localStorage.removeItem("quiz_title");
+        renderQuizPreview();
       }
     }
 
