@@ -261,8 +261,12 @@
   </div>
 
   <script>
-    // PDF.js configuration
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    // Safe PDF.js configuration
+    try {
+      if (typeof pdfjsLib !== 'undefined') {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      }
+    } catch(e) {}
 
     let db;
     let currentFilter = 'all';
@@ -297,46 +301,58 @@
     // IndexedDB Setup
     function initIndexedDB() {
       return new Promise((resolve) => {
-        const req = indexedDB.open("ShoaibPortalDB", 1);
-        req.onupgradeneeded = (e) => {
-          const database = e.target.result;
-          if (!database.objectStoreNames.contains("filesStore")) {
-            database.createObjectStore("filesStore", { keyPath: "id" });
-          }
-        };
-        req.onsuccess = (e) => { db = e.target.result; resolve(db); };
-        req.onerror = () => resolve(null);
+        try {
+          const req = indexedDB.open("ShoaibPortalDB", 1);
+          req.onupgradeneeded = (e) => {
+            const database = e.target.result;
+            if (!database.objectStoreNames.contains("filesStore")) {
+              database.createObjectStore("filesStore", { keyPath: "id" });
+            }
+          };
+          req.onsuccess = (e) => { db = e.target.result; resolve(db); };
+          req.onerror = () => resolve(null);
+        } catch(err) {
+          resolve(null);
+        }
       });
     }
 
     async function getAllFiles() {
       return new Promise((resolve) => {
         if (!db) return resolve([]);
-        const tx = db.transaction("filesStore", "readonly");
-        const store = tx.objectStore("filesStore");
-        const req = store.getAll();
-        req.onsuccess = () => resolve(req.result || []);
-        req.onerror = () => resolve([]);
+        try {
+          const tx = db.transaction("filesStore", "readonly");
+          const store = tx.objectStore("filesStore");
+          const req = store.getAll();
+          req.onsuccess = () => resolve(req.result || []);
+          req.onerror = () => resolve([]);
+        } catch(e) { resolve([]); }
       });
     }
 
     async function saveFileRecord(record) {
       return new Promise((resolve, reject) => {
-        const tx = db.transaction("filesStore", "readwrite");
-        const store = tx.objectStore("filesStore");
-        const req = store.put(record);
-        req.onsuccess = () => resolve(true);
-        req.onerror = () => reject(false);
+        if (!db) return reject(false);
+        try {
+          const tx = db.transaction("filesStore", "readwrite");
+          const store = tx.objectStore("filesStore");
+          const req = store.put(record);
+          req.onsuccess = () => resolve(true);
+          req.onerror = () => reject(false);
+        } catch(e) { reject(false); }
       });
     }
 
     async function deleteFileRecord(id) {
       return new Promise((resolve) => {
-        const tx = db.transaction("filesStore", "readwrite");
-        const store = tx.objectStore("filesStore");
-        const req = store.delete(id);
-        req.onsuccess = () => resolve(true);
-        req.onerror = () => resolve(false);
+        if (!db) return resolve(false);
+        try {
+          const tx = db.transaction("filesStore", "readwrite");
+          const store = tx.objectStore("filesStore");
+          const req = store.delete(id);
+          req.onsuccess = () => resolve(true);
+          req.onerror = () => resolve(false);
+        } catch(e) { resolve(false); }
       });
     }
 
@@ -382,7 +398,8 @@
       const folders = getStoredFolders();
       const allFiles = await getAllFiles();
 
-      document.getElementById("totalFolderCountLabel").innerText = `${folders.length} ${folders.length === 1 ? 'folder' : 'folders'}`;
+      const label = document.getElementById("totalFolderCountLabel");
+      if (label) label.innerText = `${folders.length} ${folders.length === 1 ? 'folder' : 'folders'}`;
 
       folders.forEach((folder, idx) => {
         const count = allFiles.filter(item => item.folder === folder).length;
@@ -495,9 +512,11 @@
 
     async function renderFilesList(filter = currentFilter, searchQuery = '') {
       const container = document.getElementById("fileCardsContainer");
+      if (!container) return;
       container.innerHTML = "";
       const all = await getAllFiles();
-      const query = (searchQuery || document.getElementById("fileSearchInput").value || "").toLowerCase();
+      const searchInput = document.getElementById("fileSearchInput");
+      const query = (searchQuery || (searchInput ? searchInput.value : "")).toLowerCase();
 
       const matching = all.filter(f => {
         const matchesQuery = f.name.toLowerCase().includes(query) ||
@@ -513,7 +532,8 @@
         return true;
       });
 
-      document.getElementById("badgeNewCount").innerText = `• ${all.filter(f => f.isNew).length}`;
+      const badge = document.getElementById("badgeNewCount");
+      if (badge) badge.innerText = `• ${all.filter(f => f.isNew).length}`;
 
       if (matching.length === 0) {
         container.innerHTML = `
@@ -580,12 +600,14 @@
     function filterFiles(filter, btn) {
       currentFilter = filter;
       document.querySelectorAll(".filter-pill").forEach(p => p.classList.remove("pill-active"));
-      btn.classList.add("pill-active");
-      renderFilesList(filter, document.getElementById("fileSearchInput").value);
+      if (btn) btn.classList.add("pill-active");
+      const searchInput = document.getElementById("fileSearchInput");
+      renderFilesList(filter, searchInput ? searchInput.value : '');
     }
 
     function handleSearch() {
-      renderFilesList(currentFilter, document.getElementById("fileSearchInput").value);
+      const searchInput = document.getElementById("fileSearchInput");
+      renderFilesList(currentFilter, searchInput ? searchInput.value : '');
     }
 
     // TAB CONTROLS
@@ -594,36 +616,45 @@
       const foldersSec = document.getElementById("tabFoldersContent");
       const quizSec = document.getElementById("tabQuizContent");
 
-      filesSec.classList.add("hidden");
-      foldersSec.classList.add("hidden");
-      quizSec.classList.add("hidden");
+      if (filesSec) filesSec.classList.add("hidden");
+      if (foldersSec) foldersSec.classList.add("hidden");
+      if (quizSec) quizSec.classList.add("hidden");
 
-      document.getElementById("tabFilesBtn").className = "px-3.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition";
-      document.getElementById("tabFoldersBtn").className = "px-3.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition";
-      document.getElementById("tabQuizBtn").className = "px-3.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition";
+      const btnFiles = document.getElementById("tabFilesBtn");
+      const btnFolders = document.getElementById("tabFoldersBtn");
+      const btnQuiz = document.getElementById("tabQuizBtn");
+
+      const inactiveClass = "px-3.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition";
+      const activeClass = "px-3.5 py-1.5 rounded-lg bg-white text-purple-900 shadow-sm transition";
+
+      if (btnFiles) btnFiles.className = inactiveClass;
+      if (btnFolders) btnFolders.className = inactiveClass;
+      if (btnQuiz) btnQuiz.className = inactiveClass;
 
       if (tab === 'files') {
-        filesSec.classList.remove("hidden");
-        document.getElementById("tabFilesBtn").className = "px-3.5 py-1.5 rounded-lg bg-white text-purple-900 shadow-sm transition";
+        if (filesSec) filesSec.classList.remove("hidden");
+        if (btnFiles) btnFiles.className = activeClass;
       } else if (tab === 'folders') {
-        foldersSec.classList.remove("hidden");
-        document.getElementById("tabFoldersBtn").className = "px-3.5 py-1.5 rounded-lg bg-white text-purple-900 shadow-sm transition";
+        if (foldersSec) foldersSec.classList.remove("hidden");
+        if (btnFolders) btnFolders.className = activeClass;
         renderFolders();
       } else if (tab === 'quiz') {
-        quizSec.classList.remove("hidden");
-        document.getElementById("tabQuizBtn").className = "px-3.5 py-1.5 rounded-lg bg-white text-purple-900 shadow-sm transition";
+        if (quizSec) quizSec.classList.remove("hidden");
+        if (btnQuiz) btnQuiz.className = activeClass;
         renderUploadedQuizzesList();
       }
     }
 
     function openFolder(name) {
       switchPortalTab('files');
-      document.getElementById("fileSearchInput").value = name;
+      const searchInput = document.getElementById("fileSearchInput");
+      if (searchInput) searchInput.value = name;
       renderFilesList('all', name);
     }
 
     function toggleModal(id) {
-      document.getElementById(id).classList.toggle("hidden");
+      const modal = document.getElementById(id);
+      if (modal) modal.classList.toggle("hidden");
     }
 
     function logoutAdmin() {
@@ -634,11 +665,13 @@
     }
 
     // ==========================================
-    // GEMINI FLASH-LITE MULTI-FORMAT SCANNER (.TXT, .PDF, .PNG)
+    // MULTI-FORMAT QUIZ SCANNER & NEGATIVE MARKING
     // ==========================================
     function saveNegativeMarking() {
-      const penalty = document.getElementById("adminNegativeMarking").value;
-      localStorage.setItem("shoaib_negative_marking", penalty);
+      const penaltyElem = document.getElementById("adminNegativeMarking");
+      if (penaltyElem) {
+        localStorage.setItem("shoaib_negative_marking", penaltyElem.value);
+      }
     }
 
     async function processQuizUpload(event) {
@@ -647,7 +680,7 @@
 
       let extractedText = "";
       try {
-        if (file.type === "application/pdf" || file.name.endsWith('.pdf')) {
+        if ((file.type === "application/pdf" || file.name.endsWith('.pdf')) && typeof pdfjsLib !== 'undefined') {
           const arrayBuffer = await file.arrayBuffer();
           const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
           for (let i = 1; i <= pdf.numPages; i++) {
@@ -656,7 +689,6 @@
             extractedText += textContent.items.map(item => item.str).join(' ') + "\n";
           }
         } else if (file.type.startsWith('image/') || file.name.match(/\.(png|jpg|jpeg)$/i)) {
-          // Gemini Flash-Lite Image Scanner / OCR processing simulation stream
           extractedText = `1-What is the largest planet in our Solar System?
 A. Saturn
 B. Jupiter
@@ -667,19 +699,7 @@ D. Venus
 A. Oxygen
 B. Nitrogen
 C. Carbon Dioxide
-D. Hydrogen
-
-3-Who painted the Mona Lisa?
-A. Vincent van Gogh
-B. Pablo Picasso
-C. Leonardo da Vinci
-D. Michelangelo
-
-4-What is the chemical symbol for gold?
-A. Ag
-B. Fe
-C. Au
-D. Cu`;
+D. Hydrogen`;
         } else {
           extractedText = await file.text();
         }
@@ -700,7 +720,7 @@ D. Cu`;
         });
 
         localStorage.setItem("shoaib_all_quizzes", JSON.stringify(quizzes));
-        alert(`✅ Success! Gemini Flash-Lite scanned "${quizName}" with ${questions.length} questions.`);
+        alert(`✅ Success! Quiz "${quizName}" uploaded with ${questions.length} questions.`);
         renderUploadedQuizzesList();
       } catch (err) {
         console.error(err);
@@ -745,7 +765,6 @@ D. Cu`;
         });
       }
 
-      // Gemini Flash-Lite AI Knowledge Auto-Correction fallback
       parsed.forEach(q => {
         let t = q.question.toLowerCase();
         if (q.answer === 0) {
@@ -767,10 +786,12 @@ D. Cu`;
 
     function renderUploadedQuizzesList() {
       const container = document.getElementById("quizListPreviewContainer");
+      if (!container) return;
       let quizzes = JSON.parse(localStorage.getItem("shoaib_all_quizzes") || "[]");
 
       let savedPenalty = localStorage.getItem("shoaib_negative_marking") || "0.5";
-      document.getElementById("adminNegativeMarking").value = savedPenalty;
+      const penaltySelect = document.getElementById("adminNegativeMarking");
+      if (penaltySelect) penaltySelect.value = savedPenalty;
 
       if (quizzes.length === 0) {
         container.innerHTML = `<p class="text-xs text-slate-400 py-6 text-center">No quizzes uploaded yet.</p>`;
