@@ -5,112 +5,54 @@
     let allFiles = [];
     let foldersList = [];
 
-    // 1. Open IndexedDB without version lock (avoids VersionError)
+    // 1. Read the exact LocalStorage key from adminin
+    function loadTaxonomies() {
+      const raw = localStorage.getItem('shoaib_folders_list');
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw);
+          foldersList = Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+          console.error("Error parsing shoaib_folders_list:", e);
+          foldersList = [];
+        }
+      } else {
+        foldersList = [];
+      }
+    }
+
+    // 2. Open IndexedDB matching ShoaibPortalDB
     function initDB() {
       return new Promise((resolve, reject) => {
         const req = indexedDB.open("ShoaibPortalDB");
-        req.onupgradeneeded = (e) => {
-          const db = e.target.result;
-          if (!db.objectStoreNames.contains("files")) {
-            db.createObjectStore("files", { keyPath: "id", autoIncrement: true });
-          }
-          if (!db.objectStoreNames.contains("folders")) {
-            db.createObjectStore("folders", { keyPath: "id", autoIncrement: true });
-          }
-        };
         req.onsuccess = (e) => {
           dbInstance = e.target.result;
           resolve(dbInstance);
         };
         req.onerror = (e) => {
-          console.error("IndexedDB Open Failed:", e);
+          console.error("IndexedDB Open Error:", e);
           reject(e);
         };
       });
     }
 
-    // 2. Universal File Loader (reads from any store adminin wrote to)
-    async function fetchFiles() {
-      if (!dbInstance) return [];
-      const storeNames = Array.from(dbInstance.objectStoreNames);
-      const targetStore = storeNames.find(s => ['files', 'uploads', 'documents'].includes(s.toLowerCase())) || storeNames[0];
-
-      if (!targetStore || targetStore.toLowerCase() === 'folders') return [];
-
+    // 3. Read from 'filesStore'
+    function fetchFiles() {
       return new Promise((resolve) => {
+        if (!dbInstance || !dbInstance.objectStoreNames.contains("filesStore")) {
+          return resolve([]);
+        }
         try {
-          const tx = dbInstance.transaction([targetStore], "readonly");
-          const store = tx.objectStore(targetStore);
+          const tx = dbInstance.transaction(["filesStore"], "readonly");
+          const store = tx.objectStore("filesStore");
           const req = store.getAll();
-          req.onsuccess = () => {
-            const rawFiles = req.result || [];
-            // Normalize field names
-            const normalized = rawFiles.map((f, index) => ({
-              id: f.id !== undefined ? f.id : index,
-              name: f.name || f.fileName || f.filename || "Untitled File",
-              folder: f.folder || f.category || f.folderName || f.directory || "General",
-              size: f.size || (f.blob ? f.blob.size : 0) || 0,
-              date: f.date || f.uploadedAt || f.timestamp || "Recent",
-              blob: f.blob || f.file || f.data
-            }));
-            resolve(normalized);
-          };
+          req.onsuccess = () => resolve(req.result || []);
           req.onerror = () => resolve([]);
         } catch (err) {
-          console.error("Error reading file store:", err);
+          console.error("Error reading filesStore:", err);
           resolve([]);
         }
       });
-    }
-
-    // 3. Universal Folder Loader (scans LocalStorage + IndexedDB)
-    async function loadTaxonomies() {
-      const detectedFolders = new Set();
-
-      // A. Scan all LocalStorage entries
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        try {
-          const parsed = JSON.parse(localStorage.getItem(key));
-          if (Array.isArray(parsed)) {
-            parsed.forEach(item => {
-              if (typeof item === 'string' && item.trim()) detectedFolders.add(item.trim());
-              if (typeof item === 'object' && item !== null) {
-                const name = item.name || item.folder || item.title || item.folderName;
-                if (name) detectedFolders.add(name.trim());
-              }
-            });
-          }
-        } catch (e) {}
-      }
-
-      // B. Scan IndexedDB for a dedicated 'folders' store
-      if (dbInstance && dbInstance.objectStoreNames.contains("folders")) {
-        try {
-          const idbFolders = await new Promise(res => {
-            const tx = dbInstance.transaction(["folders"], "readonly");
-            const req = tx.objectStore("folders").getAll();
-            req.onsuccess = () => res(req.result || []);
-            req.onerror = () => res([]);
-          });
-          idbFolders.forEach(item => {
-            if (typeof item === 'string') detectedFolders.add(item);
-            if (typeof item === 'object' && item !== null) {
-              const name = item.name || item.folder || item.title;
-              if (name) detectedFolders.add(name);
-            }
-          });
-        } catch (e) {}
-      }
-
-      // C. Infer folders from uploaded files if no explicit folder entry exists
-      allFiles.forEach(f => {
-        if (f.folder && f.folder !== 'General') detectedFolders.add(f.folder);
-      });
-
-      foldersList = Array.from(detectedFolders);
-      console.log("[Portal Sync] Detected Folders:", foldersList);
-      console.log("[Portal Sync] Detected Files:", allFiles);
     }
 
     // 4. Tab Navigation Switcher
@@ -145,7 +87,7 @@
       }
     }
 
-    // 5. Category Chips Rendering
+    // 5. Render Folder Filter Chips
     function renderChips() {
       const container = document.getElementById('chipsContainer');
       const categories = ['All', ...foldersList];
@@ -162,14 +104,16 @@
       renderFiles();
     }
 
-    // 6. File Cards Rendering
+    // 6. Render Files Grid
     function renderFiles() {
       const container = document.getElementById('filesContainer');
       const search = (document.getElementById('searchInput').value || '').toLowerCase().trim();
 
       const filtered = allFiles.filter(file => {
-        const matchesCategory = (activeFilter === 'All') || (file.folder === activeFilter);
-        const matchesSearch = file.name && file.name.toLowerCase().includes(search);
+        const fileFolder = file.folder || 'General';
+        const matchesCategory = (activeFilter === 'All') || (fileFolder === activeFilter);
+        const fileName = (file.name || '').toLowerCase();
+        const matchesSearch = fileName.includes(search);
         return matchesCategory && matchesSearch;
       });
 
@@ -185,8 +129,10 @@
       }
 
       container.innerHTML = filtered.map(file => {
-        const sizeFormatted = file.size ? (file.size / 1024 < 1024 ? (file.size / 1024).toFixed(1) + ' KB' : (file.size / (1024 * 1024)).toFixed(1) + ' MB') : 'Document';
-        const dateFormatted = file.date || 'Recent';
+        const sizeFormatted = typeof file.size === 'string' ? file.size : (file.size ? (file.size / 1024).toFixed(1) + ' KB' : 'Document');
+        const dateFormatted = file.time || file.date || 'Recent';
+        const folderTag = file.folder || 'General';
+        const safeId = String(file.id).replace(/'/g, "\\'");
 
         return `
           <div class="file-card">
@@ -195,7 +141,7 @@
                 <div class="file-badge-icon">&#128196;</div>
                 <div class="file-info">
                   <div class="file-name" title="${file.name}">${file.name}</div>
-                  <span class="file-tag">${file.folder}</span>
+                  <span class="file-tag">${folderTag}</span>
                 </div>
               </div>
               <div class="file-meta">
@@ -203,7 +149,7 @@
                 <span>${dateFormatted}</span>
               </div>
             </div>
-            <button class="btn-download" onclick="downloadFile(${file.id})">
+            <button class="btn-download" onclick="downloadFile('${safeId}')">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                 <polyline points="7 10 12 15 17 10"></polyline>
@@ -216,7 +162,7 @@
       }).join('');
     }
 
-    // 7. Folders Grid Rendering
+    // 7. Render Folders Grid (Geography, hello, etc.)
     function renderFolders() {
       const container = document.getElementById('foldersContainer');
       if (foldersList.length === 0) {
@@ -231,7 +177,7 @@
       }
 
       container.innerHTML = foldersList.map(folderName => {
-        const count = allFiles.filter(f => f.folder === folderName).length;
+        const count = allFiles.filter(f => (f.folder || 'General') === folderName).length;
         return `
           <div class="folder-card" onclick="openFolder('${folderName}')">
             <div class="folder-icon">&#128193;</div>
@@ -253,13 +199,13 @@
       if (currentTab === 'files') renderFiles();
     }
 
-    // 8. Universal Download Trigger
+    // 8. Download File Trigger
     function downloadFile(fileId) {
-      const file = allFiles.find(f => f.id === fileId);
-      if (!file || !file.blob) return;
+      const file = allFiles.find(f => String(f.id) === String(fileId));
+      if (!file) return;
 
-      const blob = file.blob instanceof Blob ? file.blob : new Blob([file.blob], { type: "application/octet-stream" });
-      const url = URL.createObjectURL(blob);
+      const blobData = file.blob instanceof Blob ? file.blob : (file.data instanceof Blob ? file.data : new Blob([file.blob || file.data || ""], { type: "application/octet-stream" }));
+      const url = URL.createObjectURL(blobData);
       const a = document.createElement("a");
       a.href = url;
       a.download = file.name;
@@ -269,30 +215,34 @@
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
-    // 9. Cross-Tab Live Synchronization
-    window.addEventListener('storage', async () => {
-      await reloadAll();
+    // 9. Cross-tab synchronization
+    window.addEventListener('storage', async (e) => {
+      if (e.key === 'shoaib_folders_list') {
+        loadTaxonomies();
+        renderChips();
+        if (currentTab === 'folders') {
+          renderFolders();
+        } else {
+          renderFiles();
+        }
+      }
     });
 
-    async function reloadAll() {
-      allFiles = await fetchFiles();
-      await loadTaxonomies();
+    // 10. Startup Lifecycle
+    async function boot() {
+      loadTaxonomies();
       renderChips();
+      try {
+        await initDB();
+        allFiles = await fetchFiles();
+      } catch (err) {
+        console.error("Initialization error:", err);
+      }
       if (currentTab === 'folders') {
         renderFolders();
       } else {
         renderFiles();
       }
-    }
-
-    // 10. Bootstrap
-    async function boot() {
-      try {
-        await initDB();
-      } catch (err) {
-        console.error("DB init failed:", err);
-      }
-      await reloadAll();
     }
 
     window.addEventListener('DOMContentLoaded', boot);
