@@ -1,152 +1,269 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Shoaib Akhter — Student Quiz</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg: #090514;
-      --sidebar-bg: #0f0a1c;
-      --card-bg: #160f27;
-      --border: #281a42;
-      --accent: #9333ea;
-      --accent-light: #c084fc;
-      --text: #f3f4f6;
-      --muted: #9ca3af;
-      --success: #10b981;
-      --danger: #ef4444;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
-    body { background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
-    
-    .sidebar { width: 260px; background: var(--sidebar-bg); border-right: 1px solid var(--border); padding: 24px 16px; display: flex; flex-direction: column; justify-content: space-between; }
-    .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
-    .brand-icon { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #a855f7, #ec4899); display: flex; align-items: center; justify-content: center; font-weight: bold; }
-    
-    .nav-link { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--muted); text-decoration: none; margin-bottom: 6px; font-size: 14px; }
-    .nav-link:hover, .nav-link.active { background: #1c1133; color: #fff; border: 1px solid #7c3aed; }
-    
-    .content { flex: 1; padding: 40px; max-width: 900px; margin: 0 auto; }
-    .quiz-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 18px; padding: 30px; margin-top: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.4); }
-    
-    .options-list { display: flex; flex-direction: column; gap: 12px; margin: 24px 0; }
-    .option-btn { background: #1c1333; border: 1px solid var(--border); padding: 14px 18px; border-radius: 12px; color: var(--text); text-align: left; cursor: pointer; transition: 0.2s; font-size: 15px; }
-    .option-btn:hover:not(:disabled) { border-color: var(--accent-light); background: #261945; }
-    .option-btn.correct { background: rgba(16, 185, 129, 0.2) !important; border-color: var(--success) !important; color: #34d399 !important; }
-    .option-btn.wrong { background: rgba(239, 68, 68, 0.2) !important; border-color: var(--danger) !important; color: #f87171 !important; }
-    
-    .primary-btn { background: linear-gradient(135deg, #9333ea, #a855f7); color: white; border: none; padding: 10px 22px; border-radius: 10px; font-weight: 600; cursor: pointer; }
-    .primary-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Quiz App</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 25px;
+        }
+        .question-card {
+            background: #fafbfc;
+            border: 1px solid #e1e4e8;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        .question-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #24292e;
+        }
+        .options-list label {
+            display: block;
+            padding: 8px 12px;
+            margin: 6px 0;
+            background: #fff;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .options-list label:hover {
+            background: #f3f4f6;
+            border-color: #9ca3af;
+        }
+        .options-list input {
+            margin-right: 10px;
+        }
+        .btn-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+        button {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #1d4ed8;
+        }
+        #result {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        .correct {
+            color: #16a34a;
+        }
+        .incorrect {
+            color: #dc2626;
+        }
+    </style>
 </head>
 <body>
 
-  <!-- Sidebar Matching studenton.html -->
-  <aside class="sidebar">
-    <div>
-      <div class="brand">
-        <div class="brand-icon">S</div>
-        <div>
-          <div style="font-weight:700; font-size:14px;">Shoaib Akhter</div>
-          <div style="font-size:11px; color:#eab308; font-weight:600;">STUDENT</div>
+<div class="container">
+    <h1>India General Knowledge Quiz</h1>
+    <form id="quizForm">
+
+        <!-- Question 1 -->
+        <div class="question-card" data-q="1">
+            <div class="question-title">1. What is the capital of India?</div>
+            <div class="options-list">
+                <label><input type="radio" name="q1" value="A"> A. Mumbai</label>
+                <label><input type="radio" name="q1" value="B"> B. Kolkata</label>
+                <label><input type="radio" name="q1" value="C"> C. New Delhi @</label>
+                <label><input type="radio" name="q1" value="D"> D. Chennai</label>
+            </div>
         </div>
-      </div>
 
-      <nav>
-        <a href="studenton.html" class="nav-link">📁 Files</a>
-        <a href="studenton.html" class="nav-link">🗂️ Folders</a>
-        <a href="quiz.html" class="nav-link active">❓ Quiz</a>
-      </nav>
-    </div>
+        <!-- Question 2 -->
+        <div class="question-card" data-q="2">
+            <div class="question-title">2. Which river is the longest in India?</div>
+            <div class="options-list">
+                <label><input type="radio" name="q2" value="A"> A. Yamuna</label>
+                <label><input type="radio" name="q2" value="B"> B. Ganga @</label>
+                <label><input type="radio" name="q2" value="C"> C. Brahmaputra</label>
+                <label><input type="radio" name="q2" value="D"> D. Godavari</label>
+            </div>
+        </div>
 
-    <a href="nitrence.html" style="color: #ec4899; text-decoration: none; font-size: 13px; font-weight: 600; padding: 10px;">Sign out</a>
-  </aside>
+        <!-- Question 3 -->
+        <div class="question-card" data-q="3">
+            <div class="question-title">3. Who was the first Prime Minister of independent India?</div>
+            <div class="options-list">
+                <label><input type="radio" name="q3" value="A"> A. Mahatma Gandhi</label>
+                <label><input type="radio" name="q3" value="B"> B. Sardar Vallabhbhai Patel</label>
+                <label><input type="radio" name="q3" value="C"> C. Jawaharlal Nehru @</label>
+                <label><input type="radio" name="q3" value="D"> D. Dr. B. R. Ambedkar</label>
+            </div>
+        </div>
 
-  <!-- Quiz Player Area -->
-  <main class="content">
-    <h1 id="quizTitle" style="font-size: 26px;">Classroom MCQ Test</h1>
-    <p style="color:var(--muted); font-size:14px; margin-top:4px;">Test your knowledge on uploaded questions</p>
+        <!-- Question 4 -->
+        <div class="question-card" data-q="4">
+            <div class="question-title">4. Which monument is known as one of the Seven Wonders of the World and is located in Agra?</div>
+            <div class="options-list">
+                <label><input type="radio" name="q4" value="A"> A. Qutub Minar</label>
+                <label><input type="radio" name="q4" value="B"> B. Red Fort</label>
+                <label><input type="radio" name="q4" value="C"> @ C. Taj Mahal</label>
+                <label><input type="radio" name="q4" value="D"> D. Hawa Mahal</label>
+            </div>
+        </div>
 
-    <!-- Question View -->
-    <div class="quiz-card" id="quizCard">
-      <div style="display:flex; justify-content:space-between; margin-bottom:15px; font-size:13px; color:var(--accent-light);">
-        <span id="questionNum">Question 1</span>
-      </div>
-      <h2 id="questionText" style="font-size:18px; margin-bottom:10px;">Loading questions...</h2>
-      <div class="options-list" id="options"></div>
-      <button class="primary-btn" id="nextBtn" disabled onclick="nextQuestion()">Next Question</button>
-    </div>
+        <!-- Question 5 -->
+        <div class="question-card" data-q="5">
+            <div class="question-title">5. What is the national animal of India?</div>
+            <div class="options-list">
+                <label><input type="radio" name="q5" value="A"> A. Lion</label>
+                <label><input type="radio" name="q5" value="B"> B. Elephant</label>
+                <label><input type="radio" name="q5" value="C"> C. Bengal Tiger @</label>
+                <label><input type="radio" name="q5" value="D"> D. Leopard</label>
+            </div>
+        </div>
 
-    <!-- Results View -->
-    <div class="quiz-card" id="resultCard" style="display:none; text-align:center; padding:40px;">
-      <h2>Quiz Completed! 🎉</h2>
-      <div id="finalScore" style="font-size:48px; font-weight:800; color:var(--accent-light); margin:20px 0;">0 / 0</div>
-      <button class="primary-btn" onclick="location.reload()">Retake Quiz</button>
-    </div>
-  </main>
+        <!-- Question 6 -->
+        <div class="question-card" data-q="6">
+            <div class="question-title">6. Which Indian state is known as the "Land of Five Rivers"?</div>
+            <div class="options-list">
+                <label><input type="radio" name="q6" value="A"> A. Punjab @</label>
+                <label><input type="radio" name="q6" value="B"> B. Haryana</label>
+                <label><input type="radio" name="q6" value="C"> C. Gujarat</label>
+                <label><input type="radio" name="q6" value="D"> D. Rajasthan</label>
+            </div>
+        </div>
 
-  <script>
-    // Load questions uploaded from adminin.html
-    const stored = localStorage.getItem("classroom_quiz_questions");
-    const defaultQuestions = [
-      { question: "Sample: What is the capital of Uttar Pradesh?", options: ["Kanpur", "Lucknow", "Varanasi", "Prayagraj"], answer: 1 }
-    ];
+        <!-- Question 7 -->
+        <div class="question-card" data-q="7">
+            <div class="question-title">7. In which year did India gain independence?</div>
+            <div class="options-list">
+                <label><input type="radio" name="q7" value="A"> A. 1945</label>
+                <label><input type="radio" name="q7" value="B"> B. 1947 @</label>
+                <label><input type="radio" name="q7" value="C"> C. 1950</label>
+                <label><input type="radio" name="q7" value="D"> D. 1952</label>
+            </div>
+        </div>
 
-    const questions = stored ? JSON.parse(stored) : defaultQuestions;
-    const title = localStorage.getItem("quiz_title");
-    if (title) document.getElementById('quizTitle').innerText = title;
+        <!-- Question 8 -->
+        <div class="question-card" data-q="8">
+            <div class="question-title">8. Which city is known as the "Silicon Valley of India"?</div>
+            <div class="options-list">
+                <label><input type="radio" name="q8" value="A"> A. Hyderabad</label>
+                <label><input type="radio" name="q8" value="B"> B. Pune</label>
+                <label><input type="radio" name="q8" value="C"> C. Bengaluru @</label>
+                <label><input type="radio" name="q8" value="D"> D. Chennai</label>
+            </div>
+        </div>
 
-    let idx = 0;
-    let score = 0;
+        <!-- Question 9 -->
+        <div class="question-card" data-q="9">
+            <div class="question-title">9. What is the national currency of India?</div>
+            <div class="options-list">
+                <label><input type="radio" name="q9" value="A"> A. Dollar</label>
+                <label><input type="radio" name="q9" value="B"> B. Taka</label>
+                <label><input type="radio" name="q9" value="C"> C. Rupee @</label>
+                <label><input type="radio" name="q9" value="D"> D. Yen</label>
+            </div>
+        </div>
 
-    function renderQuestion() {
-      const q = questions[idx];
-      document.getElementById('questionNum').innerText = `Question ${idx + 1} of ${questions.length}`;
-      document.getElementById('questionText').innerText = q.question;
-      const optContainer = document.getElementById('options');
-      optContainer.innerHTML = '';
-      document.getElementById('nextBtn').disabled = true;
+        <!-- Question 10 -->
+        <div class="question-card" data-q="10">
+            <div class="question-title">10. Which is the smallest state in India by area?</div>
+            <div class="options-list">
+                <label><input type="radio" name="q10" value="A"> A. Goa @</label>
+                <label><input type="radio" name="q10" value="B"> B. Sikkim</label>
+                <label><input type="radio" name="q10" value="C"> C. Tripura</label>
+                <label><input type="radio" name="q10" value="D"> D. Nagaland</label>
+            </div>
+        </div>
 
-      q.options.forEach((opt, oIdx) => {
-        const btn = document.createElement('button');
-        btn.className = 'option-btn';
-        btn.innerText = `${String.fromCharCode(65 + oIdx)}) ${opt}`;
-        btn.onclick = () => selectAnswer(oIdx, btn, q.answer);
-        optContainer.appendChild(btn);
-      });
+        <div class="btn-container">
+            <button type="button" onclick="submitQuiz()">Submit Quiz</button>
+        </div>
+    </form>
+
+    <div id="result"></div>
+</div>
+
+<script>
+    // Automatically clean up labels by removing '@' from display view and marking correct answers dynamically
+    document.addEventListener("DOMContentLoaded", () => {
+        const cards = document.querySelectorAll('.question-card');
+        cards.forEach(card => {
+            const labels = card.querySelectorAll('label');
+            labels.forEach(label => {
+                if (label.innerHTML.includes('@')) {
+                    // Extract the letter value (e.g., 'A', 'B', 'C', or 'D') from the input element inside this label
+                    const input = label.querySelector('input');
+                    if (input) {
+                        card.setAttribute('data-correct', input.value);
+                    }
+                    // Remove '@' from the visible text so the user doesn't see it
+                    label.innerHTML = label.innerHTML.replace('@', '');
+                }
+            });
+        });
+    });
+
+    function submitQuiz() {
+        const cards = document.querySelectorAll('.question-card');
+        let score = 0;
+        let total = cards.length;
+        let allAnswered = true;
+
+        cards.forEach(card => {
+            const qName = card.querySelector('input').name;
+            const selected = card.querySelector(`input[name="${qName}"]:checked`);
+            const correctValue = card.getAttribute('data-correct');
+
+            // Reset borders
+            card.style.borderColor = '#e1e4e8';
+
+            if (!selected) {
+                allAnswered = false;
+                card.style.borderColor = '#f59e0b'; // highlight unanswered questions
+            } else if (selected.value === correctValue) {
+                score++;
+                card.style.borderColor = '#16a34a'; // green for correct
+            } else {
+                card.style.borderColor = '#dc2626'; // red for incorrect
+            }
+        });
+
+        const resultDiv = document.getElementById('result');
+        if (!allAnswered) {
+            resultDiv.innerHTML = `<span class="incorrect">Please answer all questions before submitting!</span>`;
+        } else {
+            resultDiv.innerHTML = `You scored <span class="${score === total ? 'correct' : ''}">${score}</span> out of <span class="${score === total ? 'correct' : ''}">${total}</span>!`;
+        }
     }
+</script>
 
-    function selectAnswer(chosenIdx, clickedBtn, correctIdx) {
-      const allBtns = document.querySelectorAll('.option-btn');
-      allBtns.forEach((b, i) => {
-        b.disabled = true;
-        if (i === correctIdx) b.classList.add('correct');
-      });
-
-      if (chosenIdx === correctIdx) {
-        score++;
-      } else {
-        clickedBtn.classList.add('wrong');
-      }
-      document.getElementById('nextBtn').disabled = false;
-    }
-
-    function nextQuestion() {
-      idx++;
-      if (idx < questions.length) {
-        renderQuestion();
-      } else {
-        document.getElementById('quizCard').style.display = 'none';
-        document.getElementById('resultCard').style.display = 'block';
-        document.getElementById('finalScore').innerText = `${score} / ${questions.length}`;
-      }
-    }
-
-    renderQuestion();
-  </script>
 </body>
 </html>
