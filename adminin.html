@@ -108,7 +108,6 @@
           <h2 class="text-2xl font-serif-title font-bold text-slate-900">Folders</h2>
           <p class="text-xs text-slate-500 mt-0.5">Browse & manage collections</p>
         </div>
-        <!-- Create Folder Button -->
         <button onclick="toggleModal('createFolderModal')" class="px-3.5 py-2 rounded-xl bg-purple-900 hover:bg-purple-800 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
           <i class="fa-solid fa-folder-plus text-sm"></i>
           <span>Create Folder</span>
@@ -120,49 +119,52 @@
         <span id="totalFolderCountLabel" class="text-xs text-slate-500 font-medium">0 folders</span>
       </div>
 
-      <!-- Dynamic Folders Container -->
       <div id="foldersGridContainer" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5 pt-2"></div>
     </section>
 
-    <!-- QUIZ TAB SECTION -->
+    <!-- QUIZ TAB SECTION (Updated with Negative Marking & Multiple Quiz Upload) -->
     <section id="tabQuizContent" class="space-y-6 hidden">
       <div class="flex items-center justify-between">
         <div>
           <h2 class="text-2xl font-serif-title font-bold text-slate-900">Quiz Manager</h2>
-          <p class="text-xs text-slate-500 mt-0.5">Upload MCQ Question PDFs for students (Right answers marked with a dot '.')</p>
+          <p class="text-xs text-slate-500 mt-0.5">Upload multiple MCQ Question .txt or .pdf files for students</p>
         </div>
         <!-- Hidden file input & Upload button -->
         <input type="file" id="quizFileInput" accept=".pdf,.txt" class="hidden" onchange="processQuizUpload(event)" />
         <button onclick="document.getElementById('quizFileInput').click()" class="px-4 py-2.5 rounded-xl bg-purple-900 hover:bg-purple-800 text-white text-xs font-semibold flex items-center gap-2 shadow-sm transition">
           <i class="fa-solid fa-file-circle-plus text-sm"></i>
-          <span>Upload Quiz PDF</span>
+          <span>Upload Quiz (.txt / .pdf)</span>
         </button>
       </div>
 
-      <!-- Active Quiz Card -->
+      <!-- Negative Marking Selector (Placed where the admin requested) -->
+      <div class="soft-card p-4 rounded-2xl border border-purple-100/80 flex items-center justify-between">
+        <div>
+          <h4 class="text-xs font-bold text-slate-800">Negative Marking Penalty</h4>
+          <p class="text-[11px] text-slate-500">Select deduction per incorrect answer</p>
+        </div>
+        <select id="adminNegativeMarking" onchange="saveNegativeMarking()" class="px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-400">
+          <option value="0">0 (No Penalty)</option>
+          <option value="0.25">-1/4 Marks (-0.25)</option>
+          <option value="0.5" selected>-1/2 Marks (-0.5)</option>
+          <option value="1">-1 Mark (-1.0)</option>
+        </select>
+      </div>
+
+      <!-- Active Quizzes List Card -->
       <div class="soft-card p-5 rounded-2xl border border-purple-100/80">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-purple-50">
+        <div class="flex items-center justify-between pb-4 border-b border-purple-50">
           <div>
-            <div class="flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              <h3 id="currentQuizTitle" class="text-sm font-bold text-slate-900">No active quiz uploaded</h3>
-            </div>
-            <p id="currentQuizMeta" class="text-xs text-slate-500 mt-0.5">Upload a PDF to publish an MCQ test to studenton/quiz.html</p>
+            <h3 class="text-sm font-bold text-slate-900">Uploaded Quizzes</h3>
+            <p class="text-xs text-slate-500 mt-0.5">Students can choose from these uploaded quizzes</p>
           </div>
-          <div class="flex items-center gap-2">
-            <a href="quiz.html" target="_blank" class="px-3.5 py-1.5 rounded-lg border border-purple-200 text-purple-700 hover:bg-purple-50 text-xs font-semibold flex items-center gap-1.5 transition">
-              <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> View Student Quiz
-            </a>
-            <button onclick="clearCurrentQuiz()" class="px-3.5 py-1.5 rounded-lg border border-rose-100 bg-rose-50/50 hover:bg-rose-100 text-rose-600 text-xs font-semibold transition">
-              <i class="fa-solid fa-trash-can text-[10px] mr-1"></i> Delete
-            </button>
-          </div>
+          <a href="quiz.html" target="_blank" class="px-3.5 py-1.5 rounded-lg border border-purple-200 text-purple-700 hover:bg-purple-50 text-xs font-semibold flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> View Student Quiz
+          </a>
         </div>
 
-        <!-- Questions Preview -->
         <div class="pt-4">
-          <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Questions in current test</h4>
-          <div id="quizPreviewContainer" class="space-y-2.5 max-h-96 overflow-y-auto pr-1"></div>
+          <div id="quizListPreviewContainer" class="space-y-3"></div>
         </div>
       </div>
     </section>
@@ -283,11 +285,7 @@
         localStorage.setItem("shoaib_folders_list", JSON.stringify(DEFAULT_FOLDERS));
         return DEFAULT_FOLDERS;
       }
-      try {
-        return JSON.parse(stored);
-      } catch (e) {
-        return DEFAULT_FOLDERS;
-      }
+      try { return JSON.parse(stored); } catch (e) { return DEFAULT_FOLDERS; }
     }
 
     function saveStoredFolders(folders) {
@@ -400,7 +398,6 @@
                   class="absolute top-2.5 right-2.5 w-6 h-6 rounded-lg bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white flex items-center justify-center text-[10px] transition opacity-0 group-hover:opacity-100 shadow-xs">
             <i class="fa-solid fa-trash-can"></i>
           </button>
-
           <div>
             <div class="w-10 h-10 rounded-xl ${color.bg} flex items-center justify-center ${color.text} text-lg mb-3">
               <i class="fa-solid fa-folder"></i>
@@ -504,8 +501,8 @@
 
       const matching = all.filter(f => {
         const matchesQuery = f.name.toLowerCase().includes(query) ||
-                             (f.tag && f.tag.toLowerCase().includes(query)) ||
-                             (f.folder && f.folder.toLowerCase().includes(query));
+                           (f.tag && f.tag.toLowerCase().includes(query)) ||
+                           (f.folder && f.folder.toLowerCase().includes(query));
         if (!matchesQuery) return false;
         if (filter === 'all') return true;
         if (filter === 'new') return f.isNew;
@@ -525,9 +522,6 @@
               <i class="fa-regular fa-folder-open"></i>
             </div>
             <p class="text-sm font-semibold text-slate-700">No files uploaded yet</p>
-            <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-              Click the green "Upload File" button above to publish notes, PDFs, or media.
-            </p>
           </div>
         `;
         return;
@@ -549,7 +543,7 @@
         const card = document.createElement("div");
         card.className = "soft-card p-3 sm:p-3.5 rounded-2xl flex items-center justify-between";
 
-        let iconBox = `<div class="relative w-10 h-11 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center flex-shrink-0"><div class="w-5 h-7 rounded-sm bg-rose-500 border border-rose-600 flex flex-col justify-center items-center text-white"><div class="w-3 h-0.5 bg-white/70 mb-1"></div><div class="w-3 h-0.5 bg-white/70"></div></div>${f.isNew ? '<div class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-400 rounded-full border border-white"></div>' : ''}</div>`;
+        let iconBox = `<div class="relative w-10 h-11 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center flex-shrink-0"><div class="w-5 h-7 rounded-sm bg-rose-500 border border-rose-600 flex flex-col justify-center items-center text-white"><div class="w-3 h-0.5 bg-white/70 mb-1"></div><div class="w-3 h-0.5 bg-white/70"></div></div></div>`;
         if (f.type === 'image') iconBox = `<div class="w-10 h-11 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600 text-lg flex-shrink-0"><i class="fa-regular fa-image"></i></div>`;
         if (f.type === 'video') iconBox = `<div class="w-10 h-11 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center text-purple-600 text-lg flex-shrink-0"><i class="fa-solid fa-play text-sm"></i></div>`;
 
@@ -567,12 +561,11 @@
                 <span>${f.size}</span>
                 <span>•</span>
                 <span>${f.time}</span>
-                ${f.tag ? `<span class="text-purple-600 font-semibold">${f.tag}</span>` : ''}
               </div>
             </div>
           </div>
           <div class="flex items-center gap-1.5 flex-shrink-0 ml-2">
-            <button onclick="deleteFile('${f.id}')" title="Delete File" class="w-9 h-9 rounded-xl border border-rose-100 bg-rose-50/50 hover:bg-rose-100 text-rose-600 flex items-center justify-center transition">
+            <button onclick="deleteFile('${f.id}')" title="Delete" class="w-9 h-9 rounded-xl border border-rose-100 bg-rose-50/50 hover:bg-rose-100 text-rose-600 flex items-center justify-center transition">
               <i class="fa-solid fa-trash-can text-xs"></i>
             </button>
             <button onclick="downloadFile('${f.id}')" title="Download" class="w-9 h-9 rounded-xl border border-slate-200/80 hover:bg-slate-100 text-slate-600 flex items-center justify-center transition">
@@ -595,38 +588,31 @@
       renderFilesList(currentFilter, document.getElementById("fileSearchInput").value);
     }
 
-    // TAB CONTROLS (Files / Folders / Quiz)
+    // TAB CONTROLS
     function switchPortalTab(tab) {
       const filesSec = document.getElementById("tabFilesContent");
       const foldersSec = document.getElementById("tabFoldersContent");
       const quizSec = document.getElementById("tabQuizContent");
 
-      const btnFiles = document.getElementById("tabFilesBtn");
-      const btnFolders = document.getElementById("tabFoldersBtn");
-      const btnQuiz = document.getElementById("tabQuizBtn");
-
-      const inactiveClass = "px-3.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition";
-      const activeClass = "px-3.5 py-1.5 rounded-lg bg-white text-purple-900 shadow-sm transition";
-
       filesSec.classList.add("hidden");
       foldersSec.classList.add("hidden");
       quizSec.classList.add("hidden");
 
-      btnFiles.className = inactiveClass;
-      btnFolders.className = inactiveClass;
-      btnQuiz.className = inactiveClass;
+      document.getElementById("tabFilesBtn").className = "px-3.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition";
+      document.getElementById("tabFoldersBtn").className = "px-3.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition";
+      document.getElementById("tabQuizBtn").className = "px-3.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition";
 
       if (tab === 'files') {
         filesSec.classList.remove("hidden");
-        btnFiles.className = activeClass;
+        document.getElementById("tabFilesBtn").className = "px-3.5 py-1.5 rounded-lg bg-white text-purple-900 shadow-sm transition";
       } else if (tab === 'folders') {
         foldersSec.classList.remove("hidden");
-        btnFolders.className = activeClass;
+        document.getElementById("tabFoldersBtn").className = "px-3.5 py-1.5 rounded-lg bg-white text-purple-900 shadow-sm transition";
         renderFolders();
       } else if (tab === 'quiz') {
         quizSec.classList.remove("hidden");
-        btnQuiz.className = activeClass;
-        renderQuizPreview();
+        document.getElementById("tabQuizBtn").className = "px-3.5 py-1.5 rounded-lg bg-white text-purple-900 shadow-sm transition";
+        renderUploadedQuizzesList();
       }
     }
 
@@ -648,14 +634,18 @@
     }
 
     // ==========================================
-    // QUIZ PDF PARSER (WITH DOT . DETECTION)
+    // MULTIPLE QUIZ UPLOAD & NEGATIVE MARKING
     // ==========================================
+    function saveNegativeMarking() {
+      const penalty = document.getElementById("adminNegativeMarking").value;
+      localStorage.setItem("shoaib_negative_marking", penalty);
+    }
+
     async function processQuizUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
 
       let extractedText = "";
-
       try {
         if (file.type === "application/pdf" || file.name.endsWith('.pdf')) {
           const arrayBuffer = await file.arrayBuffer();
@@ -663,41 +653,44 @@
           for (let i = 1; i <= pdf.numPages; i++) {
             const page = await pdf.getPage(i);
             const textContent = await page.getTextContent();
-            const pageStr = textContent.items.map(item => item.str).join(' ');
-            extractedText += pageStr + "\n";
+            extractedText += textContent.items.map(item => item.str).join(' ') + "\n";
           }
         } else {
           extractedText = await file.text();
         }
 
-        const questions = parseMCQWithDotRule(extractedText);
+        const questions = parseQuizText(extractedText);
         if (questions.length === 0) {
-          alert("Could not detect MCQ format. Make sure questions start with numbers (e.g., '1.') and options with letters (e.g., 'A)', 'B)'), with a full stop '.' marking the correct answer.");
+          alert("Could not detect MCQ format. Make sure questions start with numbers (e.g., '1.') and options with letters (e.g., 'A)', 'B)').");
           return;
         }
 
-        const quizName = file.name.replace(/\.[^/.]+$/, "");
-        localStorage.setItem("classroom_quiz_questions", JSON.stringify(questions));
-        localStorage.setItem("quiz_title", quizName);
+        let quizzes = JSON.parse(localStorage.getItem("shoaib_all_quizzes") || "[]");
+        let quizName = `Quiz ${quizzes.length + 1} (${file.name})`;
 
-        alert(`✅ Success! ${questions.length} questions parsed. Quiz is now LIVE on studenton.html / quiz.html!`);
-        renderQuizPreview();
+        quizzes.push({
+          id: Date.now(),
+          name: quizName,
+          questions: questions
+        });
+
+        localStorage.setItem("shoaib_all_quizzes", JSON.stringify(quizzes));
+        alert(`✅ Success! "${quizName}" uploaded with ${questions.length} questions.`);
+        renderUploadedQuizzesList();
       } catch (err) {
         console.error(err);
-        alert("Failed to read file: " + err.message);
+        alert("Failed to process file: " + err.message);
       } finally {
         event.target.value = "";
       }
     }
 
-    // Parser: Detects MCQs and identifies the right option if it ends with a dot '.'
-    function parseMCQWithDotRule(rawText) {
+    function parseQuizText(rawText) {
       const lines = rawText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
       const parsed = [];
       let currentQ = null;
 
       for (let line of lines) {
-        // Question header: e.g., "1. What is..." or "Q1: What is..."
         const qMatch = line.match(/^(?:Q\d+[\.:]|\d+[\.:])\s*(.+)/i);
         if (qMatch) {
           if (currentQ && currentQ.options.length >= 2) {
@@ -711,17 +704,14 @@
           continue;
         }
 
-        // Option line: e.g. "A) Answer." or "(B) Answer" or "C. Answer"
         const optMatch = line.match(/^[\(\[]?([A-Da-d0-4])[\)\].:-]\s*(.+)/);
         if (optMatch && currentQ) {
           let optText = optMatch[2].trim();
           let isCorrect = false;
 
-          // Check if option ends with a dot (.) or has special symbol
-          if (optText.endsWith('.') || optText.endsWith('•') || optText.endsWith('*')) {
+          if (optText.endsWith('.') || optText.endsWith('@') || optText.endsWith('•') || optText.endsWith('*')) {
             isCorrect = true;
-            // Clean dot so student portal doesn't spoil answer
-            optText = optText.replace(/[\.\*•]$/, '').trim();
+            optText = optText.replace(/[\.\@\*•]$/, '').trim();
           }
 
           const optIndex = currentQ.options.length;
@@ -738,52 +728,41 @@
       return parsed;
     }
 
-    function renderQuizPreview() {
-      const container = document.getElementById("quizPreviewContainer");
-      const titleElem = document.getElementById("currentQuizTitle");
-      const metaElem = document.getElementById("currentQuizMeta");
+    function renderUploadedQuizzesList() {
+      const container = document.getElementById("quizListPreviewContainer");
+      let quizzes = JSON.parse(localStorage.getItem("shoaib_all_quizzes") || "[]");
 
-      const stored = localStorage.getItem("classroom_quiz_questions");
-      const title = localStorage.getItem("quiz_title") || "Untitled Quiz";
+      let savedPenalty = localStorage.getItem("shoaib_negative_marking") || "0.5";
+      document.getElementById("adminNegativeMarking").value = savedPenalty;
 
-      if (!stored) {
-        titleElem.innerText = "No active quiz uploaded";
-        metaElem.innerText = "Upload a PDF above to create an MCQ quiz.";
-        container.innerHTML = `<p class="text-xs text-slate-400 py-6 text-center">No questions found.</p>`;
+      if (quizzes.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-400 py-6 text-center">No quizzes uploaded yet.</p>`;
         return;
       }
 
-      const questions = JSON.parse(stored);
-      titleElem.innerText = title;
-      metaElem.innerText = `${questions.length} questions live on student portal`;
-
       container.innerHTML = "";
-      questions.forEach((q, qIdx) => {
+      quizzes.forEach((quiz, index) => {
         const item = document.createElement("div");
-        item.className = "p-3 bg-purple-50/50 rounded-xl border border-purple-100/70 text-xs";
-        
-        let optsHtml = q.options.map((opt, oIdx) => {
-          const isAns = oIdx === q.answer;
-          return `<div class="flex items-center gap-2 mt-1 ${isAns ? 'font-bold text-emerald-700' : 'text-slate-600'}">
-                    <span>${String.fromCharCode(65 + oIdx)})</span>
-                    <span>${opt}</span>
-                    ${isAns ? '<span class="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold">CORRECT (has dot)</span>' : ''}
-                  </div>`;
-        }).join("");
-
+        item.className = "flex items-center justify-between p-3 bg-purple-50/50 rounded-xl border border-purple-100 text-xs";
         item.innerHTML = `
-          <p class="font-bold text-slate-900">${qIdx + 1}. ${q.question}</p>
-          <div class="mt-1 pl-2 border-l-2 border-purple-200">${optsHtml}</div>
+          <div>
+            <span class="font-bold text-slate-900">${quiz.name}</span>
+            <span class="text-slate-500 ml-2">(${quiz.questions.length} Questions)</span>
+          </div>
+          <button onclick="deleteQuiz(${index})" class="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 font-semibold transition">
+            Delete
+          </button>
         `;
         container.appendChild(item);
       });
     }
 
-    function clearCurrentQuiz() {
-      if (confirm("Are you sure you want to remove the current quiz from student portal?")) {
-        localStorage.removeItem("classroom_quiz_questions");
-        localStorage.removeItem("quiz_title");
-        renderQuizPreview();
+    function deleteQuiz(index) {
+      if (confirm("Delete this quiz?")) {
+        let quizzes = JSON.parse(localStorage.getItem("shoaib_all_quizzes") || "[]");
+        quizzes.splice(index, 1);
+        localStorage.setItem("shoaib_all_quizzes", JSON.stringify(quizzes));
+        renderUploadedQuizzesList();
       }
     }
 
