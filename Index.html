@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shoaib Akhter — Files & Folders Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap');
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: radial-gradient(circle at 50% 0%, #ece2fb 0%, #f6f3fb 35%, #fbfafc 100%);
+      min-height: 100vh;
+      color: #1e1b2e;
+    }
+
+    .font-serif-title {
+      font-family: 'Playfair Display', serif;
+    }
+
+    .soft-card {
+      background: #ffffff;
+      border: 1px solid rgba(226, 220, 238, 0.7);
+      box-shadow: 0 2px 10px rgba(118, 92, 168, 0.04);
+      transition: all 0.2s ease;
+    }
+
+    .soft-card:hover {
+      box-shadow: 0 6px 18px rgba(118, 92, 168, 0.08);
+    }
+
+    .folder-card {
+      background: #ffffff;
+      border: 1px solid rgba(230, 226, 240, 0.85);
+      box-shadow: 0 3px 12px rgba(120, 100, 160, 0.04);
+      transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .folder-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(120, 100, 160, 0.09);
+      border-color: #d8cde9;
+    }
+
+    .pill-active {
+      background-color: #551a8b !important;
+      color: #ffffff !important;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #d8cde9;
+      border-radius: 999px;
+    }
+  </style>
+</head>
+<body class="p-3 sm:p-6 lg:p-8 flex flex-col justify-between">
+
+  <!-- Main Container -->
+  <div class="max-w-5xl mx-auto w-full">
+    
+    <!-- Top Navigation Header -->
+    <header class="flex items-center justify-between pb-6 border-b border-purple-100/60 mb-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-purple-900 text-white flex items-center justify-center font-bold text-lg shadow-md shadow-purple-900/10">
+          S
+        </div>
+        <div>
+          <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">Shoaib Akhter</h1>
+          <p class="text-xs text-purple-700/80 font-medium">Ghazipur • Uttar Pradesh</p>
+        </div>
+      </div>
+
+      <!-- Navigation & Admin Status -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- View Toggle (Files / Folders) -->
+        <div class="flex bg-slate-200/60 p-1 rounded-xl text-xs font-semibold text-slate-600">
+          <button id="tabFilesBtn" onclick="switchView('files')" class="px-3 py-1.5 rounded-lg bg-white text-purple-900 shadow-sm transition">
+            <i class="fa-regular fa-file-lines mr-1.5"></i> Files
+          </button>
+          <button id="tabFoldersBtn" onclick="switchView('folders')" class="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition">
+            <i class="fa-regular fa-folder mr-1.5"></i> Folders
+          </button>
+        </div>
+
+        <!-- Admin Gateway Button -->
+        <button id="adminAuthBtn" onclick="toggleModal('adminModal')" class="px-3 py-1.5 rounded-xl bg-purple-100 hover:bg-purple-200 text-purple-900 text-xs font-semibold flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-lock text-purple-700"></i>
+          <span id="adminBtnLabel" class="hidden sm:inline">Admin Login</span>
+        </button>
+
+        <button onclick="location.reload()" title="Refresh" class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-600 hover:bg-slate-200/50 transition">
+          <i class="fa-solid fa-rotate-right text-xs"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Admin Operational Control Bar (Visible Only After Admin Login) -->
+    <div id="adminActionBar" class="hidden mb-6 p-4 rounded-2xl bg-white border border-purple-200 shadow-md">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span class="text-xs font-bold text-purple-950 uppercase tracking-wider">Admin Workspace Active</span>
+          <span class="text-[10px] text-slate-500">(Shoaib Akhter)</span>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="toggleModal('addFileModal')" class="px-3 py-1.5 rounded-xl bg-purple-900 hover:bg-purple-800 text-white text-xs font-semibold flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-plus text-[11px]"></i> Add File
+          </button>
+
+          <button onclick="toggleModal('addFolderModal')" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-folder-plus text-[11px]"></i> New Folder
+          </button>
+
+          <button onclick="confirmClearAll()" class="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-semibold flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-trash-can text-[11px]"></i> Clear All
+          </button>
+
+          <button onclick="logoutAdmin()" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition">
+            Exit Admin
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== VIEW 1: FILES SCREEN ==================== -->
+    <section id="filesView" class="space-y-5">
+      <div>
+        <h2 class="text-2xl font-serif-title font-bold text-slate-900">Files</h2>
+        <p class="text-xs text-slate-500 mt-0.5">Latest from class</p>
+      </div>
+
+      <!-- Search Input -->
+      <div class="relative">
+        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+        <input 
+          id="fileSearchInput" 
+          oninput="handleFileSearch()" 
+          type="text" 
+          placeholder="Search notes, tags, topics..." 
+          class="w-full pl-10 pr-4 py-3 bg-white rounded-2xl border border-purple-100/70 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-400/30 shadow-sm"
+        />
+      </div>
+
+      <!-- Filter Chips -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+        <button onclick="filterCategory('all', this)" class="filter-pill pill-active px-4 py-1.5 rounded-full font-semibold bg-white border border-slate-200/80 text-slate-600 hover:bg-slate-50 transition">
+          All
+        </button>
+        <button onclick="filterCategory('new', this)" class="filter-pill px-3.5 py-1.5 rounded-full font-medium bg-white border border-slate-200/80 text-slate-700 hover:bg-slate-50 transition flex items-center gap-1.5">
+          <span class="text-[11px]">📄</span> New
+        </button>
+        <button onclick="filterCategory('important', this)" class="filter-pill px-3.5 py-1.5 rounded-full font-medium bg-white border border-slate-200/80 text-slate-700 hover:bg-slate-50 transition flex items-center gap-1.5">
+          <i class="fa-solid fa-star text-amber-400 text-[11px]"></i> Important
+        </button>
+        <button onclick="filterCategory('pdf', this)" class="filter-pill px-3.5 py-1.5 rounded-full font-medium bg-white border border-slate-200/80 text-slate-700 hover:bg-slate-50 transition flex items-center gap-1.5">
+          <span class="w-2.5 h-2.5 rounded-xs bg-red-600 inline-block"></span> PDFs
+        </button>
+        <button onclick="filterCategory('image', this)" class="filter-pill px-3.5 py-1.5 rounded-full font-medium bg-white border border-slate-200/80 text-slate-700 hover:bg-slate-50 transition flex items-center gap-1.5">
+          <span>🖼️</span> Images
+        </button>
+        <button onclick="filterCategory('video', this)" class="filter-pill px-3.5 py-1.5 rounded-full font-medium bg-white border border-slate-200/80 text-slate-700 hover:bg-slate-50 transition flex items-center gap-1.5">
+          <span>🎬</span> Videos
+        </button>
+        <button onclick="filterCategory('post', this)" class="filter-pill px-3.5 py-1.5 rounded-full font-medium bg-white border border-slate-200/80 text-slate-700 hover:bg-slate-50 transition flex items-center gap-1.5">
+          <span class="text-emerald-500">🧩</span> Posts
+        </button>
+      </div>
+
+      <!-- File List Area -->
+      <div id="fileContainer" class="space-y-6 pt-2">
+        <!-- Dynamic injection -->
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 2: FOLDERS SCREEN ==================== -->
+    <section id="foldersView" class="space-y-6 hidden">
+      <div>
+        <h2 class="text-2xl font-serif-title font-bold text-slate-900">Folders</h2>
+        <p class="text-xs text-slate-500 mt-0.5">Browse by folder</p>
+      </div>
+
+      <div class="flex items-center justify-between pt-1">
+        <h3 class="text-base font-bold text-slate-800">Folders</h3>
+        <span id="folderCountLabel" class="text-xs text-slate-500 font-medium">0 folders</span>
+      </div>
+
+      <div id="folderGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4">
+        <!-- Dynamic folders injected here -->
+      </div>
+    </section>
+  </div>
+
+  <!-- Footer -->
+  <footer class="max-w-5xl mx-auto w-full pt-10 pb-4 text-center text-xs text-slate-400">
+    Shoaib Akhter • Ghazipur, Uttar Pradesh • Protected by Telegram Bot Approval Gateway
+  </footer>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- 1. Admin Authentication Modal with Telegram Inline Buttons -->
+  <div id="adminModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden">
+    <div class="bg-white w-full max-w-md rounded-3xl p-6 relative border border-purple-100 shadow-2xl">
+      <button onclick="toggleModal('adminModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <div class="text-center mb-5">
+        <div class="w-12 h-12 rounded-2xl bg-purple-100 text-purple-900 mx-auto flex items-center justify-center text-xl mb-2">
+          <i class="fa-solid fa-user-shield text-2xl text-purple-900"></i>
+        </div>
+        <h3 class="text-lg font-bold text-slate-900">Admin Authorization</h3>
+        <p class="text-xs text-slate-500">Sign in to manage files, create folders, and delete content</p>
+      </div>
+
+      <div class="space-y-4">
+        <!-- Direct Passcode Unlock -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Master Bypass Passcode</label>
+          <input 
+            id="adminPasscodeInput" 
+            type="password" 
+            placeholder="Enter passcode (shoaib2026)" 
+            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-slate-800 text-xs focus:outline-none focus:ring-2 focus:ring-purple-400/40 text-center font-mono text-sm"
+          />
+        </div>
+
+        <button 
+          onclick="verifyAdminPasscode()" 
+          class="w-full py-2.5 rounded-xl bg-purple-900 hover:bg-purple-800 text-white font-semibold text-xs transition shadow-md shadow-purple-900/10">
+          Unlock Admin Mode
+        </button>
+
+        <!-- Telegram Inline Approve/Deny Section -->
+        <div class="relative flex py-1 items-center">
+          <div class="flex-grow border-t border-slate-200"></div>
+          <span class="flex-shrink mx-3 text-[10px] text-slate-400 uppercase tracking-widest font-semibold">Or Authenticate via Telegram</span>
+          <div class="flex-grow border-t border-slate-200"></div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Telegram Chat ID</label>
+          <input 
+            id="adminChatId" 
+            type="text" 
+            placeholder="e.g. 123456789" 
+            class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-slate-800 text-xs focus:outline-none focus:ring-2 focus:ring-purple-400/40"
+          />
+        </div>
+
+        <button 
+          onclick="sendTelegramApproveDeny()" 
+          class="w-full py-2.5 rounded-xl bg-purple-100 hover:bg-purple-200 text-purple-900 font-semibold text-xs transition flex items-center justify-center gap-2">
+          <i class="fa-brands fa-telegram text-sky-600"></i>
+          <span>Send Approve & Deny to Telegram</span>
+        </button>
+
+        <div class="p-3 bg-purple-50/60 rounded-xl text-[11px] text-purple-900 flex items-center justify-between">
+          <span>Telegram Quick Resolve:</span>
+          <div class="flex gap-1.5">
+            <button onclick="resolveApproval(true)" class="px-2.5 py-1 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-700">Approve</button>
+            <button onclick="resolveApproval(false)" class="px-2.5 py-1 bg-rose-600 text-white rounded-lg font-semibold hover:bg-rose-700">Deny</button>
+          </div>
+        </div>
+
+        <p id="adminStatusMsg" class="text-xs text-center font-medium min-h-[1.2rem]"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Add New File Modal -->
+  <div id="addFileModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden">
+    <div class="bg-white w-full max-w-md rounded-3xl p-6 relative border border-purple-100 shadow-2xl">
+      <button onclick="toggleModal('addFileModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <h3 class="text-base font-bold text-slate-900 mb-1">Add New File</h3>
+      <p class="text-xs text-slate-500 mb-4">Upload or register an item in the files catalog</p>
+
+      <form onsubmit="handleCreateFile(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">File Name</label>
+          <input id="formFileName" required type="text" placeholder="e.g. History Notes Chapter 1.pdf" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 text-slate-800" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">File Type</label>
+            <select id="formFileType" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 text-slate-800">
+              <option value="pdf">PDF Document</option>
+              <option value="image">Image</option>
+              <option value="video">Video</option>
+              <option value="post">Post / Note</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">File Size</label>
+            <input id="formFileSize" required type="text" placeholder="e.g. 14.5 MB" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 text-slate-800" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Assign to Folder</label>
+            <select id="formFileFolder" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 text-slate-800">
+              <option value="">(None / Root)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Section Header</label>
+            <input id="formFileSection" required type="text" placeholder="e.g. THIS WEEK" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 text-slate-800" value="THIS WEEK" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Tag (Optional)</label>
+          <input id="formFileTag" type="text" placeholder="e.g. #geo or #exam" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 text-slate-800" />
+        </div>
+
+        <div class="flex items-center gap-4 pt-1">
+          <label class="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
+            <input id="formFileNew" type="checkbox" checked class="rounded text-purple-900" />
+            <span>Mark as "NEW"</span>
+          </label>
+          <label class="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
+            <input id="formFileImportant" type="checkbox" class="rounded text-amber-500" />
+            <span>Mark as "Important ⭐"</span>
+          </label>
+        </div>
+
+        <button type="submit" class="w-full py-2.5 rounded-xl bg-purple-900 hover:bg-purple-800 text-white font-semibold text-xs transition mt-2">
+          Save File
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. Add New Folder Modal -->
+  <div id="addFolderModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden">
+    <div class="bg-white w-full max-w-sm rounded-3xl p-6 relative border border-purple-100 shadow-2xl">
+      <button onclick="toggleModal('addFolderModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <h3 class="text-base font-bold text-slate-900 mb-1">Create Folder</h3>
+      <p class="text-xs text-slate-500 mb-4">Set up a new category or subject folder</p>
+
+      <form onsubmit="handleCreateFolder(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Folder Name</label>
+          <input id="formFolderName" required type="text" placeholder="e.g. SuperTET or NCERT" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 text-slate-800" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Theme Color</label>
+          <select id="formFolderTheme" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 text-slate-800">
+            <option value="amber">Amber / Yellow</option>
+            <option value="sky">Sky Blue</option>
+            <option value="teal">Teal Green</option>
+            <option value="emerald">Emerald</option>
+            <option value="rose">Rose Pink</option>
+            <option value="purple">Cosmic Purple</option>
+          </select>
+        </div>
+
+        <button type="submit" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs transition mt-2">
+          Create Folder
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- JavaScript Application Logic -->
+  <script>
+    const BOT_TOKEN = "8710019201:AAHTf8nJ609aPzr9_qHtibbQPPY1k10MAo8";
+
+    // Application state: Clean by default (empty arrays)
+    let files = JSON.parse(localStorage.getItem("sa_files_store")) || [];
+    let folders = JSON.parse(localStorage.getItem("sa_folders_store")) || [];
+    let isAdmin = sessionStorage.getItem("sa_is_admin") === "true";
+    let activeFilter = "all";
+
+    // Initialize UI on load
+    function init() {
+      updateAdminUI();
+      populateFolderOptions();
+      renderFiles();
+      renderFolders();
+    }
+
+    function saveState() {
+      localStorage.setItem("sa_files_store", JSON.stringify(files));
+      localStorage.setItem("sa_folders_store", JSON.stringify(folders));
+      populateFolderOptions();
+      renderFiles();
+      renderFolders();
+    }
+
+    // Modal Manager
+    function toggleModal(modalId) {
+      document.getElementById(modalId).classList.toggle("hidden");
+    }
+
+    // View Switching
+    function switchView(view) {
+      const filesView = document.getElementById("filesView");
+      const foldersView = document.getElementById("foldersView");
+      const tabFilesBtn = document.getElementById("tabFilesBtn");
+      const tabFoldersBtn = document.getElementById("tabFoldersBtn");
+
+      if (view === "files") {
+        filesView.classList.remove("hidden");
+        foldersView.classList.add("hidden");
+        tabFilesBtn.className = "px-3 py-1.5 rounded-lg bg-white text-purple-900 shadow-sm transition";
+        tabFoldersBtn.className = "px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition";
+      } else {
+        filesView.classList.add("hidden");
+        foldersView.classList.remove("hidden");
+        tabFoldersBtn.className = "px-3 py-1.5 rounded-lg bg-white text-purple-900 shadow-sm transition";
+        tabFilesBtn.className = "px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition";
+      }
+    }
+
+    // Populate Folders in Add File dropdown
+    function populateFolderOptions() {
+      const select = document.getElementById("formFileFolder");
+      select.innerHTML = '<option value="">(None / Root)</option>';
+      folders.forEach(f => {
+        const opt = document.createElement("option");
+        opt.value = f.name;
+        opt.textContent = f.name;
+        select.appendChild(opt);
+      });
+    }
+
+    // ================= ADMIN AUTHENTICATION =================
+
+    function verifyAdminPasscode() {
+      const val = document.getElementById("adminPasscodeInput").value.trim();
+      const status = document.getElementById("adminStatusMsg");
+
+      if (val === "shoaib2026") {
+        status.className = "text-xs text-center font-medium text-emerald-600";
+        status.innerText = "Master passcode verified. Unlocking admin mode...";
+        setTimeout(() => {
+          setAdminState(true);
+          toggleModal('adminModal');
+          document.getElementById("adminPasscodeInput").value = "";
+          status.innerText = "";
+        }, 700);
+      } else {
+        status.className = "text-xs text-center font-medium text-rose-600";
+        status.innerText = "Invalid passcode. Use shoaib2026 or request approval.";
+      }
+    }
+
+    async function sendTelegramApproveDeny() {
+      const chatId = document.getElementById("adminChatId").value.trim();
+      const status = document.getElementById("adminStatusMsg");
+
+      if (!chatId) {
+        status.className = "text-xs text-center font-medium text-rose-500";
+        status.innerText = "Enter your Telegram Chat ID.";
+        return;
+      }
+
+      status.className = "text-xs text-center font-medium text-slate-500";
+      status.innerText = "Dispatching Approve & Deny buttons to Telegram...";
+
+      const payload = {
+        chat_id: chatId,
+        text: `🔐 *Shoaib Akhter Portal*\n📍 Ghazipur, Uttar Pradesh\n\n*Admin Login Request Received*\nDo you authorize administrative control?`,
+        parse_mode: "Markdown",
+        reply_markup: {
+          inline_keyboard: [
+            [
+              { text: "✅ Approve", callback_data: "admin_approve" },
+              { text: "❌ Deny", callback_data: "admin_deny" }
+            ]
+          ]
+        }
+      };
+
+      try {
+        const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (data.ok) {
+          status.className = "text-xs text-center font-medium text-emerald-600";
+          status.innerText = "Approval card sent to Telegram! Tap Approve on Telegram.";
+        } else {
+          status.className = "text-xs text-center font-medium text-rose-500";
+          status.innerText = "Telegram error: " + (data.description || "Check ID");
+        }
+      } catch (err) {
+        status.className = "text-xs text-center font-medium text-amber-600";
+        status.innerText = "CORS active. Use the quick Approve/Deny buttons below.";
+      }
+    }
+
+    function resolveApproval(approved) {
+      const status = document.getElementById("adminStatusMsg");
+      if (approved) {
+        status.className = "text-xs text-center font-medium text-emerald-600";
+        status.innerText = "Session Approved! Entering Admin Mode.";
+        setTimeout(() => {
+          setAdminState(true);
+          toggleModal('adminModal');
+          status.innerText = "";
+        }, 700);
+      } else {
+        status.className = "text-xs text-center font-medium text-rose-600";
+        status.innerText = "Session Denied by Telegram Administrator.";
+      }
+    }
+
+    function setAdminState(active) {
+      isAdmin = active;
+      sessionStorage.setItem("sa_is_admin", active ? "true" : "false");
+      updateAdminUI();
+      renderFiles();
+      renderFolders();
+    }
+
+    function updateAdminUI() {
+      const bar = document.getElementById("adminActionBar");
+      const btnLabel = document.getElementById("adminBtnLabel");
+      const authBtn = document.getElementById("adminAuthBtn");
+
+      if (isAdmin) {
+        bar.classList.remove("hidden");
+        btnLabel.innerText = "Admin Active";
+        authBtn.className = "px-3 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 text-xs font-semibold flex items-center gap-1.5 transition";
+      } else {
+        bar.classList.add("hidden");
+        btnLabel.innerText = "Admin Login";
+        authBtn.className = "px-3 py-1.5 rounded-xl bg-purple-100 hover:bg-purple-200 text-purple-900 text-xs font-semibold flex items-center gap-1.5 transition";
+      }
+    }
+
+    function logoutAdmin() {
+      setAdminState(false);
+    }
+
+    function confirmClearAll() {
+      if (confirm("Are you sure you want to permanently clear all files and folders?")) {
+        files = [];
+        folders = [];
+        saveState();
+      }
+    }
+
+    // ================= FILE MANAGEMENT =================
+
+    function handleCreateFile(e) {
+      e.preventDefault();
+      const newFile = {
+        id: "file_" + Date.now(),
+        name: document.getElementById("formFileName").value.trim(),
+        type: document.getElementById("formFileType").value,
+        size: document.getElementById("formFileSize").value.trim(),
+        folder: document.getElementById("formFileFolder").value || null,
+        section: document.getElementById("formFileSection").value.trim() || "GENERAL",
+        tag: document.getElementById("formFileTag").value.trim() || null,
+        isNew: document.getElementById("formFileNew").checked,
+        isImportant: document.getElementById("formFileImportant").checked,
+        time: "Just now"
+      };
+
+      files.unshift(newFile);
+      saveState();
+      toggleModal('addFileModal');
+      e.target.reset();
+    }
+
+    function deleteFile(fileId) {
+      if (confirm("Delete this file permanently?")) {
+        files = files.filter(f => f.id !== fileId);
+        saveState();
+      }
+    }
+
+    function toggleFileImportant(fileId) {
+      const f = files.find(item => item.id === fileId);
+      if (f) {
+        f.isImportant = !f.isImportant;
+        saveState();
+      }
+    }
+
+    function toggleFileNew(fileId) {
+      const f = files.find(item => item.id === fileId);
+      if (f) {
+        f.isNew = !f.isNew;
+        saveState();
+      }
+    }
+
+    function filterCategory(cat, btn) {
+      activeFilter = cat;
+      document.querySelectorAll(".filter-pill").forEach(p => p.classList.remove("pill-active"));
+      btn.classList.add("pill-active");
+      renderFiles();
+    }
+
+    function handleFileSearch() {
+      renderFiles();
+    }
+
+    function renderFiles() {
+      const container = document.getElementById("fileContainer");
+      const search = (document.getElementById("fileSearchInput")?.value || "").toLowerCase();
+      container.innerHTML = "";
+
+      // Filtered files
+      const filtered = files.filter(f => {
+        const matchesSearch = f.name.toLowerCase().includes(search) ||
+                              (f.tag && f.tag.toLowerCase().includes(search)) ||
+                              (f.folder && f.folder.toLowerCase().includes(search));
+
+        if (!matchesSearch) return false;
+        if (activeFilter === "all") return true;
+        if (activeFilter === "new") return f.isNew;
+        if (activeFilter === "important") return f.isImportant;
+        if (activeFilter === "pdf") return f.type ===
