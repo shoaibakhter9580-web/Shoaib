@@ -53,7 +53,7 @@
           <span>Upload File</span>
         </button>
 
-        <!-- Admin Badge / Logout -->
+        <!-- Admin Logout -->
         <button id="logoutBtn" title="Logout" class="px-3.5 py-2 rounded-xl bg-purple-900 hover:bg-purple-950 text-white text-xs font-semibold flex items-center gap-1.5 transition shadow-sm">
           <i class="fa-brands fa-telegram text-sm text-sky-400"></i>
           <span>Admin: Shoaib</span>
@@ -78,7 +78,7 @@
                class="w-full pl-10 pr-4 py-3 bg-white rounded-2xl border border-purple-100/70 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-400/30 shadow-sm" />
       </div>
 
-      <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs" id="filterPillsContainer">
+      <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
         <button data-filter="all" class="filter-pill pill-active px-4 py-1.5 rounded-full font-semibold bg-white border border-slate-200/80 text-slate-600 transition">All</button>
         <button data-filter="new" class="filter-pill px-3.5 py-1.5 rounded-full font-medium bg-white border border-slate-200/80 text-slate-700 transition flex items-center gap-1.5">
           <span class="w-3.5 h-3.5 rounded bg-emerald-100 text-emerald-700 text-[10px] flex items-center justify-center font-bold">📄</span>
@@ -282,18 +282,24 @@
     ];
 
     function getStoredFolders() {
-      const stored = localStorage.getItem("shoaib_folders_list");
-      if (!stored) {
-        localStorage.setItem("shoaib_folders_list", JSON.stringify(DEFAULT_FOLDERS));
+      try {
+        const stored = localStorage.getItem("shoaib_folders_list");
+        if (!stored) {
+          localStorage.setItem("shoaib_folders_list", JSON.stringify(DEFAULT_FOLDERS));
+          return DEFAULT_FOLDERS;
+        }
+        return JSON.parse(stored);
+      } catch (e) {
         return DEFAULT_FOLDERS;
       }
-      try { return JSON.parse(stored); } catch (e) { return DEFAULT_FOLDERS; }
     }
 
     function saveStoredFolders(folders) {
-      localStorage.setItem("shoaib_folders_list", JSON.stringify(folders));
-      renderFolders();
-      populateFolderDropdown();
+      try {
+        localStorage.setItem("shoaib_folders_list", JSON.stringify(folders));
+        renderFolders();
+        populateFolderDropdown();
+      } catch(e) {}
     }
 
     function initIndexedDB() {
@@ -351,65 +357,70 @@
       });
     }
 
-    // Event Listeners Initialization on DOMContentLoaded
+    // Safe Event Wiring on DOMContentLoaded
     document.addEventListener("DOMContentLoaded", () => {
-      // Tab Navigation
-      document.getElementById("tabFilesBtn").addEventListener("click", () => switchPortalTab('files'));
-      document.getElementById("tabFoldersBtn").addEventListener("click", () => switchPortalTab('folders'));
-      document.getElementById("tabQuizBtn").addEventListener("click", () => switchPortalTab('quiz'));
+      const bindClick = (id, fn) => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener("click", fn);
+      };
 
-      // Modals
-      document.getElementById("openUploadModalBtn").addEventListener("click", () => toggleModal('uploadModal'));
-      document.getElementById("closeUploadModalBtn").addEventListener("click", () => toggleModal('uploadModal'));
-      document.getElementById("openFolderModalBtn").addEventListener("click", () => toggleModal('createFolderModal'));
-      document.getElementById("closeFolderModalBtn").addEventListener("click", () => toggleModal('createFolderModal'));
+      bindClick("tabFilesBtn", () => switchPortalTab('files'));
+      bindClick("tabFoldersBtn", () => switchPortalTab('folders'));
+      bindClick("tabQuizBtn", () => switchPortalTab('quiz'));
 
-      // Logout
-      document.getElementById("logoutBtn").addEventListener("click", logoutAdmin);
+      bindClick("openUploadModalBtn", () => toggleModal('uploadModal'));
+      bindClick("closeUploadModalBtn", () => toggleModal('uploadModal'));
+      bindClick("openFolderModalBtn", () => toggleModal('createFolderModal'));
+      bindClick("closeFolderModalBtn", () => toggleModal('createFolderModal'));
 
-      // Search input
+      bindClick("logoutBtn", logoutAdmin);
+
       const searchInput = document.getElementById("fileSearchInput");
       if (searchInput) searchInput.addEventListener("input", handleSearch);
 
-      // Filter pills
       document.querySelectorAll(".filter-pill").forEach(btn => {
-        btn.addEventListener("click", (e) => filterFiles(btn.getAttribute("data-filter"), btn));
+        btn.addEventListener("click", () => filterFiles(btn.getAttribute("data-filter"), btn));
       });
 
-      // Forms
-      document.getElementById("uploadFileForm").addEventListener("submit", handleUploadSubmit);
-      document.getElementById("createFolderForm").addEventListener("submit", handleCreateFolderSubmit);
+      const uploadForm = document.getElementById("uploadFileForm");
+      if (uploadForm) uploadForm.addEventListener("submit", handleUploadSubmit);
 
-      // File pickers
+      const folderForm = document.getElementById("createFolderForm");
+      if (folderForm) folderForm.addEventListener("submit", handleCreateFolderSubmit);
+
       const filePicker = document.getElementById("filePicker");
       if (filePicker) filePicker.addEventListener("change", (e) => handleFilePicked(e.target));
 
       const quizFileInput = document.getElementById("quizFileInput");
       if (quizFileInput) quizFileInput.addEventListener("change", processQuizUpload);
 
-      document.getElementById("triggerQuizUploadBtn").addEventListener("click", () => {
-        document.getElementById("quizFileInput").click();
+      bindClick("triggerQuizUploadBtn", () => {
+        const qInput = document.getElementById("quizFileInput");
+        if (qInput) qInput.click();
       });
 
-      // Negative marking
       const penaltySelect = document.getElementById("adminNegativeMarking");
       if (penaltySelect) {
         penaltySelect.addEventListener("change", saveNegativeMarking);
-        let savedPenalty = localStorage.getItem("shoaib_negative_marking") || "0.5";
-        penaltySelect.value = savedPenalty;
+        try {
+          let savedPenalty = localStorage.getItem("shoaib_negative_marking") || "0.5";
+          penaltySelect.value = savedPenalty;
+        } catch(e) {}
       }
 
-      // Start DB & Render
       initIndexedDB().then(() => {
-        populateFolderDropdown();
-        renderFilesList();
-        renderFolders();
+        try {
+          populateFolderDropdown();
+          renderFilesList();
+          renderFolders();
+        } catch(e) {}
       });
     });
 
     function handleCreateFolderSubmit(e) {
       e.preventDefault();
       const input = document.getElementById("newFolderNameInput");
+      if (!input) return;
       const name = input.value.trim();
       if (!name) return;
 
@@ -507,7 +518,8 @@
     function handleFilePicked(input) {
       if (input.files && input.files[0]) {
         const file = input.files[0];
-        document.getElementById("fileCustomTitle").value = file.name;
+        const titleInput = document.getElementById("fileCustomTitle");
+        if (titleInput) titleInput.value = file.name;
         const mb = file.size / (1024 * 1024);
         selectedFileSize = mb >= 1 ? `${mb.toFixed(1)} MB` : `${(file.size / 1024).toFixed(0)} KB`;
         if (file.type.includes("image")) selectedFileType = "image";
@@ -521,9 +533,15 @@
       e.preventDefault();
       if (!selectedFileBlob) return;
 
-      const title = document.getElementById("fileCustomTitle").value.trim();
-      const folder = document.getElementById("fileFolderDest").value || null;
-      const tag = document.getElementById("fileCustomTag").value.trim();
+      const titleInput = document.getElementById("fileCustomTitle");
+      const folderDest = document.getElementById("fileFolderDest");
+      const tagInput = document.getElementById("fileCustomTag");
+      const impCheck = document.getElementById("checkImportant");
+      const newCheck = document.getElementById("checkNew");
+
+      const title = titleInput ? titleInput.value.trim() : "Untitled";
+      const folder = folderDest ? folderDest.value || null : null;
+      const tag = tagInput ? tagInput.value.trim() : "";
 
       const newRecord = {
         id: "file_" + Date.now(),
@@ -533,8 +551,8 @@
         size: selectedFileSize,
         type: selectedFileType,
         time: "Just now",
-        isImportant: document.getElementById("checkImportant").checked,
-        isNew: document.getElementById("checkNew").checked,
+        isImportant: impCheck ? impCheck.checked : false,
+        isNew: newCheck ? newCheck.checked : true,
         blob: selectedFileBlob
       };
 
@@ -719,7 +737,9 @@
 
     function logoutAdmin() {
       if (confirm("Log out from Management mode?")) {
-        sessionStorage.removeItem("shoaib_admin_auth");
+        try {
+          sessionStorage.removeItem("shoaib_admin_auth");
+        } catch(e) {}
         window.location.href = "nitrence.html";
       }
     }
@@ -727,7 +747,9 @@
     function saveNegativeMarking() {
       const penaltyElem = document.getElementById("adminNegativeMarking");
       if (penaltyElem) {
-        localStorage.setItem("shoaib_negative_marking", penaltyElem.value);
+        try {
+          localStorage.setItem("shoaib_negative_marking", penaltyElem.value);
+        } catch(e) {}
       }
     }
 
