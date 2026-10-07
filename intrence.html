@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shoaib Akhter — Entrance</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+    :root {
+      --bg-night: radial-gradient(circle at 50% 18%, #141b34 0%, #0a0f24 45%, #04060f 100%);
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg-night);
+      color: #e5e7eb;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .font-serif-title { font-family: 'Playfair Display', serif; }
+    .font-cinzel { font-family: 'Cinzel', serif; }
+
+    .moon-glow {
+      box-shadow: 0 0 60px 20px rgba(220, 235, 255, 0.22), 0 0 120px 50px rgba(160, 185, 240, 0.12);
+    }
+    .window-glow {
+      background: #ffcc55;
+      box-shadow: 0 0 10px #ffb300, 0 0 18px rgba(255, 179, 0, 0.55);
+    }
+    .glass-card {
+      background: rgba(18, 16, 28, 0.65);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    }
+  </style>
+</head>
+<body class="relative flex flex-col justify-between min-h-screen selection:bg-amber-500/30 selection:text-amber-200">
+  <canvas id="fireflyCanvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
+
+  <!-- Top Navigation Bar -->
+  <header class="relative z-30 w-full max-w-7xl mx-auto px-4 sm:px-6 pt-5">
+    <div class="glass-card rounded-2xl px-4 py-3 flex items-center justify-between">
+      <!-- Mosaic Logo -->
+      <div class="flex items-center gap-3">
+        <div id="logoContainer" onclick="cycleLogoBg()" title="Click to cycle logo background"
+             class="w-11 h-11 rounded-xl bg-white flex items-center justify-center p-1.5 cursor-pointer shadow-lg transition-all duration-300 hover:scale-105 border border-white/20">
+          <svg viewBox="0 0 100 120" class="w-full h-full drop-shadow-sm">
+            <path d="M 44,14 C 54,12 68,14 74,25 C 66,28 54,32 48,27 C 45,24 43,18 44,14 Z" fill="#594d40" />
+            <path d="M 39,20 C 42,28 36,37 26,38 C 22,31 28,21 39,20 Z" fill="#b9ab94" />
+            <path d="M 48,34 C 58,34 68,43 73,53 C 63,55 58,46 48,34 Z" fill="#54473c" />
+            <path d="M 28,42 C 40,40 50,47 52,57 C 41,56 31,52 28,42 Z" fill="#8f7e71" />
+            <path d="M 54,64 C 64,65 73,73 70,82 C 60,78 57,71 54,64 Z" fill="#8f7e71" />
+            <path d="M 26,52 C 37,56 46,67 49,77 C 37,79 26,71 23,61 C 23,56 24,53 26,52 Z" fill="#54473c" />
+            <path d="M 48,81 C 53,88 47,97 38,98 C 30,94 36,83 48,81 Z" fill="#b9ab94" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-sm sm:text-base font-bold text-white tracking-wider uppercase">Shoaib Akhter</h1>
+          <p class="text-[10px] text-amber-300/80 font-cinzel tracking-widest">GHAZIPUR</p>
+        </div>
+      </div>
+
+      <!-- Real-Time Clock & Date -->
+      <div class="flex flex-col items-center">
+        <span id="liveClock" class="text-sm sm:text-base font-semibold tracking-widest text-slate-200">--:-- --</span>
+        <span id="liveDate" class="text-[10px] sm:text-xs text-slate-400">Loading date...</span>
+      </div>
+
+      <!-- Notification Trigger -->
+      <div class="flex items-center gap-2">
+        <button onclick="alert('Shoaib Akhter Portal: All systems operational.')" 
+                class="w-10 h-10 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 border border-white/10 flex items-center justify-center transition">
+          <i class="fa-regular fa-bell text-sm"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Center Hero Section -->
+  <main class="relative z-10 w-full max-w-5xl mx-auto px-4 flex flex-col items-center justify-center flex-grow py-6 text-center">
+    <!-- Upper Full Moon -->
+    <div class="relative w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-gradient-to-tr from-slate-200 via-white to-slate-100 moon-glow mb-4 flex items-center justify-center overflow-hidden border border-white/40">
+      <div class="absolute w-7 h-7 rounded-full bg-slate-300/40 top-5 left-7 blur-[1px]"></div>
+      <div class="absolute w-10 h-10 rounded-full bg-slate-300/30 bottom-5 right-6 blur-[1px]"></div>
+      <div class="absolute w-4 h-4 rounded-full bg-slate-300/35 bottom-10 left-9"></div>
+    </div>
+
+    <!-- Campus Silhouette Building & Tree -->
+    <div class="relative w-full max-w-xl h-28 mb-3 flex items-end justify-between px-6 pointer-events-none">
+      <div class="relative w-52 h-20 bg-slate-950/95 rounded-t border-t border-slate-800 flex flex-col justify-end p-2 gap-1.5 shadow-2xl">
+        <div class="w-8 h-10 bg-slate-950 absolute -top-10 left-28 -translate-x-1/2 rounded-t border-t border-slate-800 flex items-center justify-center">
+          <div class="w-2.5 h-4 window-glow rounded-t-full"></div>
+        </div>
+        <div class="grid grid-cols-4 gap-2 px-1">
+          <div class="h-2.5 window-glow rounded-xs"></div>
+          <div class="h-2.5 window-glow rounded-xs"></div>
+          <div class="h-2.5 window-glow rounded-xs"></div>
+          <div class="h-2.5 window-glow rounded-xs"></div>
+        </div>
+        <div class="grid grid-cols-4 gap-2 px-1">
+          <div class="h-2.5 window-glow rounded-xs"></div>
+          <div class="h-2.5 window-glow rounded-xs"></div>
+          <div class="h-2.5 window-glow rounded-xs"></div>
+          <div class="h-2.5 window-glow rounded-xs"></div>
+        </div>
+      </div>
+      <div class="relative w-36 h-28 flex flex-col items-center justify-end">
+        <div class="w-32 h-20 bg-slate-950/95 rounded-full blur-[0.5px]"></div>
+        <div class="w-2.5 h-10 bg-slate-950 -mt-2"></div>
+      </div>
+    </div>
+
+    <!-- Motto & Badges -->
+    <div class="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs uppercase tracking-widest font-cinzel mb-2">
+      <span>✦</span> Student Management Portal <span>✦</span>
+    </div>
+
+    <h2 class="text-4xl sm:text-6xl font-serif-title font-bold text-white tracking-wide mb-2 drop-shadow-md">
+      Shoaib Akhter
+    </h2>
+    <p class="text-sm sm:text-base italic text-slate-300/90 font-serif-title mb-1">
+      Deep roots. Quiet nights. Bright minds.
+    </p>
+    <p class="text-[11px] font-cinzel tracking-widest text-slate-400 mb-8">
+      GHAZIPUR • UTTAR PRADESH
+    </p>
+
+    <!-- Navigation Buttons -->
+    <div class="flex flex-wrap items-center justify-center gap-4">
+      <a href="student2nd.html" 
+         class="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white font-medium text-sm shadow-lg shadow-amber-900/30 transition transform hover:-translate-y-0.5 flex items-center gap-2">
+        <i class="fa-solid fa-graduation-cap"></i>
+        <span>Student Access</span>
+      </a>
+
+      <a href="adminlogin.html" 
+         class="px-6 py-3 rounded-xl bg-purple-900/80 hover:bg-purple-800 text-white font-medium text-sm border border-purple-400/30 shadow-lg shadow-purple-950/40 transition transform hover:-translate-y-0.5 flex items-center gap-2">
+        <i class="fa-solid fa-shield-halved text-purple-300"></i>
+        <span>Management Login</span>
+      </a>
+    </div>
+  </main>
+
+  <footer class="relative z-10 w-full py-4 text-center text-xs text-slate-500 border-t border-white/5">
+    © 2026 Shoaib Akhter. Ghazipur, Uttar Pradesh. Protected by Telegram Security Gateway.
+  </footer>
+
+  <script>
+    // Logo Background Cycler
+    const logoColors = ["#ffffff", "#3e342b", "#0d0c18", "transparent"];
+    let logoColorIdx = 0;
+    function cycleLogoBg() {
+      logoColorIdx = (logoColorIdx + 1) % logoColors.length;
+      document.getElementById("logoContainer").style.backgroundColor = logoColors[logoColorIdx];
+    }
+
+    // Real-Time Clock
+    function updateClock() {
+      const now = new Date();
+      document.getElementById("liveClock").innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }).toUpperCase();
+      document.getElementById("liveDate").innerText = now.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Canvas Fireflies
+    const canvas = document.getElementById('fireflyCanvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class Particle {
+      constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.radius = Math.random() * 2 + 1;
+        this.alpha = Math.random() * 0.8 + 0.2;
+        this.speedX = (Math.random() - 0.5) * 0.4;
+        this.speedY = (Math.random() - 0.5) * 0.4;
+        this.fade = Math.random() * 0.02 + 0.005;
+      }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        this.alpha += this.fade;
+        if (this.alpha <= 0.1 || this.alpha >= 0.9) this.fade = -this.fade;
+        if (this.x < 0) this.x = canvas.width;
+        if (this.x > canvas.width) this.x = 0;
+        if (this.y < 0) this.y = canvas.height;
+        if (this.y > canvas.height) this.y = 0;
+      }
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 230, 160, ${this.alpha})`;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = '#ffea9f';
+        ctx.fill();
+      }
+    }
+
+    for (let i = 0; i < 45; i++) particles.push(new Particle());
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+      requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+  </script>
+</body>
+</html>
