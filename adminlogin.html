@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Authorization — Shoaib Akhter</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: radial-gradient(circle at 50% 18%, #141b34 0%, #0a0f24 45%, #04060f 100%);
+      min-height: 100vh;
+    }
+  </style>
+</head>
+<body class="flex items-center justify-center p-4 min-h-screen">
+  <!-- Modal Card matching Image 3 -->
+  <div class="bg-white w-full max-w-sm rounded-3xl p-6 relative border border-purple-100 shadow-2xl text-slate-900">
+    <a href="nitrence.html" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 transition">
+      <i class="fa-solid fa-xmark text-lg"></i>
+    </a>
+
+    <div class="text-center mb-5">
+      <div class="w-12 h-12 rounded-2xl bg-purple-100 text-purple-900 mx-auto flex items-center justify-center text-xl mb-3 shadow-inner">
+        <i class="fa-brands fa-telegram text-2xl text-sky-600"></i>
+      </div>
+      <h3 class="text-lg font-bold text-slate-900">Admin Authorization</h3>
+      <p class="text-xs text-slate-500 mt-0.5">Linked to: <span class="font-semibold text-purple-900">Shoaib (@shoaib9580)</span></p>
+    </div>
+
+    <div class="space-y-3">
+      <button onclick="sendTelegramAuthButtons()" id="btnSendAuth" 
+              class="w-full py-3.5 rounded-xl bg-purple-900 hover:bg-purple-800 text-white font-semibold text-xs transition shadow-md shadow-purple-900/10 flex items-center justify-center gap-2">
+        <i class="fa-solid fa-paper-plane text-xs"></i>
+        <span>Send Approve & Deny to Telegram</span>
+      </button>
+
+      <p id="tgAuthStatus" class="text-xs text-center font-medium min-h-[1.5rem] text-slate-500 pt-1">
+        Tap the button to send request to Telegram.
+      </p>
+
+      <div class="pt-3 border-t border-slate-100 text-center">
+        <a href="studenton.html" class="text-xs text-purple-700 hover:underline font-medium">Continue as Student →</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const BOT_TOKEN = "8710019201:AAHTf8nJ609aPzr9_qHtibbQPPY1k10MAo8";
+    const ADMIN_CHAT_ID = "1616921893";
+    let pollingInterval = null;
+    let lastUpdateId = 0;
+
+    async function callTelegram(method, data = null) {
+      const directUrl = `https://api.telegram.org/bot${BOT_TOKEN}/${method}`;
+      const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(directUrl)}`;
+      const options = data ? {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      } : { method: "GET" };
+
+      try {
+        const res = await fetch(directUrl, options);
+        if (res.ok) return await res.json();
+      } catch (err) {}
+
+      try {
+        const res2 = await fetch(proxyUrl, options);
+        return await res2.json();
+      } catch (err) {
+        return null;
+      }
+    }
+
+    async function sendTelegramAuthButtons() {
+      const status = document.getElementById("tgAuthStatus");
+      status.className = "text-xs text-center font-medium text-purple-700";
+      status.innerText = "Notification sent! Tap 'Approve Access' on your Telegram...";
+
+      const latest = await callTelegram("getUpdates?offset=-1");
+      if (latest && latest.result && latest.result.length > 0) {
+        lastUpdateId = latest.result[0].update_id + 1;
+      }
+
+      const payload = {
+        chat_id: ADMIN_CHAT_ID,
+        text: `🔐 *Shoaib Akhter Portal Access Request*\n\n📍 *Campus:* Ghazipur, Uttar Pradesh\n👤 *Admin:* Shoaib (@shoaib9580)\n\n_Do you approve management access?_`,
+        parse_mode: "Markdown",
+        reply_markup: {
+          inline_keyboard: [
+            [
+              { text: "✅ Approve Access", callback_data: "auth_approve" },
+              { text: "❌ Deny", callback_data: "auth_deny" }
+            ]
+          ]
+        }
+      };
+
+      const sendRes = await callTelegram("sendMessage", payload);
+      if (!sendRes || !sendRes.ok) {
+        status.className = "text-xs text-center font-medium text-amber-600";
+        status.innerText = "Bot offline or connection blocked. Please start @Shoaib_login on Telegram.";
+        return;
+      }
+
+      if (pollingInterval) clearInterval(pollingInterval);
+
+      pollingInterval = setInterval(async () => {
+        const updates = await callTelegram(`getUpdates?offset=${lastUpdateId}`);
+        if (!updates || !updates.ok || !updates.result) return;
+
+        for (const up of updates.result) {
+          lastUpdateId = up.update_id + 1;
+
+          if (up.callback_query) {
+            const cq = up.callback_query;
+            if (cq.data === "auth_approve") {
+              await callTelegram("answerCallbackQuery", {
+                callback_query_id: cq.id,
+                text: "✅ Access Approved! Welcome Shoaib."
+              });
+
+              await callTelegram("sendMessage", {
+                chat_id: ADMIN_CHAT_ID,
+                text: `✅ *Shoaib Akhter Management Login Alert*\nAdministrator authorized successfully.\nCampus: Ghazipur, Uttar Pradesh.`,
+                parse_mode: "Markdown"
+              });
+
+              clearInterval(pollingInterval);
+              sessionStorage.setItem("shoaib_admin_auth", "true");
+              status.className = "text-xs text-center font-bold text-emerald-600";
+              status.innerText = "Access Approved! Redirecting...";
+              setTimeout(() => {
+                window.location.href = "adminin.html";
+              }, 700);
+              return;
+            } else if (cq.data === "auth_deny") {
+              await callTelegram("answerCallbackQuery", {
+                callback_query_id: cq.id,
+                text: "❌ Access Denied."
+              });
+
+              clearInterval(pollingInterval);
+              status.className = "text-xs text-center font-medium text-rose-600";
+              status.innerText = "Access denied by Telegram administrator.";
+              return;
+            }
+          }
+        }
+      }, 1500);
+    }
+  </script>
+</body>
+</html>
