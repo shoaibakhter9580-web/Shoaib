@@ -53,7 +53,7 @@
 
   <div class="max-w-5xl mx-auto w-full">
     
-    <!-- Top Bar -->
+    <!-- Top Header Navigation -->
     <header class="flex items-center justify-between pb-6 border-b border-purple-100/60 mb-6">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl bg-purple-900 text-white flex items-center justify-center font-bold text-lg shadow-md shadow-purple-900/10">
@@ -65,34 +65,54 @@
         </div>
       </div>
 
-      <!-- Actions -->
-      <div class="flex items-center gap-3">
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-2 sm:gap-3">
         <div class="flex bg-slate-200/60 p-1 rounded-xl text-xs font-semibold text-slate-600">
-          <button id="tabFilesBtn" onclick="switchView('files')" class="px-3.5 py-1.5 rounded-lg bg-white text-purple-900 shadow-sm transition">
-            <i class="fa-regular fa-file-lines mr-1.5"></i> Files
+          <button id="tabFilesBtn" onclick="switchView('files')" class="px-3 py-1.5 rounded-lg bg-white text-purple-900 shadow-sm transition">
+            <i class="fa-regular fa-file-lines mr-1"></i> Files
           </button>
-          <button id="tabFoldersBtn" onclick="switchView('folders')" class="px-3.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition">
-            <i class="fa-regular fa-folder mr-1.5"></i> Folders
+          <button id="tabFoldersBtn" onclick="switchView('folders')" class="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition">
+            <i class="fa-regular fa-folder mr-1"></i> Folders
           </button>
         </div>
 
-        <!-- 1-Click Management Login Button -->
-        <button onclick="toggleModal('authModal')" class="px-3 py-2 rounded-xl bg-purple-900 hover:bg-purple-800 text-white text-xs font-semibold flex items-center gap-1.5 transition shadow-sm">
-          <i class="fa-brands fa-telegram text-sm text-sky-300"></i>
-          <span id="authStatusBadge">Admin Gateway</span>
+        <!-- Upload File Button (Visible only when logged in) -->
+        <button id="btnOpenUpload" onclick="toggleModal('uploadModal')" class="hidden px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
+          <i class="fa-solid fa-cloud-arrow-up text-xs"></i>
+          <span>Upload File</span>
         </button>
 
-        <button onclick="location.reload()" title="Refresh" class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-600 hover:bg-slate-200/50 transition">
-          <i class="fa-solid fa-rotate-right text-sm"></i>
+        <!-- Admin Login / Status Trigger -->
+        <button id="authBtn" onclick="toggleModal('authModal')" class="px-3 py-2 rounded-xl bg-purple-900 hover:bg-purple-800 text-white text-xs font-semibold flex items-center gap-1.5 transition shadow-sm">
+          <i class="fa-brands fa-telegram text-sm text-sky-300"></i>
+          <span id="authStatusBadge">Admin Login</span>
+        </button>
+
+        <!-- Logout Button -->
+        <button id="btnLogout" onclick="logoutAdmin()" class="hidden px-2.5 py-2 rounded-xl bg-rose-100 hover:bg-rose-200 text-rose-700 text-xs font-semibold transition" title="Logout">
+          <i class="fa-solid fa-right-from-bracket"></i>
         </button>
       </div>
     </header>
 
+    <!-- Admin Notification Banner -->
+    <div id="adminBanner" class="hidden mb-6 p-3 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center justify-between text-xs text-emerald-800">
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-circle-check text-emerald-600"></i>
+        <span>Logged in as <b>Shoaib Akhter (Administrator)</b>. You can now add and delete files.</span>
+      </div>
+      <button onclick="toggleModal('uploadModal')" class="font-bold underline text-emerald-900 hover:text-emerald-700">
+        + Add New Material
+      </button>
+    </div>
+
     <!-- ==================== FILES VIEW ==================== -->
     <section id="filesView" class="space-y-6">
-      <div>
-        <h2 class="text-2xl font-serif-title font-bold text-slate-900">Files</h2>
-        <p class="text-xs text-slate-500 mt-0.5">Latest from class</p>
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-2xl font-serif-title font-bold text-slate-900">Files</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Latest from class</p>
+        </div>
       </div>
 
       <!-- Search Field -->
@@ -114,7 +134,7 @@
         </button>
         <button onclick="filterFiles('new', this)" class="filter-pill px-3.5 py-1.5 rounded-full font-medium bg-white border border-slate-200/80 text-slate-700 transition flex items-center gap-1.5">
           <span class="w-3.5 h-3.5 rounded bg-emerald-100 text-emerald-700 text-[10px] flex items-center justify-center font-bold">📄</span>
-          New • 4
+          New
         </button>
         <button onclick="filterFiles('important', this)" class="filter-pill px-3.5 py-1.5 rounded-full font-medium bg-white border border-slate-200/80 text-slate-700 transition flex items-center gap-1.5">
           <i class="fa-solid fa-star text-amber-400 text-[11px]"></i>
@@ -126,6 +146,12 @@
         </button>
         <button onclick="filterFiles('image', this)" class="filter-pill px-3.5 py-1.5 rounded-full font-medium bg-white border border-slate-200/80 text-slate-700 transition flex items-center gap-1.5">
           <span>🖼️</span> Images
+        </button>
+        <button onclick="filterFiles('video', this)" class="filter-pill px-3.5 py-1.5 rounded-full font-medium bg-white border border-slate-200/80 text-slate-700 transition flex items-center gap-1.5">
+          <span>🎬</span> Videos
+        </button>
+        <button onclick="filterFiles('post', this)" class="filter-pill px-3.5 py-1.5 rounded-full font-medium bg-white border border-slate-200/80 text-slate-700 transition flex items-center gap-1.5">
+          <span>🧩</span> Posts
         </button>
       </div>
 
@@ -141,7 +167,7 @@
 
       <div class="flex items-center justify-between pt-1">
         <h3 class="text-base font-bold text-slate-800">Folders</h3>
-        <span class="text-xs text-slate-500 font-medium">6 folders</span>
+        <span id="folderCountBadge" class="text-xs text-slate-500 font-medium">6 folders</span>
       </div>
 
       <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4">
@@ -150,7 +176,7 @@
             <i class="fa-solid fa-folder"></i>
           </div>
           <h4 class="font-bold text-xs sm:text-sm text-slate-800 mb-0.5">SuperTET</h4>
-          <p class="text-[11px] text-slate-400">1 item • 4d ago</p>
+          <p id="folder-count-SuperTET" class="text-[11px] text-slate-400">Loading...</p>
         </div>
 
         <div onclick="openFolder('Cosmos')" class="folder-card p-4 rounded-2xl cursor-pointer">
@@ -158,7 +184,7 @@
             <i class="fa-solid fa-folder"></i>
           </div>
           <h4 class="font-bold text-xs sm:text-sm text-slate-800 mb-0.5">Cosmos</h4>
-          <p class="text-[11px] text-slate-400">6 items • 24 Sept 26</p>
+          <p id="folder-count-Cosmos" class="text-[11px] text-slate-400">Loading...</p>
         </div>
 
         <div onclick="openFolder('UPSSSC')" class="folder-card p-4 rounded-2xl cursor-pointer">
@@ -166,7 +192,7 @@
             <i class="fa-solid fa-folder"></i>
           </div>
           <h4 class="font-bold text-xs sm:text-sm text-slate-800 mb-0.5">UPSSSC</h4>
-          <p class="text-[11px] text-slate-400">3 items • 10 Aug 26</p>
+          <p id="folder-count-UPSSSC" class="text-[11px] text-slate-400">Loading...</p>
         </div>
 
         <div onclick="openFolder('Group D')" class="folder-card p-4 rounded-2xl cursor-pointer">
@@ -174,7 +200,7 @@
             <i class="fa-solid fa-folder"></i>
           </div>
           <h4 class="font-bold text-xs sm:text-sm text-slate-800 mb-0.5">Group D</h4>
-          <p class="text-[11px] text-slate-400">4 items • 24 Jul 26</p>
+          <p id="folder-count-Group D" class="text-[11px] text-slate-400">Loading...</p>
         </div>
 
         <div onclick="openFolder('NCERT')" class="folder-card p-4 rounded-2xl cursor-pointer">
@@ -182,7 +208,7 @@
             <i class="fa-solid fa-folder"></i>
           </div>
           <h4 class="font-bold text-xs sm:text-sm text-slate-800 mb-0.5">NCERT</h4>
-          <p class="text-[11px] text-slate-400">3 items • 29 Apr 26</p>
+          <p id="folder-count-NCERT" class="text-[11px] text-slate-400">Loading...</p>
         </div>
 
         <div onclick="openFolder('Lekhpal')" class="folder-card p-4 rounded-2xl cursor-pointer">
@@ -190,271 +216,90 @@
             <i class="fa-solid fa-folder"></i>
           </div>
           <h4 class="font-bold text-xs sm:text-sm text-slate-800 mb-0.5">Lekhpal</h4>
-          <p class="text-[11px] text-slate-400">4 items • 27 Apr 26</p>
+          <p id="folder-count-Lekhpal" class="text-[11px] text-slate-400">Loading...</p>
         </div>
       </div>
     </section>
 
   </div>
 
+  <!-- Footer -->
   <footer class="max-w-5xl mx-auto w-full pt-10 pb-4 text-center text-xs text-slate-400">
-    Shoaib Akhter • Ghazipur, Uttar Pradesh • Bot Gateway Linked to Shoaib (@shoaib9580)
+    Shoaib Akhter • Ghazipur, Uttar Pradesh • Bot Gateway Linked to @Shoaib_login
   </footer>
 
-  <!-- ==================== NO-TYPING TELEGRAM ADMIN MODAL ==================== -->
-  <div id="authModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden">
-    <div class="bg-white w-full max-w-sm rounded-3xl p-6 relative border border-purple-100 shadow-2xl">
-      <button onclick="toggleModal('authModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700">
+  <!-- ==================== UPLOAD FILE MODAL ==================== -->
+  <div id="uploadModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden">
+    <div class="bg-white w-full max-w-lg rounded-3xl p-6 relative border border-purple-100 shadow-2xl">
+      <button onclick="toggleModal('uploadModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700">
         <i class="fa-solid fa-xmark text-lg"></i>
       </button>
 
-      <div class="text-center mb-5">
-        <div class="w-12 h-12 rounded-2xl bg-purple-100 text-purple-900 mx-auto flex items-center justify-center text-xl mb-2">
-          <i class="fa-brands fa-telegram text-2xl text-sky-600"></i>
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg">
+          <i class="fa-solid fa-cloud-arrow-up"></i>
         </div>
-        <h3 class="text-lg font-bold text-slate-900">Admin Authorization</h3>
-        <p class="text-xs text-slate-500">Linked to: <span class="font-semibold text-purple-900">Shoaib (@shoaib9580)</span></p>
+        <div>
+          <h3 class="text-base font-bold text-slate-900">Upload New Study Material</h3>
+          <p class="text-xs text-slate-500">Publish notes, PDFs, or files to student sections</p>
+        </div>
       </div>
 
-      <div class="space-y-3">
-        <!-- 1-Click Send Button -->
-        <button 
-          onclick="sendTelegramAuthButtons()" 
-          id="btnSendAuth" 
-          class="w-full py-3 rounded-xl bg-purple-900 hover:bg-purple-800 text-white font-semibold text-xs transition shadow-md shadow-purple-900/10 flex items-center justify-center gap-2">
-          <i class="fa-solid fa-paper-plane text-xs"></i>
-          <span>Send Approve & Deny to My Telegram</span>
-        </button>
-
-        <p id="tgStatusMsg" class="text-xs text-center font-medium min-h-[1.2rem]"></p>
-
-        <div class="relative flex py-1 items-center">
-          <div class="flex-grow border-t border-slate-200"></div>
-          <span class="flex-shrink mx-2 text-[10px] text-slate-400 uppercase tracking-widest">Or Emergency Bypass</span>
-          <div class="flex-grow border-t border-slate-200"></div>
-        </div>
-
+      <form onsubmit="handleUploadSubmit(event)" class="space-y-3.5">
+        <!-- Pick File from Device -->
         <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Select File from Device</label>
           <input 
-            id="passcodeInput" 
-            type="password" 
-            placeholder="Enter bypass passcode (shoaib2026)" 
-            class="w-full px-3 py-2 rounded-xl border border-slate-200 text-center text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-400"
+            id="uploadFileInput" 
+            type="file" 
+            onchange="autoPopulateFileInfo(this)"
+            class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100 cursor-pointer border border-slate-200 rounded-xl p-1"
           />
         </div>
 
-        <button onclick="verifyBypassPasscode()" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs transition">
-          Unlock Instantly
-        </button>
-      </div>
-    </div>
-  </div>
+        <!-- File Title / Name -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">File Title</label>
+          <input 
+            id="upFileName" 
+            required 
+            type="text" 
+            placeholder="e.g. History TGT-PGT Ghatnachakra.pdf" 
+            class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-400"
+          />
+        </div>
 
-  <script>
-    // HARDCODED CREDENTIALS (NO TYPING NEEDED)
-    const BOT_TOKEN = "8710019201:AAHTf8nJ609aPzr9_qHtibbQPPY1k10MAo8";
-    const ADMIN_CHAT_ID = "1616921893"; // Your Telegram ID (@shoaib9580)
-
-    const fileCatalog = [
-      {
-        section: "THIS WEEK",
-        count: 4,
-        files: [
-          { name: "स्थलाकृति_उच्चावच_चित्रारेख.pdf", isNew: true, isImportant: true, size: "24.2 MB", time: "2d ago", tag: "#geo", folder: null, type: "pdf" },
-          { name: "स्थलाकृति उच्चावच.pdf", isNew: true, isImportant: true, size: "25.0 MB", time: "2d ago", tag: "#geo", folder: null, type: "pdf" },
-          { name: "History TGT-PGT Ghatnachakra .pdf", isNew: true, isImportant: false, size: "87.0 MB", time: "4d ago", tag: null, folder: "SuperTET", type: "pdf" },
-          { name: "Paper practice test 01.pdf", isNew: true, isImportant: false, size: "4.0 MB", time: "6d ago", tag: null, folder: null, type: "pdf" }
-        ]
-      },
-      {
-        section: "SEPTEMBER 2026",
-        count: 23,
-        files: [
-          { name: "20260928_082302.jpg", isNew: false, isImportant: false, size: "3.2 MB", time: "28 Sept 26", tag: null, folder: "Cosmos", type: "image" },
-          { name: "UPSSSC_Exam_Pattern_Notes.pdf", isNew: false, isImportant: true, size: "12.8 MB", time: "24 Sept 26", tag: "#upsssc", folder: "UPSSSC", type: "pdf" }
-        ]
-      }
-    ];
-
-    let currentFilter = 'all';
-
-    function renderFiles(filter = 'all', searchQuery = '') {
-      const container = document.getElementById("fileSections");
-      container.innerHTML = "";
-
-      fileCatalog.forEach(sec => {
-        const matchingFiles = sec.files.filter(f => {
-          const matchSearch = f.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                              (f.tag && f.tag.toLowerCase().includes(searchQuery.toLowerCase())) ||
-                              (f.folder && f.folder.toLowerCase().includes(searchQuery.toLowerCase()));
-          if (!matchSearch) return false;
-          if (filter === 'all') return true;
-          if (filter === 'new') return f.isNew;
-          if (filter === 'important') return f.isImportant;
-          if (filter === 'pdf') return f.type === 'pdf';
-          if (filter === 'image') return f.type === 'image';
-          return true;
-        });
-
-        if (matchingFiles.length === 0) return;
-
-        const secDiv = document.createElement("div");
-        secDiv.className = "space-y-2.5";
-        secDiv.innerHTML = `
-          <div class="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase tracking-wide">
-            <span>${sec.section}</span>
-            <span class="text-slate-400 font-semibold text-[11px]">${sec.count}</span>
+        <div class="grid grid-cols-2 gap-3">
+          <!-- Format Type -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Format Type</label>
+            <select id="upFileType" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 text-slate-800 focus:outline-none">
+              <option value="pdf">📄 PDF Document</option>
+              <option value="image">🖼️ Image</option>
+              <option value="video">🎬 Video</option>
+              <option value="post">🧩 Post / Note</option>
+            </select>
           </div>
-          <div class="space-y-2.5" id="sec-list-${sec.section.replace(/\s+/g, '')}"></div>
-        `;
-        container.appendChild(secDiv);
 
-        const listContainer = secDiv.querySelector(`#sec-list-${sec.section.replace(/\s+/g, '')}`);
+          <!-- Target Folder -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Target Folder</label>
+            <select id="upFileFolder" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 text-slate-800 focus:outline-none">
+              <option value="">(None / General)</option>
+              <option value="SuperTET">SuperTET</option>
+              <option value="Cosmos">Cosmos</option>
+              <option value="UPSSSC">UPSSSC</option>
+              <option value="Group D">Group D</option>
+              <option value="NCERT">NCERT</option>
+              <option value="Lekhpal">Lekhpal</option>
+            </select>
+          </div>
+        </div>
 
-        matchingFiles.forEach(f => {
-          const card = document.createElement("div");
-          card.className = "soft-card p-3 sm:p-3.5 rounded-2xl flex items-center justify-between";
-
-          const iconBox = f.type === 'image' 
-            ? `<div class="w-10 h-11 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600 text-lg flex-shrink-0"><i class="fa-regular fa-image"></i></div>`
-            : `<div class="relative w-10 h-11 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center flex-shrink-0">
-                 <div class="w-5 h-7 rounded-sm bg-rose-500 border border-rose-600 flex flex-col justify-center items-center text-white">
-                   <div class="w-3 h-0.5 bg-white/70 mb-1"></div>
-                   <div class="w-3 h-0.5 bg-white/70"></div>
-                 </div>
-                 <div class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-400 rounded-full border border-white"></div>
-               </div>`;
-
-          card.innerHTML = `
-            <div class="flex items-center gap-3 min-w-0">
-              ${iconBox}
-              <div class="truncate">
-                <div class="flex items-center gap-2">
-                  ${f.isImportant ? '<i class="fa-solid fa-star text-amber-400 text-xs"></i>' : ''}
-                  <span class="text-xs sm:text-sm font-bold text-slate-900 truncate">${f.name}</span>
-                  ${f.isNew ? '<span class="text-[9px] font-bold px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded-md">NEW</span>' : ''}
-                </div>
-                <div class="flex items-center gap-2 text-[11px] text-slate-400 mt-0.5">
-                  ${f.folder ? `<span class="flex items-center gap-1 text-slate-500"><i class="fa-solid fa-folder text-amber-400 text-[10px]"></i> ${f.folder}</span>` : ''}
-                  <span>${f.size}</span>
-                  <span>•</span>
-                  <span>${f.time}</span>
-                  ${f.tag ? `<span class="text-purple-600 font-semibold">${f.tag}</span>` : ''}
-                </div>
-              </div>
-            </div>
-            <button onclick="downloadFile('${f.name}')" title="Download" class="w-9 h-9 rounded-xl border border-slate-200/80 hover:bg-slate-100 text-slate-600 flex items-center justify-center transition flex-shrink-0 ml-2">
-              <i class="fa-solid fa-arrow-down text-xs"></i>
-            </button>
-          `;
-          listContainer.appendChild(card);
-        });
-      });
-    }
-
-    function downloadFile(name) {
-      alert("Downloading: " + name);
-    }
-
-    function handleSearch() {
-      const q = document.getElementById("fileSearchInput").value;
-      renderFiles(currentFilter, q);
-    }
-
-    function filterFiles(filter, btn) {
-      currentFilter = filter;
-      document.querySelectorAll(".filter-pill").forEach(p => p.classList.remove("pill-active"));
-      btn.classList.add("pill-active");
-      renderFiles(filter, document.getElementById("fileSearchInput").value);
-    }
-
-    function switchView(view) {
-      const filesView = document.getElementById("filesView");
-      const foldersView = document.getElementById("foldersView");
-      const tabFilesBtn = document.getElementById("tabFilesBtn");
-      const tabFoldersBtn = document.getElementById("tabFoldersBtn");
-
-      if (view === 'files') {
-        filesView.classList.remove("hidden");
-        foldersView.classList.add("hidden");
-        tabFilesBtn.className = "px-3.5 py-1.5 rounded-lg bg-white text-purple-900 shadow-sm transition";
-        tabFoldersBtn.className = "px-3.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition";
-      } else {
-        filesView.classList.add("hidden");
-        foldersView.classList.remove("hidden");
-        tabFoldersBtn.className = "px-3.5 py-1.5 rounded-lg bg-white text-purple-900 shadow-sm transition";
-        tabFilesBtn.className = "px-3.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition";
-      }
-    }
-
-    function openFolder(folderName) {
-      switchView('files');
-      document.getElementById("fileSearchInput").value = folderName;
-      renderFiles('all', folderName);
-    }
-
-    function toggleModal(id) {
-      document.getElementById(id).classList.toggle("hidden");
-    }
-
-    // 1-CLICK DISPATCH DIRECTLY TO TELEGRAM ID 1616921893
-    async function sendTelegramAuthButtons() {
-      const status = document.getElementById("tgStatusMsg");
-      status.className = "text-xs text-center font-medium text-slate-500";
-      status.innerText = "Sending buttons to your Telegram (@shoaib9580)...";
-
-      const payload = {
-        chat_id: ADMIN_CHAT_ID,
-        text: `🔐 *Shoaib Akhter Portal Access Request*\n\n📍 *Campus:* Ghazipur, Uttar Pradesh\n👤 *Admin:* Shoaib (@shoaib9580)\n\n_Tap Approve to grant full portal access._`,
-        parse_mode: "Markdown",
-        reply_markup: {
-          inline_keyboard: [
-            [
-              { text: "✅ Approve Access", callback_data: "auth_approve" },
-              { text: "❌ Deny", callback_data: "auth_deny" }
-            ]
-          ]
-        }
-      };
-
-      try {
-        const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-
-        const data = await response.json();
-        if (data.ok) {
-          status.className = "text-xs text-center font-medium text-emerald-600";
-          status.innerText = "Notification sent! Check your Telegram.";
-        } else {
-          status.className = "text-xs text-center font-medium text-rose-500";
-          status.innerText = "Telegram Error: " + data.description;
-        }
-      } catch (err) {
-        status.className = "text-xs text-center font-medium text-amber-600";
-        status.innerText = "Request dispatched! Use bypass passcode if offline.";
-      }
-    }
-
-    function verifyBypassPasscode() {
-      const val = document.getElementById("passcodeInput").value.trim();
-      const status = document.getElementById("tgStatusMsg");
-      const badge = document.getElementById("authStatusBadge");
-
-      if (val === "shoaib2026" || val === "admin2026") {
-        status.className = "text-xs text-center font-medium text-emerald-600";
-        status.innerText = "Access granted! Welcome, Shoaib.";
-        badge.innerText = "Admin: Shoaib";
-        setTimeout(() => toggleModal('authModal'), 600);
-      } else {
-        status.className = "text-xs text-center font-medium text-rose-500";
-        status.innerText = "Invalid bypass passcode.";
-      }
-    }
-
-    renderFiles();
-  </script>
-</body>
-</html>
+        <div class="grid grid-cols-2 gap-3">
+          <!-- Tag -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Subject Tag</label>
+            <input 
+              id="upFileTag" 
+              type="text"
