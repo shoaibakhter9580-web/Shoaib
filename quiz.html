@@ -3,181 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Glossy AI Quiz - Shoaib Akhter</title>
+    <title>Quiz Portal — Shoaib Akhter</title>
     <style>
-        :root {
-            --primary: #6366f1;
-            --primary-hover: #4f46e5;
-            --success: #10b981;
-            --error: #ef4444;
-            --bg-glass: rgba(255, 255, 255, 0.85);
-            --border-glass: rgba(255, 255, 255, 0.4);
-        }
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: linear-gradient(135deg, #f3e8ff 0%, #e0e7ff 100%);
-            color: #1e293b;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 95vh;
-        }
-        .container {
-            width: 100%;
-            max-width: 700px;
-            background: var(--bg-glass);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--border-glass);
-            padding: 35px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-        }
-        h1 {
-            text-align: center;
-            color: #312e81;
-            margin-bottom: 20px;
-            font-size: 1.75rem;
-            font-weight: 700;
-        }
-        /* Admin Bar matching your screenshot requirement */
-        .admin-controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 12px 18px;
-            border-radius: 12px;
-            margin-bottom: 25px;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
-        }
-        .admin-controls label {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #475569;
-        }
-        .admin-controls select {
-            padding: 6px 12px;
-            border-radius: 6px;
-            border: 1px solid #cbd5e1;
-            background: #fff;
-            font-weight: 600;
-            color: #1e293b;
-        }
-        .question-card {
-            display: none;
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            padding: 25px;
-            border-radius: 14px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-            animation: fadeIn 0.3s ease-in-out;
-        }
-        .question-card.active {
-            display: block;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(6px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .question-title {
-            font-size: 1.15rem;
-            font-weight: 600;
-            margin-bottom: 18px;
-            color: #0f172a;
-        }
-        .options-list label {
-            display: block;
-            padding: 12px 16px;
-            margin: 10px 0;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 1rem;
-        }
-        .options-list label:hover {
-            background: #f1f5f9;
-            border-color: #cbd5e1;
-        }
-        .options-list input {
-            margin-right: 12px;
-        }
-        /* Dynamic state highlights */
-        label.correct-choice {
-            background-color: #d1fae5 !important;
-            border-color: var(--success) !important;
-            color: #065f46;
-            font-weight: 600;
-        }
-        label.incorrect-choice {
-            background-color: #fee2e2 !important;
-            border-color: var(--error) !important;
-            color: #991b1b;
-            font-weight: 600;
-        }
-        .nav-buttons {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 25px;
-        }
-        button.nav-btn {
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            padding: 10px 22px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background 0.2s, transform 0.1s;
-        }
-        button.nav-btn:hover {
-            background-color: var(--primary-hover);
-        }
-        button.nav-btn:active {
-            transform: scale(0.98);
-        }
-        button.skip-btn {
-            background-color: #64748b;
-        }
-        button.skip-btn:hover {
-            background-color: #475569;
-        }
-        #result-container {
-            text-align: center;
-            font-size: 1.25rem;
-            font-weight: bold;
-            margin-top: 20px;
-            background: #fff;
-            padding: 25px;
-            border-radius: 14px;
-            border: 1px solid #e2e8f0;
-        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f5f9; color: #1e293b; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 90vh; }
+        .container { width: 100%; max-width: 650px; background: #ffffff; padding: 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; }
+        h1 { text-align: center; color: #312e81; margin-bottom: 20px; font-size: 1.5rem; }
+        .select-box { margin-bottom: 20px; }
+        select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-weight: 600; font-size: 0.95rem; background: #f8fafc; }
+        .question-card { display: none; background: #fbfbfc; border: 1px solid #e2e8f0; padding: 22px; border-radius: 12px; margin-bottom: 20px; }
+        .question-card.active { display: block; }
+        .question-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 15px; color: #0f172a; }
+        .options-list label { display: block; padding: 12px 14px; margin: 8px 0; background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; cursor: pointer; transition: all 0.2s; font-size: 1rem; }
+        .options-list label:hover { background: #f1f5f9; border-color: #94a3b8; }
+        .options-list input { margin-right: 10px; }
+        label.correct-choice { background-color: #d1fae5 !important; border-color: #10b981 !important; color: #065f46; font-weight: bold; }
+        label.incorrect-choice { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #991b1b; font-weight: bold; }
+        .nav-buttons { display: flex; justify-content: space-between; margin-top: 20px; }
+        button.nav-btn { background-color: #551a8b; color: white; border: none; padding: 10px 20px; font-size: 0.95rem; font-weight: 600; border-radius: 8px; cursor: pointer; transition: background 0.2s; }
+        button.nav-btn:hover { background-color: #44136e; }
+        button.skip-btn { background-color: #64748b; }
+        button.skip-btn:hover { background-color: #475569; }
+        #result-container { text-align: center; font-size: 1.2rem; font-weight: bold; margin-top: 20px; background: #f8fafc; padding: 25px; border-radius: 12px; border: 1px solid #e2e8f0; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Shoaib Akhter - AI Quiz Manager</h1>
+    <h1>Online Quiz Portal</h1>
 
-    <!-- Admin Panel: Negative Marking Selector (matching your black box area) -->
-    <div class="admin-controls">
-        <div>
-            <label for="negativeMarking">Negative Marking:</label>
-            <select id="negativeMarking">
-                <option value="0">0 (No Penalty)</option>
-                <option value="0.25">-1/4 Marks (-0.25)</option>
-                <option value="0.5" selected>-1/2 Marks (-0.5)</option>
-                <option value="1">-1 Mark (-1.0)</option>
-            </select>
-        </div>
-        <button class="nav-btn" style="padding: 6px 14px; font-size: 0.85rem;" onclick="loadQuizData()">Reload Quiz</button>
+    <div class="select-box">
+        <label for="quizDropdown" style="font-size: 0.85rem; font-weight: bold; color: #475569; display: block; margin-bottom: 5px;">Select Quiz to Attempt:</label>
+        <select id="quizDropdown" onchange="loadChosenQuiz()">
+            <option value="">-- Choose Uploaded Quiz --</option>
+        </select>
     </div>
 
     <div id="quiz-container"></div>
@@ -192,131 +50,79 @@
 </div>
 
 <script>
-    // Sample raw text data simulating your uploaded .txt or .pdf files (No '@' or '.' formatting needed)
-    let rawQuizData = `
-1-What is the largest planet in our Solar System?
-A. Saturn
-B. Jupiter
-C. Mars
-D. Venus
-
-2-Which gas do plants absorb from the atmosphere for photosynthesis?
-A. Oxygen
-B. Nitrogen
-C. Carbon Dioxide
-D. Hydrogen
-
-3-Who painted the Mona Lisa?
-A. Vincent van Gogh
-B. Pablo Picasso
-C. Leonardo da Vinci
-D. Michelangelo
-
-4-What is the chemical symbol for gold?
-A. Ag
-B. Fe
-C. Au
-D. Cu
-`;
-
-    let questions = [];
+    let activeQuizQuestions = [];
     let currentIndex = 0;
     let userAnswers = {};
 
-    // Gemini 3.5 Flash-Lite Intelligence Knowledge Base Mapping for Auto-Correct Detection
-    const knowledgeAnswers = {
-        "largest planet": "B",
-        "photosynthesis": "C",
-        "mona lisa": "C",
-        "gold": "C"
+    window.onload = function() {
+        populateQuizSelector();
     };
 
-    function aiAutoDetectCorrectAnswer(qText, options) {
-        let textLower = qText.toLowerCase();
-        for (let key in knowledgeAnswers) {
-            if (textLower.includes(key)) {
-                return knowledgeAnswers[key];
-            }
-        }
-        // Fallback intelligent heuristic if not in pre-mapped dictionary
-        return options[0].letter; 
-    }
+    function populateQuizSelector() {
+        let quizzes = JSON.parse(localStorage.getItem("shoaib_all_quizzes") || "[]");
+        const dropdown = document.getElementById("quizDropdown");
+        dropdown.innerHTML = '<option value="">-- Choose Uploaded Quiz --</option>';
 
-    function parseQuiz(text) {
-        const blocks = text.trim().split(/\n\s*\n/);
-        let parsed = [];
-
-        blocks.forEach((block, idx) => {
-            const lines = block.split('\n').map(l => l.trim()).filter(l => l);
-            if (lines.length >= 2) {
-                let qText = lines[0].replace(/^[\d\-]+[\.\)]?\s*/, '');
-                let options = [];
-
-                for (let i = 1; i < lines.length; i++) {
-                    let line = lines[i];
-                    let matchLetter = line.match(/^([A-Da-d])[\.\)]/);
-                    let letter = matchLetter ? matchLetter[1].toUpperCase() : String.fromCharCode(65 + (i - 1));
-                    options.push({ letter: letter, text: line });
-                }
-
-                if (options.length > 0) {
-                    // Let AI determine the correct answer automatically
-                    let correctLetter = aiAutoDetectCorrectAnswer(qText, options);
-                    parsed.push({
-                        id: idx + 1,
-                        question: qText,
-                        options: options,
-                        correct: correctLetter
-                    });
-                }
-            }
+        quizzes.forEach((quiz, index) => {
+            let opt = document.createElement("option");
+            opt.value = index;
+            opt.textContent = quiz.name;
+            dropdown.appendChild(opt);
         });
-        return parsed;
     }
 
-    function loadQuizData() {
-        questions = parseQuiz(rawQuizData);
+    function loadChosenQuiz() {
+        const index = document.getElementById("quizDropdown").value;
+        if (index === "") {
+            document.getElementById("quiz-container").innerHTML = "";
+            document.getElementById("controls").style.display = "none";
+            document.getElementById("result-container").style.display = "none";
+            return;
+        }
+
+        let quizzes = JSON.parse(localStorage.getItem("shoaib_all_quizzes") || "[]");
+        activeQuizQuestions = quizzes[index].questions;
         currentIndex = 0;
         userAnswers = {};
-        document.getElementById('result-container').style.display = 'none';
-        
-        if (questions.length > 0) {
-            document.getElementById('controls').style.display = 'flex';
+        document.getElementById("result-container").style.display = "none";
+
+        if (activeQuizQuestions.length > 0) {
+            document.getElementById("controls").style.display = "flex";
             renderQuestion();
         }
     }
 
     function renderQuestion() {
-        const container = document.getElementById('quiz-container');
-        if (currentIndex >= questions.length) {
+        const container = document.getElementById("quiz-container");
+        if (currentIndex >= activeQuizQuestions.length) {
             showResults();
             return;
         }
 
-        const q = questions[currentIndex];
+        const q = activeQuizQuestions[currentIndex];
         let html = `
             <div class="question-card active">
-                <div class="question-title">Question ${currentIndex + 1} of ${questions.length}: ${q.question}</div>
+                <div class="question-title">Question ${currentIndex + 1} of ${activeQuizQuestions.length}: ${q.question}</div>
                 <div class="options-list">
         `;
 
-        q.options.forEach(opt => {
+        q.options.forEach((optText, oIdx) => {
             let isAnswered = userAnswers[currentIndex] !== undefined;
-            let checkedAttr = (userAnswers[currentIndex] === opt.letter) ? 'checked' : '';
+            let checkedAttr = (userAnswers[currentIndex] === oIdx) ? 'checked' : '';
             let extraClass = '';
 
             if (isAnswered) {
-                if (opt.letter === q.correct) {
+                if (oIdx === q.answer) {
                     extraClass = 'correct-choice';
-                } else if (userAnswers[currentIndex] === opt.letter) {
+                } else if (userAnswers[currentIndex] === oIdx) {
                     extraClass = 'incorrect-choice';
                 }
             }
 
             html += `
                 <label class="${extraClass}">
-                    <input type="radio" name="q_${currentIndex}" value="${opt.letter}" ${checkedAttr} ${isAnswered ? 'disabled' : ''} onclick="selectAnswer('${opt.letter}')">
-                    ${opt.text}
+                    <input type="radio" name="q_current" value="${oIdx}" ${checkedAttr} ${isAnswered ? 'disabled' : ''} onclick="selectAnswer(${oIdx})">
+                    ${String.fromCharCode(65 + oIdx)}) ${optText}
                 </label>
             `;
         });
@@ -325,19 +131,19 @@ D. Cu
         container.innerHTML = html;
     }
 
-    function selectAnswer(selectedLetter) {
+    function selectAnswer(selectedIdx) {
         if (userAnswers[currentIndex] !== undefined) return;
-        userAnswers[currentIndex] = selectedLetter;
+        userAnswers[currentIndex] = selectedIdx;
 
-        const q = questions[currentIndex];
+        const q = activeQuizQuestions[currentIndex];
         const labels = document.querySelectorAll('.options-list label');
-        
-        labels.forEach(label => {
+
+        labels.forEach((label, idx) => {
             const input = label.querySelector('input');
             input.disabled = true;
-            if (input.value === q.correct) {
+            if (idx === q.answer) {
                 label.classList.add('correct-choice');
-            } else if (input.value === selectedLetter && selectedLetter !== q.correct) {
+            } else if (idx === selectedIdx && selectedIdx !== q.answer) {
                 label.classList.add('incorrect-choice');
             }
         });
@@ -369,16 +175,16 @@ D. Cu
     }
 
     function showResults() {
-        document.getElementById('quiz-container').innerHTML = '';
-        document.getElementById('controls').style.display = 'none';
+        document.getElementById("quiz-container").innerHTML = "";
+        document.getElementById("controls").style.display = "none";
 
         let correctCount = 0;
         let incorrectCount = 0;
         let skippedCount = 0;
 
-        questions.forEach((q, idx) => {
+        activeQuizQuestions.forEach((q, idx) => {
             let ans = userAnswers[idx];
-            if (ans === q.correct) {
+            if (ans === q.answer) {
                 correctCount++;
             } else if (ans === null || ans === undefined) {
                 skippedCount++;
@@ -387,27 +193,25 @@ D. Cu
             }
         });
 
-        const penaltyFactor = parseFloat(document.getElementById('negativeMarking').value);
-        let finalScore = (correctCount * 1) - (incorrectCount * penaltyFactor);
+        const penalty = parseFloat(localStorage.getItem("shoaib_negative_marking") || "0.5");
+        let finalScore = (correctCount * 1) - (incorrectCount * penalty);
 
-        const resDiv = document.getElementById('result-container');
-        resDiv.style.display = 'block';
+        const resDiv = document.getElementById("result-container");
+        resDiv.style.display = "block";
         resDiv.innerHTML = `
             🎉 Quiz Completed Successfully!<br><br>
-            <div style="font-size: 1rem; font-weight: normal; color: #475569; line-height: 1.6;">
-                Correct: <strong style="color: var(--success);">${correctCount}</strong> | 
-                Incorrect: <strong style="color: var(--error);">${incorrectCount}</strong> | 
+            <div style="font-size: 0.95rem; font-weight: normal; color: #475569; line-height: 1.6;">
+                Correct: <strong style="color: #10b981;">${correctCount}</strong> | 
+                Incorrect: <strong style="color: #ef4444;">${incorrectCount}</strong> | 
                 Skipped: <strong>${skippedCount}</strong><br>
-                Negative Penalty Rate: <strong>-${penaltyFactor}</strong>
+                Negative Penalty Rate: <strong>-${penalty}</strong>
             </div>
             <br>
-            Final Calculated Score: <span style="color: var(--primary); font-size: 1.5rem;">${finalScore.toFixed(2)}</span> / ${questions.length}
+            Final Calculated Score: <span style="color: #551a8b; font-size: 1.4rem;">${finalScore.toFixed(2)}</span> / ${activeQuizQuestions.length}
             <br><br>
-            <button class="nav-btn" onclick="loadQuizData()">Try Again</button>
+            <button class="nav-btn" onclick="loadChosenQuiz()">Retake Quiz</button>
         `;
     }
-
-    window.onload = loadQuizData;
 </script>
 
 </body>
