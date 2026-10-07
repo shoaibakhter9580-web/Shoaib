@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shoaib Akhter — Admin Management</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at 50% 0%, #ece2fb 0%, #f6f3fb 35%, #fbfafc 100%); color: #1e1b2e; min-height: 100vh; }
+    .font-serif-title { font-family: 'Playfair Display', serif; }
+    .soft-card { background: #ffffff; border: 1px solid rgba(226, 220, 238, 0.75); box-shadow: 0 2px 10px rgba(118, 92, 168, 0.04); transition: all 0.2s ease; }
+    .soft-card:hover { box-shadow: 0 6px 18px rgba(118, 92, 168, 0.08); transform: translateY(-1px); }
+    .folder-card { background: #ffffff; border: 1px solid rgba(230, 226, 240, 0.85); box-shadow: 0 3px 12px rgba(120, 100, 160, 0.04); transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1); }
+    .folder-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(120, 100, 160, 0.09); border-color: #d8cde9; }
+    .pill-active { background-color: #551a8b !important; color: #ffffff !important; }
+  </style>
+</head>
+<body class="p-3 sm:p-6 lg:p-8 flex flex-col justify-between min-h-screen">
+  <div class="max-w-5xl mx-auto w-full">
+    <!-- Header with Upload File and Admin Badge -->
+    <header class="flex items-center justify-between pb-6 border-b border-purple-100/70 mb-6">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-purple-900 text-white flex items-center justify-center font-bold text-lg shadow-md shadow-purple-900/10">
+          S
+        </div>
+        <div>
+          <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">Shoaib Akhter</h1>
+          <p class="text-xs text-purple-700/80 font-medium">Ghazipur • Uttar Pradesh</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 sm:gap-3">
+        <div class="flex bg-slate-200/60 p-1 rounded-xl text-xs font-semibold text-slate-600">
+          <button id="tabFilesBtn" onclick="switchPortalTab('files')" class="px-3.5 py-1.5 rounded-lg bg-white text-purple-900 shadow-sm transition">
+            <i class="fa-regular fa-file-lines mr-1.5"></i> Files
+          </button>
+          <button id="tabFoldersBtn" onclick="switchPortalTab('folders')" class="px-3.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition">
+            <i class="fa-regular fa-folder mr-1.5"></i> Folders
+          </button>
+        </div>
+
+        <!-- Green Upload File Button matching Image 4 -->
+        <button onclick="toggleModal('uploadModal')" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
+          <i class="fa-solid fa-cloud-arrow-up text-sm"></i>
+          <span>Upload File</span>
+        </button>
+
+        <!-- Admin Badge matching Image 4 -->
+        <button onclick="logoutAdmin()" title="Click to log out" class="px-3.5 py-2 rounded-xl bg-purple-900 hover:bg-purple-950 text-white text-xs font-semibold flex items-center gap-1.5 transition shadow-sm">
+          <i class="fa-brands fa-telegram text-sm text-sky-400"></i>
+          <span>Admin: Shoaib</span>
+        </button>
+
+        <a href="nitrence.html" title="Home" class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 flex items-center justify-center transition">
+          <i class="fa-solid fa-house text-xs"></i>
+        </a>
+      </div>
+    </
