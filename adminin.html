@@ -36,25 +36,25 @@
       <div class="flex items-center gap-2 sm:gap-3">
         <!-- Files / Folders / Quiz Navigation Toggle -->
         <div class="flex bg-slate-200/60 p-1 rounded-xl text-xs font-semibold text-slate-600">
-          <button id="tabFilesBtn" class="px-3.5 py-1.5 rounded-lg bg-white text-purple-900 shadow-sm transition">
+          <button id="tabFilesBtn" onclick="switchPortalTab('files')" class="px-3.5 py-1.5 rounded-lg bg-white text-purple-900 shadow-sm transition">
             <i class="fa-regular fa-file-lines mr-1.5"></i> Files
           </button>
-          <button id="tabFoldersBtn" class="px-3.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition">
+          <button id="tabFoldersBtn" onclick="switchPortalTab('folders')" class="px-3.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition">
             <i class="fa-regular fa-folder mr-1.5"></i> Folders
           </button>
-          <button id="tabQuizBtn" class="px-3.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition">
+          <button id="tabQuizBtn" onclick="switchPortalTab('quiz')" class="px-3.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition">
             <i class="fa-regular fa-circle-question mr-1.5"></i> Quiz
           </button>
         </div>
 
         <!-- Upload File Button -->
-        <button id="openUploadModalBtn" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
+        <button onclick="toggleModal('uploadModal')" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
           <i class="fa-solid fa-cloud-arrow-up text-sm"></i>
           <span>Upload File</span>
         </button>
 
-        <!-- Admin Logout -->
-        <button id="logoutBtn" title="Logout" class="px-3.5 py-2 rounded-xl bg-purple-900 hover:bg-purple-950 text-white text-xs font-semibold flex items-center gap-1.5 transition shadow-sm">
+        <!-- Admin Badge -->
+        <button onclick="logoutAdmin()" title="Logout" class="px-3.5 py-2 rounded-xl bg-purple-900 hover:bg-purple-950 text-white text-xs font-semibold flex items-center gap-1.5 transition shadow-sm">
           <i class="fa-brands fa-telegram text-sm text-sky-400"></i>
           <span>Admin: Shoaib</span>
         </button>
@@ -74,26 +74,26 @@
 
       <div class="relative">
         <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-        <input id="fileSearchInput" type="text" placeholder="Search notes, tags, topics..." 
+        <input id="fileSearchInput" oninput="handleSearch()" type="text" placeholder="Search notes, tags, topics..." 
                class="w-full pl-10 pr-4 py-3 bg-white rounded-2xl border border-purple-100/70 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-400/30 shadow-sm" />
       </div>
 
       <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
-        <button data-filter="all" class="filter-pill pill-active px-4 py-1.5 rounded-full font-semibold bg-white border border-slate-200/80 text-slate-600 transition">All</button>
-        <button data-filter="new" class="filter-pill px-3.5 py-1.5 rounded-full font-medium bg-white border border-slate-200/80 text-slate-700 transition flex items-center gap-1.5">
+        <button onclick="filterFiles('all', this)" class="filter-pill pill-active px-4 py-1.5 rounded-full font-semibold bg-white border border-slate-200/80 text-slate-600 transition">All</button>
+        <button onclick="filterFiles('new', this)" class="filter-pill px-3.5 py-1.5 rounded-full font-medium bg-white border border-slate-200/80 text-slate-700 transition flex items-center gap-1.5">
           <span class="w-3.5 h-3.5 rounded bg-emerald-100 text-emerald-700 text-[10px] flex items-center justify-center font-bold">📄</span>
           New <span id="badgeNewCount">• 0</span>
         </button>
-        <button data-filter="important" class="filter-pill px-3.5 py-1.5 rounded-full font-medium bg-white border border-slate-200/80 text-slate-700 transition flex items-center gap-1.5">
+        <button onclick="filterFiles('important', this)" class="filter-pill px-3.5 py-1.5 rounded-full font-medium bg-white border border-slate-200/80 text-slate-700 transition flex items-center gap-1.5">
           <i class="fa-solid fa-star text-amber-400 text-[11px]"></i> Important
         </button>
-        <button data-filter="pdf" class="filter-pill px-3.5 py-1.5 rounded-full font-medium bg-white border border-slate-200/80 text-slate-700 transition flex items-center gap-1.5">
+        <button onclick="filterFiles('pdf', this)" class="filter-pill px-3.5 py-1.5 rounded-full font-medium bg-white border border-slate-200/80 text-slate-700 transition flex items-center gap-1.5">
           <span class="w-2.5 h-2.5 rounded-xs bg-red-600 inline-block"></span> PDFs
         </button>
-        <button data-filter="image" class="filter-pill px-3.5 py-1.5 rounded-full font-medium bg-white border border-slate-200/80 text-slate-700 transition flex items-center gap-1.5">
+        <button onclick="filterFiles('image', this)" class="filter-pill px-3.5 py-1.5 rounded-full font-medium bg-white border border-slate-200/80 text-slate-700 transition flex items-center gap-1.5">
           <span>🖼️</span> Images
         </button>
-        <button data-filter="video" class="filter-pill px-3.5 py-1.5 rounded-full font-medium bg-white border border-slate-200/80 text-slate-700 transition flex items-center gap-1.5">
+        <button onclick="filterFiles('video', this)" class="filter-pill px-3.5 py-1.5 rounded-full font-medium bg-white border border-slate-200/80 text-slate-700 transition flex items-center gap-1.5">
           <span>🎬</span> Videos
         </button>
       </div>
@@ -108,7 +108,7 @@
           <h2 class="text-2xl font-serif-title font-bold text-slate-900">Folders</h2>
           <p class="text-xs text-slate-500 mt-0.5">Browse & manage collections</p>
         </div>
-        <button id="openFolderModalBtn" class="px-3.5 py-2 rounded-xl bg-purple-900 hover:bg-purple-800 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
+        <button onclick="toggleModal('createFolderModal')" class="px-3.5 py-2 rounded-xl bg-purple-900 hover:bg-purple-800 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
           <i class="fa-solid fa-folder-plus text-sm"></i>
           <span>Create Folder</span>
         </button>
@@ -129,8 +129,8 @@
           <h2 class="text-2xl font-serif-title font-bold text-slate-900">Quiz Manager</h2>
           <p class="text-xs text-slate-500 mt-0.5">Upload multiple MCQ Question .txt, .pdf, or .png files for students</p>
         </div>
-        <input type="file" id="quizFileInput" accept=".pdf,.txt,.png,.jpg,.jpeg" class="hidden" />
-        <button id="triggerQuizUploadBtn" class="px-4 py-2.5 rounded-xl bg-purple-900 hover:bg-purple-800 text-white text-xs font-semibold flex items-center gap-2 shadow-sm transition">
+        <input type="file" id="quizFileInput" accept=".pdf,.txt,.png,.jpg,.jpeg" class="hidden" onchange="processQuizUpload(event)" />
+        <button onclick="document.getElementById('quizFileInput').click()" class="px-4 py-2.5 rounded-xl bg-purple-900 hover:bg-purple-800 text-white text-xs font-semibold flex items-center gap-2 shadow-sm transition">
           <i class="fa-solid fa-file-circle-plus text-sm"></i>
           <span>Upload Quiz (.txt, .pdf, .png)</span>
         </button>
@@ -142,7 +142,7 @@
           <h4 class="text-xs font-bold text-slate-800">Negative Marking Penalty</h4>
           <p class="text-[11px] text-slate-500">Select deduction per incorrect answer</p>
         </div>
-        <select id="adminNegativeMarking" class="px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-400">
+        <select id="adminNegativeMarking" onchange="saveNegativeMarking()" class="px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-400">
           <option value="0">0 (No Penalty)</option>
           <option value="0.25">-1/4 Marks (-0.25)</option>
           <option value="0.5" selected>-1/2 Marks (-0.5)</option>
@@ -176,7 +176,7 @@
   <!-- MODAL: UPLOAD FILE -->
   <div id="uploadModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm hidden">
     <div class="bg-white w-full max-w-md rounded-3xl p-6 relative border border-purple-100 shadow-2xl text-slate-900">
-      <button id="closeUploadModalBtn" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700">
+      <button onclick="toggleModal('uploadModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700">
         <i class="fa-solid fa-xmark text-lg"></i>
       </button>
 
@@ -187,10 +187,10 @@
         <p class="text-xs text-slate-500">Supports PDF, DOCX, XLSX, Images, Videos, ZIP, Audio</p>
       </div>
 
-      <form id="uploadFileForm" class="space-y-3.5">
+      <form onsubmit="handleUploadSubmit(event)" class="space-y-3.5">
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Select File</label>
-          <input id="filePicker" type="file" required
+          <input id="filePicker" type="file" required onchange="handleFilePicked(this)"
                  class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100 cursor-pointer" />
         </div>
 
@@ -234,7 +234,7 @@
   <!-- MODAL: CREATE NEW FOLDER -->
   <div id="createFolderModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm hidden">
     <div class="bg-white w-full max-w-sm rounded-3xl p-6 relative border border-purple-100 shadow-2xl text-slate-900">
-      <button id="closeFolderModalBtn" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700">
+      <button onclick="toggleModal('createFolderModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700">
         <i class="fa-solid fa-xmark text-lg"></i>
       </button>
 
@@ -245,7 +245,7 @@
         <p class="text-xs text-slate-500">Add a dedicated category for files</p>
       </div>
 
-      <form id="createFolderForm" class="space-y-4">
+      <form onsubmit="handleCreateFolderSubmit(event)" class="space-y-4">
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Folder Name</label>
           <input id="newFolderNameInput" type="text" required placeholder="e.g. Current Affairs 2026"
@@ -260,6 +260,7 @@
   </div>
 
   <script>
+    // PDF.js configuration
     try {
       if (typeof pdfjsLib !== 'undefined') {
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -302,6 +303,7 @@
       } catch(e) {}
     }
 
+    // IndexedDB Setup
     function initIndexedDB() {
       return new Promise((resolve) => {
         try {
@@ -357,67 +359,8 @@
       });
     }
 
-    // Safe Event Wiring on DOMContentLoaded
-    document.addEventListener("DOMContentLoaded", () => {
-      const bindClick = (id, fn) => {
-        const el = document.getElementById(id);
-        if (el) el.addEventListener("click", fn);
-      };
-
-      bindClick("tabFilesBtn", () => switchPortalTab('files'));
-      bindClick("tabFoldersBtn", () => switchPortalTab('folders'));
-      bindClick("tabQuizBtn", () => switchPortalTab('quiz'));
-
-      bindClick("openUploadModalBtn", () => toggleModal('uploadModal'));
-      bindClick("closeUploadModalBtn", () => toggleModal('uploadModal'));
-      bindClick("openFolderModalBtn", () => toggleModal('createFolderModal'));
-      bindClick("closeFolderModalBtn", () => toggleModal('createFolderModal'));
-
-      bindClick("logoutBtn", logoutAdmin);
-
-      const searchInput = document.getElementById("fileSearchInput");
-      if (searchInput) searchInput.addEventListener("input", handleSearch);
-
-      document.querySelectorAll(".filter-pill").forEach(btn => {
-        btn.addEventListener("click", () => filterFiles(btn.getAttribute("data-filter"), btn));
-      });
-
-      const uploadForm = document.getElementById("uploadFileForm");
-      if (uploadForm) uploadForm.addEventListener("submit", handleUploadSubmit);
-
-      const folderForm = document.getElementById("createFolderForm");
-      if (folderForm) folderForm.addEventListener("submit", handleCreateFolderSubmit);
-
-      const filePicker = document.getElementById("filePicker");
-      if (filePicker) filePicker.addEventListener("change", (e) => handleFilePicked(e.target));
-
-      const quizFileInput = document.getElementById("quizFileInput");
-      if (quizFileInput) quizFileInput.addEventListener("change", processQuizUpload);
-
-      bindClick("triggerQuizUploadBtn", () => {
-        const qInput = document.getElementById("quizFileInput");
-        if (qInput) qInput.click();
-      });
-
-      const penaltySelect = document.getElementById("adminNegativeMarking");
-      if (penaltySelect) {
-        penaltySelect.addEventListener("change", saveNegativeMarking);
-        try {
-          let savedPenalty = localStorage.getItem("shoaib_negative_marking") || "0.5";
-          penaltySelect.value = savedPenalty;
-        } catch(e) {}
-      }
-
-      initIndexedDB().then(() => {
-        try {
-          populateFolderDropdown();
-          renderFilesList();
-          renderFolders();
-        } catch(e) {}
-      });
-    });
-
-    function handleCreateFolderSubmit(e) {
+    // FOLDER CRUD (Global Scope)
+    window.handleCreateFolderSubmit = function(e) {
       e.preventDefault();
       const input = document.getElementById("newFolderNameInput");
       if (!input) return;
@@ -433,10 +376,10 @@
       current.push(name);
       saveStoredFolders(current);
       input.value = "";
-      toggleModal('createFolderModal');
-    }
+      window.toggleModal('createFolderModal');
+    };
 
-    async function deleteFolder(folderName) {
+    window.deleteFolder = async function(folderName) {
       const all = await getAllFiles();
       const filesInFolder = all.filter(f => f.folder === folderName);
 
@@ -449,7 +392,7 @@
         current = current.filter(f => f !== folderName);
         saveStoredFolders(current);
       }
-    }
+    };
 
     async function renderFolders() {
       const container = document.getElementById("foldersGridContainer");
@@ -468,32 +411,22 @@
 
         const card = document.createElement("div");
         card.className = "folder-card p-4 rounded-2xl cursor-pointer relative group flex flex-col justify-between";
-        card.addEventListener("click", () => openFolder(folder));
+        card.onclick = () => window.openFolder(folder);
 
-        const delBtn = document.createElement("button");
-        delBtn.className = "absolute top-2.5 right-2.5 w-6 h-6 rounded-lg bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white flex items-center justify-center text-[10px] transition opacity-0 group-hover:opacity-100 shadow-xs";
-        delBtn.title = "Delete Folder";
-        delBtn.innerHTML = '<i class="fa-solid fa-trash-can"></i>';
-        delBtn.addEventListener("click", (ev) => {
-          ev.stopPropagation();
-          deleteFolder(folder);
-        });
-        card.appendChild(delBtn);
-
-        const innerDiv = document.createElement("div");
-        innerDiv.innerHTML = `
-          <div class="w-10 h-10 rounded-xl ${color.bg} flex items-center justify-center ${color.text} text-lg mb-3">
-            <i class="fa-solid fa-folder"></i>
+        card.innerHTML = `
+          <button onclick="event.stopPropagation(); deleteFolder('${folder}')" 
+                  title="Delete Folder" 
+                  class="absolute top-2.5 right-2.5 w-6 h-6 rounded-lg bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white flex items-center justify-center text-[10px] transition opacity-0 group-hover:opacity-100 shadow-xs">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+          <div>
+            <div class="w-10 h-10 rounded-xl ${color.bg} flex items-center justify-center ${color.text} text-lg mb-3">
+              <i class="fa-solid fa-folder"></i>
+            </div>
+            <h4 class="font-bold text-xs sm:text-sm text-slate-800 mb-0.5 truncate" title="${folder}">${folder}</h4>
           </div>
-          <h4 class="font-bold text-xs sm:text-sm text-slate-800 mb-0.5 truncate" title="${folder}">${folder}</h4>
+          <p class="text-[11px] text-slate-400 mt-2">${count} ${count === 1 ? 'item' : 'items'}</p>
         `;
-        card.appendChild(innerDiv);
-
-        const countP = document.createElement("p");
-        countP.className = "text-[11px] text-slate-400 mt-2";
-        countP.innerText = `${count} ${count === 1 ? 'item' : 'items'}`;
-        card.appendChild(countP);
-
         container.appendChild(card);
       });
     }
@@ -511,11 +444,12 @@
       });
     }
 
+    // FILE CONTROLS (Global Scope)
     let selectedFileBlob = null;
     let selectedFileSize = "0 KB";
     let selectedFileType = "pdf";
 
-    function handleFilePicked(input) {
+    window.handleFilePicked = function(input) {
       if (input.files && input.files[0]) {
         const file = input.files[0];
         const titleInput = document.getElementById("fileCustomTitle");
@@ -527,9 +461,9 @@
         else selectedFileType = "pdf";
         selectedFileBlob = file;
       }
-    }
+    };
 
-    async function handleUploadSubmit(e) {
+    window.handleUploadSubmit = async function(e) {
       e.preventDefault();
       if (!selectedFileBlob) return;
 
@@ -557,22 +491,22 @@
       };
 
       await saveFileRecord(newRecord);
-      toggleModal('uploadModal');
+      window.toggleModal('uploadModal');
       e.target.reset();
       selectedFileBlob = null;
       renderFilesList();
       renderFolders();
-    }
+    };
 
-    async function deleteFile(id) {
+    window.deleteFile = async function(id) {
       if (confirm("Permanently delete this file?")) {
         await deleteFileRecord(id);
         renderFilesList();
         renderFolders();
       }
-    }
+    };
 
-    async function downloadFile(id) {
+    window.downloadFile = async function(id) {
       const all = await getAllFiles();
       const item = all.find(f => f.id === id);
       if (!item || !item.blob) return alert("File not found.");
@@ -585,7 +519,7 @@
       a.click();
       document.body.removeChild(a);
       setTimeout(() => URL.revokeObjectURL(url), 1500);
-    }
+    };
 
     async function renderFilesList(filter = currentFilter, searchQuery = '') {
       const container = document.getElementById("fileCardsContainer");
@@ -662,34 +596,33 @@
             </div>
           </div>
           <div class="flex items-center gap-1.5 flex-shrink-0 ml-2">
-            <button class="del-file-btn w-9 h-9 rounded-xl border border-rose-100 bg-rose-50/50 hover:bg-rose-100 text-rose-600 flex items-center justify-center transition" title="Delete">
+            <button onclick="deleteFile('${f.id}')" title="Delete" class="w-9 h-9 rounded-xl border border-rose-100 bg-rose-50/50 hover:bg-rose-100 text-rose-600 flex items-center justify-center transition">
               <i class="fa-solid fa-trash-can text-xs"></i>
             </button>
-            <button class="down-file-btn w-9 h-9 rounded-xl border border-slate-200/80 hover:bg-slate-100 text-slate-600 flex items-center justify-center transition" title="Download">
+            <button onclick="downloadFile('${f.id}')" title="Download" class="w-9 h-9 rounded-xl border border-slate-200/80 hover:bg-slate-100 text-slate-600 flex items-center justify-center transition">
               <i class="fa-solid fa-arrow-down text-xs"></i>
             </button>
           </div>
         `;
-        card.querySelector(".del-file-btn").addEventListener("click", () => deleteFile(f.id));
-        card.querySelector(".down-file-btn").addEventListener("click", () => downloadFile(f.id));
         itemsList.appendChild(card);
       });
     }
 
-    function filterFiles(filter, btn) {
+    window.filterFiles = function(filter, btn) {
       currentFilter = filter;
       document.querySelectorAll(".filter-pill").forEach(p => p.classList.remove("pill-active"));
       if (btn) btn.classList.add("pill-active");
       const searchInput = document.getElementById("fileSearchInput");
       renderFilesList(filter, searchInput ? searchInput.value : '');
-    }
+    };
 
-    function handleSearch() {
+    window.handleSearch = function() {
       const searchInput = document.getElementById("fileSearchInput");
       renderFilesList(currentFilter, searchInput ? searchInput.value : '');
-    }
+    };
 
-    function switchPortalTab(tab) {
+    // TAB CONTROLS (Global Scope)
+    window.switchPortalTab = function(tab) {
       const filesSec = document.getElementById("tabFilesContent");
       const foldersSec = document.getElementById("tabFoldersContent");
       const quizSec = document.getElementById("tabQuizContent");
@@ -721,39 +654,42 @@
         if (btnQuiz) btnQuiz.className = activeClass;
         renderUploadedQuizzesList();
       }
-    }
+    };
 
-    function openFolder(name) {
-      switchPortalTab('files');
+    window.openFolder = function(name) {
+      window.switchPortalTab('files');
       const searchInput = document.getElementById("fileSearchInput");
       if (searchInput) searchInput.value = name;
       renderFilesList('all', name);
-    }
+    };
 
-    function toggleModal(id) {
+    window.toggleModal = function(id) {
       const modal = document.getElementById(id);
       if (modal) modal.classList.toggle("hidden");
-    }
+    };
 
-    function logoutAdmin() {
+    window.logoutAdmin = function() {
       if (confirm("Log out from Management mode?")) {
         try {
           sessionStorage.removeItem("shoaib_admin_auth");
         } catch(e) {}
         window.location.href = "nitrence.html";
       }
-    }
+    };
 
-    function saveNegativeMarking() {
+    // ==========================================
+    // QUIZ MANAGER & NEGATIVE MARKING (Global Scope)
+    // ==========================================
+    window.saveNegativeMarking = function() {
       const penaltyElem = document.getElementById("adminNegativeMarking");
       if (penaltyElem) {
         try {
           localStorage.setItem("shoaib_negative_marking", penaltyElem.value);
         } catch(e) {}
       }
-    }
+    };
 
-    async function processQuizUpload(event) {
+    window.processQuizUpload = async function(event) {
       const file = event.target.files[0];
       if (!file) return;
 
@@ -807,7 +743,7 @@ D. Hydrogen`;
       } finally {
         event.target.value = "";
       }
-    }
+    };
 
     function parseQuizText(rawText) {
       const lines = rawText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
@@ -889,21 +825,32 @@ D. Hydrogen`;
         const delBtn = document.createElement("button");
         delBtn.className = "px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 font-semibold transition";
         delBtn.innerText = "Delete";
-        delBtn.addEventListener("click", () => deleteQuiz(index));
+        delBtn.onclick = () => window.deleteQuiz(index);
         item.appendChild(delBtn);
 
         container.appendChild(item);
       });
     }
 
-    function deleteQuiz(index) {
+    window.deleteQuiz = function(index) {
       if (confirm("Delete this quiz?")) {
         let quizzes = JSON.parse(localStorage.getItem("shoaib_all_quizzes") || "[]");
         quizzes.splice(index, 1);
         localStorage.setItem("shoaib_all_quizzes", JSON.stringify(quizzes));
         renderUploadedQuizzesList();
       }
-    }
+    };
+
+    // App Initialization on Load
+    window.onload = function() {
+      initIndexedDB().then(() => {
+        try {
+          populateFolderDropdown();
+          renderFilesList();
+          renderFolders();
+        } catch(e) {}
+      });
+    };
   </script>
 </body>
 </html>
