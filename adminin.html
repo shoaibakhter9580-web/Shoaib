@@ -9,54 +9,104 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
-    body { font-family: 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at 50% 0%, #ece2fb 0%, #f6f3fb 35%, #fbfafc 100%); color: #1e1b2e; min-height: 100vh; pointer-events: auto !important; }
-    button, input, select, a { pointer-events: auto !important; cursor: pointer !important; }
+    
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: radial-gradient(circle at 15% 15%, rgba(216, 180, 254, 0.45) 0%, transparent 40%),
+                  radial-gradient(circle at 85% 85%, rgba(192, 132, 252, 0.35) 0%, transparent 45%),
+                  radial-gradient(circle at 50% 50%, #f3e8ff 0%, #ede9fe 50%, #f8fafc 100%);
+      background-attachment: fixed;
+      color: #1e1b2e;
+      min-height: 100vh;
+    }
+
     .font-serif-title { font-family: 'Playfair Display', serif; }
-    .soft-card { background: #ffffff; border: 1px solid rgba(226, 220, 238, 0.75); box-shadow: 0 2px 10px rgba(118, 92, 168, 0.04); transition: all 0.2s ease; }
-    .soft-card:hover { box-shadow: 0 6px 18px rgba(118, 92, 168, 0.08); transform: translateY(-1px); }
-    .folder-card { background: #ffffff; border: 1px solid rgba(230, 226, 240, 0.85); box-shadow: 0 3px 12px rgba(120, 100, 160, 0.04); transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1); }
-    .folder-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(120, 100, 160, 0.09); border-color: #d8cde9; }
-    .pill-active { background-color: #551a8b !important; color: #ffffff !important; }
+
+    /* Glossy & Translucent Glassmorphism */
+    .glossy-panel {
+      background: rgba(255, 255, 255, 0.55);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      box-shadow: 0 8px 32px 0 rgba(112, 60, 180, 0.08), inset 0 1px 1px 0 rgba(255, 255, 255, 0.8);
+    }
+
+    .glossy-card {
+      background: rgba(255, 255, 255, 0.62);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 4px 20px rgba(118, 92, 168, 0.06), inset 0 1px 2px rgba(255, 255, 255, 0.9);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .glossy-card:hover {
+      background: rgba(255, 255, 255, 0.82);
+      transform: translateY(-2px);
+      border-color: rgba(192, 132, 252, 0.7);
+      box-shadow: 0 12px 28px rgba(118, 92, 168, 0.12), inset 0 1px 2px #ffffff;
+    }
+
+    .glossy-button {
+      background: linear-gradient(135deg, rgba(88, 28, 135, 0.95), rgba(126, 34, 206, 0.95));
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(216, 180, 254, 0.4);
+      box-shadow: 0 4px 14px rgba(88, 28, 135, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+      transition: all 0.2s ease;
+    }
+
+    .glossy-button:hover {
+      background: linear-gradient(135deg, rgba(107, 33, 168, 1), rgba(147, 51, 234, 1));
+      box-shadow: 0 6px 20px rgba(88, 28, 135, 0.35), inset 0 1px 2px rgba(255, 255, 255, 0.5);
+      transform: translateY(-1px);
+    }
+
+    .pill-active {
+      background: linear-gradient(135deg, #581c87, #7e22ce) !important;
+      color: #ffffff !important;
+      box-shadow: 0 4px 12px rgba(88, 28, 135, 0.25);
+    }
   </style>
 </head>
 <body class="p-3 sm:p-6 lg:p-8 flex flex-col justify-between min-h-screen">
   <div class="max-w-5xl mx-auto w-full z-10 relative">
-    <!-- Header -->
-    <header class="flex items-center justify-between pb-6 border-b border-purple-100/70 mb-6">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-purple-900 text-white flex items-center justify-center font-bold text-lg shadow-md shadow-purple-900/10">
+
+    <!-- Glossy Header -->
+    <header class="glossy-panel rounded-3xl p-4 sm:p-5 flex flex-wrap items-center justify-between gap-4 mb-6">
+      <div class="flex items-center gap-3.5">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-purple-900 to-fuchsia-700 text-white flex items-center justify-center font-extrabold text-xl shadow-lg shadow-purple-900/20 border border-white/30">
           S
         </div>
         <div>
           <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">Shoaib Akhter</h1>
-          <p class="text-xs text-purple-700/80 font-medium">Ghazipur • Uttar Pradesh</p>
+          <p class="text-xs text-purple-800 font-semibold tracking-wide">Ghazipur • Uttar Pradesh</p>
         </div>
       </div>
 
-      <div class="flex items-center gap-2 sm:gap-3">
-        <div class="flex bg-slate-200/60 p-1 rounded-xl text-xs font-semibold text-slate-600">
-          <button id="tabFilesBtn" onclick="switchPortalTab('files')" class="px-3.5 py-1.5 rounded-lg bg-white text-purple-900 shadow-sm transition">
+      <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+        <div class="flex bg-white/40 backdrop-blur-md p-1 rounded-2xl border border-white/60 text-xs font-semibold text-slate-700">
+          <button id="tabFilesBtn" onclick="switchPortalTab('files')" class="px-3.5 py-1.5 rounded-xl bg-white text-purple-950 shadow-sm transition">
             <i class="fa-regular fa-file-lines mr-1.5"></i> Files
           </button>
-          <button id="tabFoldersBtn" onclick="switchPortalTab('folders')" class="px-3.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition">
+          <button id="tabFoldersBtn" onclick="switchPortalTab('folders')" class="px-3.5 py-1.5 rounded-xl text-slate-600 hover:text-purple-950 transition">
             <i class="fa-regular fa-folder mr-1.5"></i> Folders
           </button>
-          <button id="tabQuizBtn" onclick="switchPortalTab('quiz')" class="px-3.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition">
+          <button id="tabQuizBtn" onclick="switchPortalTab('quiz')" class="px-3.5 py-1.5 rounded-xl text-slate-600 hover:text-purple-950 transition">
             <i class="fa-regular fa-circle-question mr-1.5"></i> Quiz
           </button>
         </div>
 
-        <button onclick="openUploadModalWithFolder()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
+        <button onclick="openUploadModalWithFolder()" class="px-3.5 py-2 rounded-xl bg-emerald-600/90 hover:bg-emerald-600 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition border border-emerald-400/40 backdrop-blur-md">
           <i class="fa-solid fa-cloud-arrow-up text-sm"></i>
           <span>Upload File</span>
         </button>
 
-        <button onclick="logoutAdmin()" title="Logout" class="px-3.5 py-2 rounded-xl bg-purple-900 hover:bg-purple-950 text-white text-xs font-semibold flex items-center gap-1.5 transition shadow-sm">
-          <i class="fa-brands fa-telegram text-sm text-sky-400"></i>
+        <button onclick="logoutAdmin()" title="Logout" class="px-3.5 py-2 rounded-xl glossy-button text-white text-xs font-semibold flex items-center gap-1.5 transition">
+          <i class="fa-brands fa-telegram text-sm text-sky-300"></i>
           <span>Admin: Shoaib</span>
         </button>
 
-        <a href="nitrence.html" title="Home" class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 flex items-center justify-center transition">
+        <a href="nitrence.html" title="Home" class="w-9 h-9 rounded-xl bg-white/60 border border-white/80 text-slate-700 hover:bg-white flex items-center justify-center transition shadow-sm">
           <i class="fa-solid fa-house text-xs"></i>
         </a>
       </div>
@@ -67,84 +117,94 @@
       <div class="flex items-center justify-between">
         <div>
           <h2 id="filesHeaderTitle" class="text-2xl font-serif-title font-bold text-slate-900">Files</h2>
-          <p id="filesHeaderSubtitle" class="text-xs text-slate-500 mt-0.5">Latest from class</p>
+          <p id="filesHeaderSubtitle" class="text-xs text-slate-600 mt-0.5">Verified classroom modules</p>
         </div>
-        <button onclick="clearFolderFilter()" id="clearFolderFilterBtn" class="hidden px-3 py-1 bg-purple-100 text-purple-800 rounded-lg text-xs font-semibold">
-          <i class="fa-solid fa-arrow-left mr-1"></i> Show All Files
+        <button onclick="clearFolderFilter()" id="clearFolderFilterBtn" class="hidden px-3.5 py-1.5 glossy-panel text-purple-900 rounded-xl text-xs font-bold hover:bg-white/80 transition">
+          <i class="fa-solid fa-arrow-left mr-1.5"></i> Show General Files
         </button>
       </div>
 
       <div class="relative">
-        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-        <input id="fileSearchInput" oninput="handleSearch()" type="text" placeholder="Search notes, tags, topics..." 
-               class="w-full pl-10 pr-4 py-3 bg-white rounded-2xl border border-purple-100/70 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-400/30 shadow-sm" />
+        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-purple-900/40 text-xs"></i>
+        <input id="fileSearchInput" oninput="handleSearch()" type="text" placeholder="Search general files or documents inside current folder..." 
+               class="w-full pl-10 pr-4 py-3 glossy-panel rounded-2xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-400/40" />
       </div>
 
       <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
-        <button onclick="filterFiles('all', this)" class="filter-pill pill-active px-4 py-1.5 rounded-full font-semibold bg-white border border-slate-200/80 text-slate-600 transition">All</button>
-        <button onclick="filterFiles('new', this)" class="filter-pill px-3.5 py-1.5 rounded-full font-medium bg-white border border-slate-200/80 text-slate-700 transition flex items-center gap-1.5">
-          <span class="w-3.5 h-3.5 rounded bg-emerald-100 text-emerald-700 text-[10px] flex items-center justify-center font-bold">📄</span>
+        <button onclick="filterFiles('all', this)" class="filter-pill pill-active px-4 py-1.5 rounded-full font-semibold glossy-panel text-slate-700 transition">All</button>
+        <button onclick="filterFiles('new', this)" class="filter-pill px-3.5 py-1.5 rounded-full font-medium glossy-panel text-slate-700 transition flex items-center gap-1.5">
+          <span class="w-3.5 h-3.5 rounded bg-emerald-100 text-emerald-800 text-[10px] flex items-center justify-center font-bold">📄</span>
           New <span id="badgeNewCount">• 0</span>
         </button>
-        <button onclick="filterFiles('important', this)" class="filter-pill px-3.5 py-1.5 rounded-full font-medium bg-white border border-slate-200/80 text-slate-700 transition flex items-center gap-1.5">
-          <i class="fa-solid fa-star text-amber-400 text-[11px]"></i> Important
+        <button onclick="filterFiles('important', this)" class="filter-pill px-3.5 py-1.5 rounded-full font-medium glossy-panel text-slate-700 transition flex items-center gap-1.5">
+          <i class="fa-solid fa-star text-amber-500 text-[11px]"></i> Important
         </button>
-        <button onclick="filterFiles('pdf', this)" class="filter-pill px-3.5 py-1.5 rounded-full font-medium bg-white border border-slate-200/80 text-slate-700 transition flex items-center gap-1.5">
+        <button onclick="filterFiles('pdf', this)" class="filter-pill px-3.5 py-1.5 rounded-full font-medium glossy-panel text-slate-700 transition flex items-center gap-1.5">
           <span class="w-2.5 h-2.5 rounded-xs bg-red-600 inline-block"></span> PDFs
         </button>
-        <button onclick="filterFiles('image', this)" class="filter-pill px-3.5 py-1.5 rounded-full font-medium bg-white border border-slate-200/80 text-slate-700 transition flex items-center gap-1.5">
+        <button onclick="filterFiles('image', this)" class="filter-pill px-3.5 py-1.5 rounded-full font-medium glossy-panel text-slate-700 transition flex items-center gap-1.5">
           <span>🖼️</span> Images
         </button>
-        <button onclick="filterFiles('video', this)" class="filter-pill px-3.5 py-1.5 rounded-full font-medium bg-white border border-slate-200/80 text-slate-700 transition flex items-center gap-1.5">
+        <button onclick="filterFiles('video', this)" class="filter-pill px-3.5 py-1.5 rounded-full font-medium glossy-panel text-slate-700 transition flex items-center gap-1.5">
           <span>🎬</span> Videos
         </button>
       </div>
 
-      <div id="fileCardsContainer" class="space-y-6 pt-2"></div>
+      <div id="fileCardsContainer" class="space-y-4 pt-2"></div>
     </section>
 
     <!-- FOLDERS TAB -->
     <section id="tabFoldersContent" class="space-y-6 hidden">
-      <div class="flex items-center justify-between">
+      <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 class="text-2xl font-serif-title font-bold text-slate-900">Folders</h2>
-          <p class="text-xs text-slate-500 mt-0.5">Browse & manage collections</p>
+          <p class="text-xs text-slate-600 mt-0.5">Manage hierarchical categories & nested subfolders</p>
         </div>
-        <button onclick="openCreateFolderModal()" class="px-3.5 py-2 rounded-xl bg-purple-900 hover:bg-purple-800 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
-          <i class="fa-solid fa-folder-plus text-sm"></i>
-          <span>Create Folder</span>
+        <div class="flex items-center gap-2">
+          <button onclick="openCreateFolderModal()" class="px-3.5 py-2 rounded-xl glossy-button text-white text-xs font-semibold flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-folder-plus text-sm"></i>
+            <span>Create Folder</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Breadcrumbs navigation inside folders tab -->
+      <div id="folderBreadcrumbBar" class="hidden glossy-panel px-4 py-2.5 rounded-2xl flex items-center gap-2 text-xs">
+        <button onclick="renderFoldersHierarchy('')" class="text-purple-900 font-bold hover:underline flex items-center gap-1">
+          <i class="fa-solid fa-house text-[10px]"></i> Root
         </button>
+        <span class="text-slate-400">/</span>
+        <span id="currentBreadcrumbText" class="font-bold text-slate-800"></span>
       </div>
 
       <div class="flex items-center justify-between pt-1">
-        <h3 class="text-base font-bold text-slate-800">All Folders</h3>
-        <span id="totalFolderCountLabel" class="text-xs text-slate-500 font-medium">0 folders</span>
+        <h3 id="currentFolderSectionHeading" class="text-base font-bold text-slate-800">Root Folders</h3>
+        <span id="totalFolderCountLabel" class="text-xs text-purple-900 font-bold">0 folders</span>
       </div>
 
-      <div id="foldersGridContainer" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5 pt-2"></div>
+      <div id="foldersGridContainer" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 pt-2"></div>
     </section>
 
     <!-- QUIZ TAB SECTION -->
     <section id="tabQuizContent" class="space-y-6 hidden">
-      <div class="flex items-center justify-between">
+      <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 class="text-2xl font-serif-title font-bold text-slate-900">Quiz Manager</h2>
-          <p class="text-xs text-slate-500 mt-0.5">Upload English & Hindi MCQ files (.txt, .pdf, .jpeg, .png). Gemini Flash-Lite automatically scans.</p>
+          <p class="text-xs text-slate-600 mt-0.5">Upload English & Hindi MCQ files (.txt, .pdf, .jpeg, .png). Gemini Flash-Lite scans automatically.</p>
         </div>
         <input type="file" id="quizFileInput" accept=".pdf,.txt,.png,.jpg,.jpeg" class="hidden" onchange="processQuizUpload(event)" />
-        <button onclick="document.getElementById('quizFileInput').click()" class="px-4 py-2.5 rounded-xl bg-purple-900 hover:bg-purple-800 text-white text-xs font-semibold flex items-center gap-2 shadow-sm transition">
+        <button onclick="document.getElementById('quizFileInput').click()" class="px-4 py-2.5 rounded-xl glossy-button text-white text-xs font-semibold flex items-center gap-2 transition">
           <i class="fa-solid fa-file-circle-plus text-sm"></i>
           <span>Upload Quiz (Gemini AI Scan)</span>
         </button>
       </div>
 
-      <!-- Negative Marking Selector for Uploads -->
-      <div class="soft-card p-4 rounded-2xl border border-purple-100/80 flex items-center justify-between">
+      <div class="glossy-panel p-4 rounded-2xl flex items-center justify-between">
         <div>
           <h4 class="text-xs font-bold text-slate-800">Negative Marking for New Upload</h4>
-          <p class="text-[11px] text-slate-500">Choose penalty deduction for incorrect answers on next upload.</p>
+          <p class="text-[11px] text-slate-500">Choose penalty deduction for incorrect answers.</p>
         </div>
-        <select id="quizNegativeMarkingSelect" class="px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-800 bg-white focus:outline-none">
+        <select id="quizNegativeMarkingSelect" class="px-3 py-2 rounded-xl border border-white/80 bg-white/70 backdrop-blur-md text-xs text-slate-800 focus:outline-none">
           <option value="1">-1 Mark</option>
           <option value="0.5" selected>-1/2 Mark (0.5)</option>
           <option value="0.3333">-1/3 Mark (~0.33)</option>
@@ -153,19 +213,18 @@
         </select>
       </div>
 
-      <!-- All Uploaded Quizzes Container -->
       <div id="allQuizzesListContainer" class="space-y-4"></div>
     </section>
   </div>
 
-  <footer class="max-w-5xl mx-auto w-full pt-10 pb-4 text-center text-xs text-slate-400">
+  <footer class="max-w-5xl mx-auto w-full pt-10 pb-4 text-center text-xs text-purple-900/60 font-medium">
     Shoaib Akhter • Ghazipur, Uttar Pradesh • Protected by Telegram Security Gateway
   </footer>
 
   <!-- MODAL: UPLOAD FILE -->
-  <div id="uploadModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm hidden">
-    <div class="bg-white w-full max-w-md rounded-3xl p-6 relative border border-purple-100 shadow-2xl text-slate-900">
-      <button onclick="toggleModal('uploadModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700">
+  <div id="uploadModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-purple-950/40 backdrop-blur-md hidden">
+    <div class="glossy-panel bg-white/85 w-full max-w-md rounded-3xl p-6 relative border border-white shadow-2xl text-slate-900">
+      <button onclick="toggleModal('uploadModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-800">
         <i class="fa-solid fa-xmark text-lg"></i>
       </button>
 
@@ -180,25 +239,25 @@
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Select File</label>
           <input id="filePicker" type="file" required onchange="handleFilePicked(this)"
-                 class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100 cursor-pointer" />
+                 class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-purple-100 file:text-purple-800 hover:file:bg-purple-200 cursor-pointer" />
         </div>
 
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Display Title</label>
           <input id="fileCustomTitle" type="text" required placeholder="e.g. Science Revision Capsule.pdf"
-                 class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-400" />
+                 class="w-full px-3 py-2 rounded-xl bg-white/70 border border-slate-200 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-400" />
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Folder</label>
-            <select id="fileFolderDest" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-800 focus:outline-none"></select>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Target Folder</label>
+            <select id="fileFolderDest" class="w-full px-3 py-2 rounded-xl bg-white/70 border border-slate-200 text-xs text-slate-800 focus:outline-none"></select>
           </div>
 
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Tag (Optional)</label>
             <input id="fileCustomTag" type="text" placeholder="e.g. #notes"
-                   class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-800 focus:outline-none" />
+                   class="w-full px-3 py-2 rounded-xl bg-white/70 border border-slate-200 text-xs text-slate-800 focus:outline-none" />
           </div>
         </div>
 
@@ -213,42 +272,42 @@
           </label>
         </div>
 
-        <button type="submit" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition shadow-sm">
+        <button type="submit" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition shadow-md">
           Publish File to Portal
         </button>
       </form>
     </div>
   </div>
 
-  <!-- MODAL: CREATE NEW FOLDER -->
-  <div id="createFolderModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm hidden">
-    <div class="bg-white w-full max-w-sm rounded-3xl p-6 relative border border-purple-100 shadow-2xl text-slate-900">
-      <button onclick="toggleModal('createFolderModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700">
+  <!-- MODAL: CREATE NEW FOLDER / SUBFOLDER -->
+  <div id="createFolderModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-purple-950/40 backdrop-blur-md hidden">
+    <div class="glossy-panel bg-white/90 w-full max-w-sm rounded-3xl p-6 relative border border-white shadow-2xl text-slate-900">
+      <button onclick="toggleModal('createFolderModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-800">
         <i class="fa-solid fa-xmark text-lg"></i>
       </button>
 
       <div class="mb-4">
         <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
-          <i class="fa-solid fa-folder-plus text-purple-900"></i> Create New Folder
+          <i class="fa-solid fa-folder-plus text-purple-900"></i> <span id="modalFolderTitle">Create Folder / Subfolder</span>
         </h3>
-        <p class="text-xs text-slate-500">Add a dedicated category or nested subfolder</p>
+        <p class="text-xs text-slate-500">Create a root category or nest inside an existing folder</p>
       </div>
 
       <form onsubmit="handleCreateFolderSubmit(event)" class="space-y-4">
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Parent Folder (Optional)</label>
-          <select id="parentFolderSelect" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-800 focus:outline-none">
-            <option value="">None (Top-Level Folder)</option>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Parent Folder (Select to create Subfolder)</label>
+          <select id="parentFolderSelect" class="w-full px-3.5 py-2.5 rounded-xl bg-white/80 border border-slate-200 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-400">
+            <option value="">None (Top-Level Root Folder)</option>
           </select>
         </div>
 
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Folder Name</label>
-          <input id="newFolderNameInput" type="text" required placeholder="e.g. Climatology"
-                 class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-400" />
+          <input id="newFolderNameInput" type="text" required placeholder="e.g. Physical Geography"
+                 class="w-full px-3.5 py-2.5 rounded-xl bg-white/80 border border-slate-200 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-400" />
         </div>
 
-        <button type="submit" class="w-full py-2.5 rounded-xl bg-purple-900 hover:bg-purple-800 text-white font-semibold text-xs transition shadow-sm">
+        <button type="submit" class="w-full py-2.5 rounded-xl glossy-button text-white font-semibold text-xs transition shadow-md">
           Create Folder
         </button>
       </form>
@@ -265,17 +324,16 @@
     let db = null;
     let currentFilter = 'all';
     let activeFolderFilter = null;
+    let activeFolderHierarchyPath = ''; // Tracks current folder drill-down in Folders tab
 
-    const DEFAULT_FOLDERS = ['SuperTET', 'Cosmos', 'UPSSSC', 'Group D', 'NCERT', 'Lekhpal'];
+    const DEFAULT_FOLDERS = ['GEO', 'SuperTET', 'UPSSSC', 'NCERT'];
     const FOLDER_COLORS = [
-      { bg: 'bg-amber-50', text: 'text-amber-500' },
-      { bg: 'bg-sky-50', text: 'text-sky-500' },
-      { bg: 'bg-teal-50', text: 'text-teal-500' },
-      { bg: 'bg-emerald-50', text: 'text-emerald-500' },
-      { bg: 'bg-yellow-50', text: 'text-amber-500' },
-      { bg: 'bg-rose-50', text: 'text-rose-500' },
-      { bg: 'bg-indigo-50', text: 'text-indigo-500' },
-      { bg: 'bg-purple-50', text: 'text-purple-600' }
+      { bg: 'bg-amber-100/70', text: 'text-amber-700' },
+      { bg: 'bg-sky-100/70', text: 'text-sky-700' },
+      { bg: 'bg-teal-100/70', text: 'text-teal-700' },
+      { bg: 'bg-emerald-100/70', text: 'text-emerald-700' },
+      { bg: 'bg-purple-100/70', text: 'text-purple-700' },
+      { bg: 'bg-rose-100/70', text: 'text-rose-700' }
     ];
 
     function getStoredFolders() {
@@ -356,15 +414,18 @@
       });
     }
 
-    window.openCreateFolderModal = function() {
+    window.openCreateFolderModal = function(preselectedParent = '') {
       const parentSelect = document.getElementById("parentFolderSelect");
       if (parentSelect) {
         const folders = getStoredFolders();
-        parentSelect.innerHTML = '<option value="">None (Top-Level Folder)</option>';
+        parentSelect.innerHTML = '<option value="">None (Top-Level Root Folder)</option>';
         folders.forEach(f => {
           const opt = document.createElement("option");
           opt.value = f;
           opt.innerText = f;
+          if (preselectedParent && f === preselectedParent) {
+            opt.selected = true;
+          }
           parentSelect.appendChild(opt);
         });
       }
@@ -385,7 +446,7 @@
 
         const current = getStoredFolders();
         if (current.includes(fullName)) {
-          alert("Is naam ka folder pehle se bana hua hai.");
+          alert("This folder or subfolder already exists.");
           return;
         }
 
@@ -399,15 +460,16 @@
     window.deleteFolder = async function(folderName) {
       try {
         const all = await getAllFiles();
-        const filesInFolder = all.filter(f => f.folder === folderName);
+        // Check files in folder and subfolders
+        const filesInFolder = all.filter(f => f.folder === folderName || (f.folder && f.folder.startsWith(folderName + ' / ')));
 
         const msg = filesInFolder.length > 0
-          ? `"${folderName}" folder me ${filesInFolder.length} files hain. Kya aap sach me ise delete karna chahte hain?`
-          : `Kya aap "${folderName}" folder ko delete karna chahte hain?`;
+          ? `"${folderName}" contains ${filesInFolder.length} items (including subfolders). Are you sure you want to delete it?`
+          : `Delete "${folderName}" folder?`;
 
         if (confirm(msg)) {
           let current = getStoredFolders();
-          current = current.filter(f => f !== folderName);
+          current = current.filter(f => f !== folderName && !f.startsWith(folderName + ' / '));
           saveStoredFolders(current);
           if (activeFolderFilter === folderName) {
             clearFolderFilter();
@@ -416,44 +478,110 @@
       } catch(e) {}
     };
 
+    window.renderFoldersHierarchy = function(folderPath = '') {
+      activeFolderHierarchyPath = folderPath;
+      renderFolders();
+    };
+
     async function renderFolders() {
       try {
         const container = document.getElementById("foldersGridContainer");
+        const bBar = document.getElementById("folderBreadcrumbBar");
+        const bText = document.getElementById("currentBreadcrumbText");
+        const heading = document.getElementById("currentFolderSectionHeading");
+        const countLabel = document.getElementById("totalFolderCountLabel");
         if (!container) return;
-        container.innerHTML = "";
 
-        const folders = getStoredFolders();
+        container.innerHTML = "";
+        const allFolders = getStoredFolders();
         const allFiles = await getAllFiles();
 
-        const label = document.getElementById("totalFolderCountLabel");
-        if (label) label.innerText = `${folders.length} ${folders.length === 1 ? 'folder' : 'folders'}`;
+        if (activeFolderHierarchyPath) {
+          bBar.classList.remove("hidden");
+          bText.innerText = activeFolderHierarchyPath;
+          heading.innerText = `Subfolders inside "${activeFolderHierarchyPath}"`;
+        } else {
+          bBar.classList.add("hidden");
+          heading.innerText = `Root Folders`;
+        }
 
-        folders.forEach((folder, idx) => {
-          const count = allFiles.filter(item => item.folder === folder).length;
+        // Filter folders for current hierarchy level
+        const currentLevelFolders = allFolders.filter(f => {
+          if (!activeFolderHierarchyPath) {
+            return !f.includes(" / "); // Top level
+          } else {
+            // Immediate child of activeFolderHierarchyPath
+            if (f.startsWith(activeFolderHierarchyPath + " / ")) {
+              const remainder = f.slice((activeFolderHierarchyPath + " / ").length);
+              return !remainder.includes(" / ");
+            }
+            return false;
+          }
+        });
+
+        if (countLabel) {
+          countLabel.innerText = `${currentLevelFolders.length} ${currentLevelFolders.length === 1 ? 'folder' : 'folders'}`;
+        }
+
+        if (currentLevelFolders.length === 0) {
+          container.innerHTML = `
+            <div class="col-span-full py-12 text-center glossy-card rounded-2xl">
+              <i class="fa-regular fa-folder-open text-3xl text-purple-400 mb-2"></i>
+              <p class="text-xs font-semibold text-slate-600">No subfolders here.</p>
+              <button onclick="openCreateFolderModal('${activeFolderHierarchyPath}')" class="mt-3 px-3 py-1.5 rounded-xl glossy-button text-white text-xs font-semibold">
+                + Create Subfolder
+              </button>
+            </div>
+          `;
+          return;
+        }
+
+        currentLevelFolders.forEach((folder, idx) => {
+          const filesCount = allFiles.filter(item => item.folder === folder).length;
+          const subfoldersCount = allFolders.filter(f => f.startsWith(folder + " / ")).length;
           const color = FOLDER_COLORS[idx % FOLDER_COLORS.length];
+          const displayName = folder.includes(" / ") ? folder.split(" / ").pop() : folder;
 
           const card = document.createElement("div");
-          card.className = "folder-card p-4 rounded-2xl cursor-pointer relative group flex flex-col justify-between";
-          card.onclick = () => openFolder(folder);
-
-          const isSubfolder = folder.includes(" / ");
-          const displayName = isSubfolder ? folder.split(" / ").pop() : folder;
-          const parentBadge = isSubfolder ? `<span class="text-[9px] uppercase tracking-wide bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded font-semibold mb-1 inline-block truncate max-w-full">${folder.split(" / ")[0]}</span>` : '';
+          card.className = "glossy-card p-4 rounded-3xl cursor-pointer relative group flex flex-col justify-between";
+          
+          card.onclick = () => {
+            // If has subfolders, navigate deeper; otherwise open files
+            if (subfoldersCount > 0) {
+              renderFoldersHierarchy(folder);
+            } else {
+              openFolder(folder);
+            }
+          };
 
           card.innerHTML = `
-            <button onclick="event.stopPropagation(); deleteFolder('${folder}')" 
-                    title="Delete Folder" 
-                    class="absolute top-2.5 right-2.5 w-6 h-6 rounded-lg bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white flex items-center justify-center text-[10px] transition opacity-0 group-hover:opacity-100 shadow-xs">
-              <i class="fa-solid fa-trash-can"></i>
-            </button>
-            <div>
-              <div class="w-10 h-10 rounded-xl ${color.bg} flex items-center justify-center ${color.text} text-lg mb-3">
-                <i class="fa-solid ${isSubfolder ? 'fa-folder-tree' : 'fa-folder'}"></i>
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-11 h-11 rounded-2xl ${color.bg} flex items-center justify-center ${color.text} text-xl shadow-inner">
+                <i class="fa-solid fa-folder"></i>
               </div>
-              ${parentBadge}
-              <h4 class="font-bold text-xs sm:text-sm text-slate-800 mb-0.5 truncate" title="${folder}">${displayName}</h4>
+              <div class="flex items-center gap-1">
+                <button onclick="event.stopPropagation(); openCreateFolderModal('${folder}')" 
+                        title="Add Subfolder inside ${displayName}" 
+                        class="px-2 py-1 rounded-lg bg-purple-100 text-purple-800 hover:bg-purple-200 text-[10px] font-bold transition">
+                  + Sub
+                </button>
+                <button onclick="event.stopPropagation(); deleteFolder('${folder}')" 
+                        title="Delete Folder" 
+                        class="w-7 h-7 rounded-lg bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white flex items-center justify-center text-[10px] transition">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              </div>
             </div>
-            <p class="text-[11px] text-slate-400 mt-2">${count} ${count === 1 ? 'item' : 'items'}</p>
+
+            <div>
+              <h4 class="font-extrabold text-sm text-slate-800 truncate" title="${folder}">${displayName}</h4>
+              <p class="text-[11px] text-slate-500 mt-0.5">${filesCount} files ${subfoldersCount > 0 ? '• ' + subfoldersCount + ' subfolders' : ''}</p>
+            </div>
+
+            <div class="mt-3 pt-2 border-t border-purple-100/60 flex items-center justify-between text-[11px]">
+              <span class="text-purple-800 font-semibold" onclick="event.stopPropagation(); openFolder('${folder}')">View Files →</span>
+              ${subfoldersCount > 0 ? `<span class="text-slate-400 font-medium" onclick="event.stopPropagation(); renderFoldersHierarchy('${folder}')">Browse (${subfoldersCount})</span>` : ''}
+            </div>
           `;
           container.appendChild(card);
         });
@@ -465,7 +593,7 @@
         const select = document.getElementById("fileFolderDest");
         if (!select) return;
         const folders = getStoredFolders();
-        select.innerHTML = '<option value="">No Folder (General)</option>';
+        select.innerHTML = '<option value="">General Files (No Folder)</option>';
         folders.forEach(f => {
           const opt = document.createElement("option");
           opt.value = f;
@@ -569,18 +697,18 @@
         const query = (searchQuery || (searchInput ? searchInput.value : "")).toLowerCase();
 
         const matching = all.filter(f => {
+          // If viewing a specific folder, only match this folder
           if (activeFolderFilter) {
             return f.folder === activeFolderFilter;
           }
 
-          // If in "All" view without an active folder selected, hide files assigned to folders
+          // In "All" view: Do NOT show files that belong to any folder/subfolder
           if (f.folder) {
             return false;
           }
 
           const matchesQuery = f.name.toLowerCase().includes(query) ||
-                             (f.tag && f.tag.toLowerCase().includes(query)) ||
-                             (f.folder && f.folder.toLowerCase().includes(query));
+                             (f.tag && f.tag.toLowerCase().includes(query));
           if (!matchesQuery) return false;
           if (filter === 'all') return true;
           if (filter === 'new') return f.isNew;
@@ -596,22 +724,22 @@
 
         if (matching.length === 0) {
           container.innerHTML = `
-            <div class="py-16 text-center">
-              <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-400 mx-auto flex items-center justify-center text-xl mb-3">
+            <div class="py-14 text-center glossy-card rounded-3xl">
+              <div class="w-12 h-12 rounded-2xl bg-purple-100 text-purple-600 mx-auto flex items-center justify-center text-xl mb-3">
                 <i class="fa-regular fa-folder-open"></i>
               </div>
-              <p class="text-sm font-semibold text-slate-700">No files found ${activeFolderFilter ? 'in folder "' + activeFolderFilter + '"' : 'in General files'}</p>
+              <p class="text-sm font-semibold text-slate-700">No files found ${activeFolderFilter ? 'inside folder "' + activeFolderFilter + '"' : 'in General files'}</p>
             </div>
           `;
           return;
         }
 
         const secDiv = document.createElement("div");
-        secDiv.className = "space-y-2.5";
+        secDiv.className = "space-y-3";
         secDiv.innerHTML = `
           <div class="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase tracking-wide">
-            <span>PORTAL FILES ${activeFolderFilter ? '— ' + activeFolderFilter.toUpperCase() : ''}</span>
-            <span class="text-slate-400 font-semibold text-[11px]">${matching.length}</span>
+            <span>${activeFolderFilter ? 'FOLDER: ' + activeFolderFilter.toUpperCase() : 'GENERAL CLASSROOM FILES'}</span>
+            <span class="text-purple-900 bg-purple-100 px-2 py-0.5 rounded-full font-bold text-[10px]">${matching.length}</span>
           </div>
           <div class="space-y-2.5" id="fileItemsList"></div>
         `;
@@ -620,23 +748,23 @@
 
         matching.forEach(f => {
           const card = document.createElement("div");
-          card.className = "soft-card p-3 sm:p-3.5 rounded-2xl flex items-center justify-between";
+          card.className = "glossy-card p-3 sm:p-4 rounded-2xl flex items-center justify-between";
 
-          let iconBox = `<div class="relative w-10 h-11 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center flex-shrink-0"><div class="w-5 h-7 rounded-sm bg-rose-500 border border-rose-600 flex flex-col justify-center items-center text-white"><div class="w-3 h-0.5 bg-white/70 mb-1"></div><div class="w-3 h-0.5 bg-white/70"></div></div></div>`;
-          if (f.type === 'image') iconBox = `<div class="w-10 h-11 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600 text-lg flex-shrink-0"><i class="fa-regular fa-image"></i></div>`;
-          if (f.type === 'video') iconBox = `<div class="w-10 h-11 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center text-purple-600 text-lg flex-shrink-0"><i class="fa-solid fa-play text-sm"></i></div>`;
+          let iconBox = `<div class="w-10 h-11 rounded-xl bg-rose-50 border border-rose-200/80 flex items-center justify-center text-rose-600 text-lg flex-shrink-0"><i class="fa-solid fa-file-pdf"></i></div>`;
+          if (f.type === 'image') iconBox = `<div class="w-10 h-11 rounded-xl bg-teal-50 border border-teal-200/80 flex items-center justify-center text-teal-600 text-lg flex-shrink-0"><i class="fa-regular fa-image"></i></div>`;
+          if (f.type === 'video') iconBox = `<div class="w-10 h-11 rounded-xl bg-purple-50 border border-purple-200/80 flex items-center justify-center text-purple-600 text-lg flex-shrink-0"><i class="fa-solid fa-play text-xs"></i></div>`;
 
           card.innerHTML = `
             <div class="flex items-center gap-3 min-w-0">
               ${iconBox}
               <div class="truncate">
                 <div class="flex items-center gap-2">
-                  ${f.isImportant ? '<i class="fa-solid fa-star text-amber-400 text-xs"></i>' : ''}
+                  ${f.isImportant ? '<i class="fa-solid fa-star text-amber-500 text-xs"></i>' : ''}
                   <span class="text-xs sm:text-sm font-bold text-slate-900 truncate">${f.name}</span>
-                  ${f.isNew ? '<span class="text-[9px] font-bold px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded-md">NEW</span>' : ''}
+                  ${f.isNew ? '<span class="text-[9px] font-bold px-1.5 py-0.5 bg-amber-200/80 text-amber-900 rounded-md">NEW</span>' : ''}
                 </div>
-                <div class="flex items-center gap-2 text-[11px] text-slate-400 mt-0.5">
-                  ${f.folder ? `<span class="flex items-center gap-1 text-slate-500"><i class="fa-solid fa-folder text-amber-400 text-[10px]"></i> ${f.folder}</span>` : ''}
+                <div class="flex items-center gap-2 text-[11px] text-slate-500 mt-0.5">
+                  ${f.folder ? `<span class="flex items-center gap-1 text-purple-900 font-semibold"><i class="fa-solid fa-folder text-amber-500 text-[10px]"></i> ${f.folder}</span>` : ''}
                   <span>${f.size}</span>
                   <span>•</span>
                   <span>${f.time}</span>
@@ -644,10 +772,10 @@
               </div>
             </div>
             <div class="flex items-center gap-1.5 flex-shrink-0 ml-2">
-              <button onclick="deleteFile('${f.id}')" title="Delete" class="w-9 h-9 rounded-xl border border-rose-100 bg-rose-50/50 hover:bg-rose-100 text-rose-600 flex items-center justify-center transition">
+              <button onclick="deleteFile('${f.id}')" title="Delete" class="w-9 h-9 rounded-xl border border-rose-200 bg-rose-50/80 hover:bg-rose-100 text-rose-600 flex items-center justify-center transition">
                 <i class="fa-solid fa-trash-can text-xs"></i>
               </button>
-              <button onclick="downloadFile('${f.id}')" title="Download" class="w-9 h-9 rounded-xl border border-slate-200/80 hover:bg-slate-100 text-slate-600 flex items-center justify-center transition">
+              <button onclick="downloadFile('${f.id}')" title="Download" class="w-9 h-9 rounded-xl border border-white/80 bg-white/60 hover:bg-white text-slate-700 flex items-center justify-center transition shadow-sm">
                 <i class="fa-solid fa-arrow-down text-xs"></i>
               </button>
             </div>
@@ -688,8 +816,8 @@
         const btnFolders = document.getElementById("tabFoldersBtn");
         const btnQuiz = document.getElementById("tabQuizBtn");
 
-        const inactiveClass = "px-3.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition";
-        const activeClass = "px-3.5 py-1.5 rounded-lg bg-white text-purple-900 shadow-sm transition";
+        const inactiveClass = "px-3.5 py-1.5 rounded-xl text-slate-600 hover:text-purple-950 transition";
+        const activeClass = "px-3.5 py-1.5 rounded-xl bg-white text-purple-950 shadow-sm transition";
 
         if (btnFiles) btnFiles.className = inactiveClass;
         if (btnFolders) btnFolders.className = inactiveClass;
@@ -719,7 +847,7 @@
         const clearBtn = document.getElementById("clearFolderFilterBtn");
 
         if (hTitle) hTitle.innerText = `Folder: ${name}`;
-        if (hSub) hSub.innerText = `Viewing files inside ${name}`;
+        if (hSub) hSub.innerText = `Viewing files strictly inside ${name}`;
         if (clearBtn) clearBtn.classList.remove("hidden");
 
         renderFilesList('all', '');
@@ -734,7 +862,7 @@
         const clearBtn = document.getElementById("clearFolderFilterBtn");
 
         if (hTitle) hTitle.innerText = "Files";
-        if (hSub) hSub.innerText = "Latest from class";
+        if (hSub) hSub.innerText = "Verified classroom modules";
         if (clearBtn) clearBtn.classList.add("hidden");
 
         renderFilesList('all', '');
@@ -829,11 +957,11 @@
         localStorage.setItem("quiz_title", quizName);
         localStorage.setItem("shoaib_negative_marking", negativeMarkingVal);
 
-        alert(`✅ Success! Gemini Flash-Lite scanned ${questions.length} questions. Quiz is now LIVE on student portal!`);
+        alert(`✅ Success! Scanned ${questions.length} questions. Quiz is now LIVE on student portal!`);
         renderQuizManager();
       } catch (err) {
         console.error(err);
-        alert("Gemini Flash-Lite Scan Failed: " + err.message);
+        alert("Scan Failed: " + err.message);
       } finally {
         event.target.value = "";
       }
@@ -857,7 +985,7 @@
       if (data.candidates && data.candidates[0].content.parts[0].text) {
         return data.candidates[0].content.parts[0].text;
       }
-      throw new Error("Invalid response received from Gemini Flash-Lite API.");
+      throw new Error("Invalid response received from Gemini API.");
     }
 
     function parseBilingualMCQ(rawText) {
@@ -923,8 +1051,8 @@
 
         if (allQuizzes.length === 0) {
           container.innerHTML = `
-            <div class="soft-card p-8 rounded-2xl text-center">
-              <p class="text-xs text-slate-400">No active quizzes uploaded. Upload a document above to publish an AI-scanned MCQ test.</p>
+            <div class="glossy-card p-8 rounded-2xl text-center">
+              <p class="text-xs text-slate-500">No active quizzes uploaded. Upload a document above to publish an AI-scanned MCQ test.</p>
             </div>
           `;
           return;
@@ -933,7 +1061,7 @@
         container.innerHTML = "";
         allQuizzes.forEach((quiz) => {
           const card = document.createElement("div");
-          card.className = "soft-card p-5 rounded-2xl border border-purple-100/80 space-y-3";
+          card.className = "glossy-card p-5 rounded-2xl space-y-3";
           
           let negLabel = "-1/2";
           if (quiz.negativeMarking == 1) negLabel = "-1";
@@ -944,27 +1072,27 @@
           let previewHtml = "";
           if (quiz.questions && quiz.questions.length > 0) {
             previewHtml = quiz.questions.map((q, idx) => `
-              <div class="p-2.5 bg-purple-50/50 rounded-xl border border-purple-100/70 text-xs">
+              <div class="p-2.5 bg-white/70 rounded-xl border border-purple-100 text-xs">
                 <p class="font-bold text-slate-900">${idx + 1}. ${q.question}</p>
-                <div class="mt-1 pl-2 border-l-2 border-purple-200">
-                  ${q.options.map((opt, oIdx) => `<div class="${oIdx === q.answer ? 'font-bold text-emerald-700' : 'text-slate-600'}">${String.fromCharCode(65 + oIdx)}) ${opt}${oIdx === q.answer ? '✓' : ''}</div>`).join('')}
+                <div class="mt-1 pl-2 border-l-2 border-purple-300">
+                  ${q.options.map((opt, oIdx) => `<div class="${oIdx === q.answer ? 'font-bold text-emerald-800' : 'text-slate-600'}">${String.fromCharCode(65 + oIdx)}) ${opt}${oIdx === q.answer ? ' ✓' : ''}</div>`).join('')}
                 </div>
               </div>
             `).join('');
           }
 
           card.innerHTML = `
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-purple-50">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-purple-100">
               <div>
                 <div class="flex items-center gap-2">
-                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm"></span>
                   <h3 class="text-sm font-bold text-slate-900">${quiz.name}</h3>
-                  <span class="text-[10px] bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full font-bold">Penalty: ${negLabel}</span>
+                  <span class="text-[10px] bg-purple-100 text-purple-900 px-2 py-0.5 rounded-full font-bold">Penalty: ${negLabel}</span>
                 </div>
                 <p class="text-xs text-slate-500 mt-0.5">${quiz.questions ? quiz.questions.length : 0} questions • Live on student portal</p>
               </div>
               <div class="flex items-center gap-2">
-                <button onclick="deleteSpecificQuiz(${quiz.id})" class="px-3 py-1.5 rounded-lg border border-rose-100 bg-rose-50/50 hover:bg-rose-100 text-rose-600 text-xs font-semibold transition">
+                <button onclick="deleteSpecificQuiz(${quiz.id})" class="px-3 py-1.5 rounded-lg border border-rose-200 bg-rose-50/70 hover:bg-rose-100 text-rose-600 text-xs font-semibold transition">
                   <i class="fa-solid fa-trash-can text-[10px] mr-1"></i> Delete
                 </button>
               </div>
