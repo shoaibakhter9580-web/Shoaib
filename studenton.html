@@ -402,6 +402,14 @@
       color: #0f172a;
     }
 
+    .folder-parent-crumb {
+      font-size: 0.72rem;
+      color: #7c3aed;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
     .folder-card-count {
       font-size: 0.75rem;
       color: var(--text-muted);
@@ -599,8 +607,8 @@
         filesContainer.style.display = 'grid';
         foldersContainer.style.display = 'none';
         chipsContainer.style.display = 'flex';
-        viewTitle.textContent = "Latest Files";
-        viewSubtitle.textContent = "Verified classroom modules, notes & study materials";
+        viewTitle.textContent = activeFilter === 'All' ? "Latest Files" : `Folder: ${activeFilter}`;
+        viewSubtitle.textContent = activeFilter === 'All' ? "Verified general modules & materials" : `Viewing materials inside ${activeFilter}`;
         renderFiles();
       } else {
         navFolders.classList.add('active');
@@ -626,6 +634,10 @@
 
     function filterByChip(cat) {
       activeFilter = cat;
+      const viewTitle = document.getElementById('viewTitle');
+      const viewSubtitle = document.getElementById('viewSubtitle');
+      viewTitle.textContent = activeFilter === 'All' ? "Latest Files" : `Folder: ${activeFilter}`;
+      viewSubtitle.textContent = activeFilter === 'All' ? "Verified general modules & materials" : `Viewing materials inside ${activeFilter}`;
       renderChips();
       renderFiles();
     }
@@ -635,10 +647,17 @@
       const search = (document.getElementById('searchInput').value || '').toLowerCase().trim();
 
       const filtered = allFiles.filter(file => {
-        const fileFolder = file.folder || 'General';
-        const matchesCategory = (activeFilter === 'All') || (fileFolder === activeFilter);
+        const fileFolder = file.folder || null;
         const fileName = (file.name || '').toLowerCase();
         const matchesSearch = fileName.includes(search);
+
+        // When in "All" view: Do NOT show files that belong to specific folders
+        if (activeFilter === 'All') {
+          return !fileFolder && matchesSearch;
+        }
+
+        // When a folder/subfolder chip is clicked: Show only files in that folder
+        const matchesCategory = (fileFolder === activeFilter);
         return matchesCategory && matchesSearch;
       });
 
@@ -647,7 +666,7 @@
           <div class="empty-state">
             <span>&#128196;</span>
             <h3>No files found</h3>
-            <p>Admin has not uploaded documents for this selection yet.</p>
+            <p>${activeFilter === 'All' ? 'No general files uploaded outside folders.' : 'No files uploaded inside this folder yet.'}</p>
           </div>
         `;
         return;
@@ -701,12 +720,17 @@
       }
 
       container.innerHTML = foldersList.map(folderName => {
-        const count = allFiles.filter(f => (f.folder || 'General') === folderName).length;
+        const count = allFiles.filter(f => (f.folder || null) === folderName).length;
+        const isSubfolder = folderName.includes(" / ");
+        const displayName = isSubfolder ? folderName.split(" / ").pop() : folderName;
+        const parentCrumb = isSubfolder ? `<div class="folder-parent-crumb">${folderName.split(" / ")[0]}</div>` : '';
+
         return `
-          <div class="folder-card" onclick="openFolder('${folderName}')">
-            <div class="folder-icon">&#128193;</div>
+          <div class="folder-card" onclick="openFolder('${folderName.replace(/'/g, "\\'")}')">
+            <div class="folder-icon">${isSubfolder ? '📁' : '📂'}</div>
             <div>
-              <div class="folder-card-title">${folderName}</div>
+              ${parentCrumb}
+              <div class="folder-card-title">${displayName}</div>
               <div class="folder-card-count">${count} ${count === 1 ? 'file' : 'files'}</div>
             </div>
           </div>
@@ -717,6 +741,7 @@
     function openFolder(folderName) {
       activeFilter = folderName;
       switchTab('files');
+      renderChips();
     }
 
     function handleSearch() {
