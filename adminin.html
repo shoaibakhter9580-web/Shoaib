@@ -10,7 +10,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
-    body { font-family: 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at 50% 0%, #ece2fb 0%, #f6f3fb 35%, #fbfafc 100%); color: #1e1b2e; min-height: 100vh; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at 50% 0%, #ece2fb 0%, #f6f3fb 35%, #fbfafc 100%); color: #1e1b2e; min-height: 100vh; pointer-events: auto !important; }
+    button, input, select, a { pointer-events: auto !important; cursor: pointer !important; }
     .font-serif-title { font-family: 'Playfair Display', serif; }
     .soft-card { background: #ffffff; border: 1px solid rgba(226, 220, 238, 0.75); box-shadow: 0 2px 10px rgba(118, 92, 168, 0.04); transition: all 0.2s ease; }
     .soft-card:hover { box-shadow: 0 6px 18px rgba(118, 92, 168, 0.08); transform: translateY(-1px); }
@@ -20,7 +21,7 @@
   </style>
 </head>
 <body class="p-3 sm:p-6 lg:p-8 flex flex-col justify-between min-h-screen">
-  <div class="max-w-5xl mx-auto w-full">
+  <div class="max-w-5xl mx-auto w-full z-10 relative">
     <!-- Header -->
     <header class="flex items-center justify-between pb-6 border-b border-purple-100/70 mb-6">
       <div class="flex items-center gap-3">
@@ -36,25 +37,25 @@
       <div class="flex items-center gap-2 sm:gap-3">
         <!-- Files / Folders / Quiz Navigation Toggle -->
         <div class="flex bg-slate-200/60 p-1 rounded-xl text-xs font-semibold text-slate-600">
-          <button id="tabFilesBtn" onclick="switchPortalTab('files')" class="px-3.5 py-1.5 rounded-lg bg-white text-purple-900 shadow-sm transition">
+          <button id="tabFilesBtn" type="button" class="px-3.5 py-1.5 rounded-lg bg-white text-purple-900 shadow-sm transition">
             <i class="fa-regular fa-file-lines mr-1.5"></i> Files
           </button>
-          <button id="tabFoldersBtn" onclick="switchPortalTab('folders')" class="px-3.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition">
+          <button id="tabFoldersBtn" type="button" class="px-3.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition">
             <i class="fa-regular fa-folder mr-1.5"></i> Folders
           </button>
-          <button id="tabQuizBtn" onclick="switchPortalTab('quiz')" class="px-3.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition">
+          <button id="tabQuizBtn" type="button" class="px-3.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition">
             <i class="fa-regular fa-circle-question mr-1.5"></i> Quiz
           </button>
         </div>
 
         <!-- Upload File Button -->
-        <button onclick="openUploadModalWithFolder()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
+        <button id="uploadModalOpenBtn" type="button" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
           <i class="fa-solid fa-cloud-arrow-up text-sm"></i>
           <span>Upload File</span>
         </button>
 
         <!-- Admin Badge -->
-        <button onclick="logoutAdmin()" title="Logout" class="px-3.5 py-2 rounded-xl bg-purple-900 hover:bg-purple-950 text-white text-xs font-semibold flex items-center gap-1.5 transition shadow-sm">
+        <button id="logoutBtn" type="button" title="Logout" class="px-3.5 py-2 rounded-xl bg-purple-900 hover:bg-purple-950 text-white text-xs font-semibold flex items-center gap-1.5 transition shadow-sm">
           <i class="fa-brands fa-telegram text-sm text-sky-400"></i>
           <span>Admin: Shoaib</span>
         </button>
@@ -72,33 +73,33 @@
           <h2 id="filesHeaderTitle" class="text-2xl font-serif-title font-bold text-slate-900">Files</h2>
           <p id="filesHeaderSubtitle" class="text-xs text-slate-500 mt-0.5">Latest from class</p>
         </div>
-        <button onclick="clearFolderFilter()" id="clearFolderFilterBtn" class="hidden px-3 py-1 bg-purple-100 text-purple-800 rounded-lg text-xs font-semibold">
+        <button id="clearFolderFilterBtn" type="button" class="hidden px-3 py-1 bg-purple-100 text-purple-800 rounded-lg text-xs font-semibold">
           <i class="fa-solid fa-arrow-left mr-1"></i> Show All Files
         </button>
       </div>
 
       <div class="relative">
         <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-        <input id="fileSearchInput" oninput="handleSearch()" type="text" placeholder="Search notes, tags, topics..." 
+        <input id="fileSearchInput" type="text" placeholder="Search notes, tags, topics..." 
                class="w-full pl-10 pr-4 py-3 bg-white rounded-2xl border border-purple-100/70 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-400/30 shadow-sm" />
       </div>
 
       <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
-        <button onclick="filterFiles('all', this)" class="filter-pill pill-active px-4 py-1.5 rounded-full font-semibold bg-white border border-slate-200/80 text-slate-600 transition">All</button>
-        <button onclick="filterFiles('new', this)" class="filter-pill px-3.5 py-1.5 rounded-full font-medium bg-white border border-slate-200/80 text-slate-700 transition flex items-center gap-1.5">
+        <button type="button" data-filter="all" class="filter-pill pill-active px-4 py-1.5 rounded-full font-semibold bg-white border border-slate-200/80 text-slate-600 transition">All</button>
+        <button type="button" data-filter="new" class="filter-pill px-3.5 py-1.5 rounded-full font-medium bg-white border border-slate-200/80 text-slate-700 transition flex items-center gap-1.5">
           <span class="w-3.5 h-3.5 rounded bg-emerald-100 text-emerald-700 text-[10px] flex items-center justify-center font-bold">📄</span>
           New <span id="badgeNewCount">• 0</span>
         </button>
-        <button onclick="filterFiles('important', this)" class="filter-pill px-3.5 py-1.5 rounded-full font-medium bg-white border border-slate-200/80 text-slate-700 transition flex items-center gap-1.5">
+        <button type="button" data-filter="important" class="filter-pill px-3.5 py-1.5 rounded-full font-medium bg-white border border-slate-200/80 text-slate-700 transition flex items-center gap-1.5">
           <i class="fa-solid fa-star text-amber-400 text-[11px]"></i> Important
         </button>
-        <button onclick="filterFiles('pdf', this)" class="filter-pill px-3.5 py-1.5 rounded-full font-medium bg-white border border-slate-200/80 text-slate-700 transition flex items-center gap-1.5">
+        <button type="button" data-filter="pdf" class="filter-pill px-3.5 py-1.5 rounded-full font-medium bg-white border border-slate-200/80 text-slate-700 transition flex items-center gap-1.5">
           <span class="w-2.5 h-2.5 rounded-xs bg-red-600 inline-block"></span> PDFs
         </button>
-        <button onclick="filterFiles('image', this)" class="filter-pill px-3.5 py-1.5 rounded-full font-medium bg-white border border-slate-200/80 text-slate-700 transition flex items-center gap-1.5">
+        <button type="button" data-filter="image" class="filter-pill px-3.5 py-1.5 rounded-full font-medium bg-white border border-slate-200/80 text-slate-700 transition flex items-center gap-1.5">
           <span>🖼️</span> Images
         </button>
-        <button onclick="filterFiles('video', this)" class="filter-pill px-3.5 py-1.5 rounded-full font-medium bg-white border border-slate-200/80 text-slate-700 transition flex items-center gap-1.5">
+        <button type="button" data-filter="video" class="filter-pill px-3.5 py-1.5 rounded-full font-medium bg-white border border-slate-200/80 text-slate-700 transition flex items-center gap-1.5">
           <span>🎬</span> Videos
         </button>
       </div>
@@ -113,7 +114,7 @@
           <h2 class="text-2xl font-serif-title font-bold text-slate-900">Folders</h2>
           <p class="text-xs text-slate-500 mt-0.5">Browse & manage collections</p>
         </div>
-        <button onclick="toggleModal('createFolderModal')" class="px-3.5 py-2 rounded-xl bg-purple-900 hover:bg-purple-800 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
+        <button id="folderModalOpenBtn" type="button" class="px-3.5 py-2 rounded-xl bg-purple-900 hover:bg-purple-800 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
           <i class="fa-solid fa-folder-plus text-sm"></i>
           <span>Create Folder</span>
         </button>
@@ -132,10 +133,10 @@
       <div class="flex items-center justify-between">
         <div>
           <h2 class="text-2xl font-serif-title font-bold text-slate-900">Quiz Manager</h2>
-          <p class="text-xs text-slate-500 mt-0.5">Upload English & Hindi MCQ files (.txt, .pdf, .jpeg, .png). Gemini AI automatically scans and grades.</p>
+          <p class="text-xs text-slate-500 mt-0.5">Upload English & Hindi MCQ files (.txt, .pdf, .jpeg, .png). Gemini AI automatically scans.</p>
         </div>
-        <input type="file" id="quizFileInput" accept=".pdf,.txt,.png,.jpg,.jpeg" class="hidden" onchange="processQuizUpload(event)" />
-        <button onclick="document.getElementById('quizFileInput').click()" class="px-4 py-2.5 rounded-xl bg-purple-900 hover:bg-purple-800 text-white text-xs font-semibold flex items-center gap-2 shadow-sm transition">
+        <input type="file" id="quizFileInput" accept=".pdf,.txt,.png,.jpg,.jpeg" class="hidden" />
+        <button id="triggerQuizUploadBtn" type="button" class="px-4 py-2.5 rounded-xl bg-purple-900 hover:bg-purple-800 text-white text-xs font-semibold flex items-center gap-2 shadow-sm transition">
           <i class="fa-solid fa-file-circle-plus text-sm"></i>
           <span>Upload Quiz (Gemini AI Scan)</span>
         </button>
@@ -154,14 +155,14 @@
             <a href="quiz.html" target="_blank" class="px-3.5 py-1.5 rounded-lg border border-purple-200 text-purple-700 hover:bg-purple-50 text-xs font-semibold flex items-center gap-1.5 transition">
               <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> View Student Quiz
             </a>
-            <button onclick="clearCurrentQuiz()" class="px-3.5 py-1.5 rounded-lg border border-rose-100 bg-rose-50/50 hover:bg-rose-100 text-rose-600 text-xs font-semibold transition">
+            <button id="clearQuizBtn" type="button" class="px-3.5 py-1.5 rounded-lg border border-rose-100 bg-rose-50/50 hover:bg-rose-100 text-rose-600 text-xs font-semibold transition">
               <i class="fa-solid fa-trash-can text-[10px] mr-1"></i> Delete
             </button>
           </div>
         </div>
 
         <div class="pt-4">
-          <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Questions in current test ( English & Hindi Supported )</h4>
+          <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Questions in current test</h4>
           <div id="quizPreviewContainer" class="space-y-2.5 max-h-96 overflow-y-auto pr-1"></div>
         </div>
       </div>
@@ -175,7 +176,7 @@
   <!-- MODAL: UPLOAD FILE -->
   <div id="uploadModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm hidden">
     <div class="bg-white w-full max-w-md rounded-3xl p-6 relative border border-purple-100 shadow-2xl text-slate-900">
-      <button onclick="toggleModal('uploadModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700">
+      <button id="uploadModalCloseBtn" type="button" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700">
         <i class="fa-solid fa-xmark text-lg"></i>
       </button>
 
@@ -186,10 +187,10 @@
         <p class="text-xs text-slate-500">Supports PDF, DOCX, XLSX, Images, Videos, ZIP, Audio</p>
       </div>
 
-      <form onsubmit="handleUploadSubmit(event)" class="space-y-3.5">
+      <form id="uploadFileForm" class="space-y-3.5">
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Select File</label>
-          <input id="filePicker" type="file" required onchange="handleFilePicked(this)"
+          <input id="filePicker" type="file" required
                  class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100 cursor-pointer" />
         </div>
 
@@ -233,7 +234,7 @@
   <!-- MODAL: CREATE NEW FOLDER -->
   <div id="createFolderModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm hidden">
     <div class="bg-white w-full max-w-sm rounded-3xl p-6 relative border border-purple-100 shadow-2xl text-slate-900">
-      <button onclick="toggleModal('createFolderModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700">
+      <button id="folderModalCloseBtn" type="button" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700">
         <i class="fa-solid fa-xmark text-lg"></i>
       </button>
 
@@ -244,7 +245,7 @@
         <p class="text-xs text-slate-500">Add a dedicated category for files</p>
       </div>
 
-      <form onsubmit="handleCreateFolderSubmit(event)" class="space-y-4">
+      <form id="createFolderForm" class="space-y-4">
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Folder Name</label>
           <input id="newFolderNameInput" type="text" required placeholder="e.g. Current Affairs 2026"
@@ -259,11 +260,15 @@
   </div>
 
   <script>
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    try {
+      if (typeof pdfjsLib !== 'undefined') {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      }
+    } catch(e) {}
 
-    let db;
+    let db = null;
     let currentFilter = 'all';
-    let activeFolderFilter = null; // Tracks active folder view
+    let activeFolderFilter = null;
 
     const DEFAULT_FOLDERS = ['SuperTET', 'Cosmos', 'UPSSSC', 'Group D', 'NCERT', 'Lekhpal'];
     const FOLDER_COLORS = [
@@ -278,68 +283,138 @@
     ];
 
     function getStoredFolders() {
-      const stored = localStorage.getItem("shoaib_folders_list");
-      if (!stored) {
-        localStorage.setItem("shoaib_folders_list", JSON.stringify(DEFAULT_FOLDERS));
+      try {
+        const stored = localStorage.getItem("shoaib_folders_list");
+        if (!stored) {
+          localStorage.setItem("shoaib_folders_list", JSON.stringify(DEFAULT_FOLDERS));
+          return DEFAULT_FOLDERS;
+        }
+        return JSON.parse(stored);
+      } catch (e) {
         return DEFAULT_FOLDERS;
       }
-      try { return JSON.parse(stored); } catch (e) { return DEFAULT_FOLDERS; }
     }
 
     function saveStoredFolders(folders) {
-      localStorage.setItem("shoaib_folders_list", JSON.stringify(folders));
-      renderFolders();
-      populateFolderDropdown();
+      try {
+        localStorage.setItem("shoaib_folders_list", JSON.stringify(folders));
+        renderFolders();
+        populateFolderDropdown();
+      } catch(e) {}
     }
 
     function initIndexedDB() {
       return new Promise((resolve) => {
-        const req = indexedDB.open("ShoaibPortalDB", 1);
-        req.onupgradeneeded = (e) => {
-          const database = e.target.result;
-          if (!database.objectStoreNames.contains("filesStore")) {
-            database.createObjectStore("filesStore", { keyPath: "id" });
-          }
-        };
-        req.onsuccess = (e) => { db = e.target.result; resolve(db); };
-        req.onerror = () => resolve(null);
+        try {
+          const req = indexedDB.open("ShoaibPortalDB", 1);
+          req.onupgradeneeded = (e) => {
+            try {
+              const database = e.target.result;
+              if (!database.objectStoreNames.contains("filesStore")) {
+                database.createObjectStore("filesStore", { keyPath: "id" });
+              }
+            } catch(err) {}
+          };
+          req.onsuccess = (e) => { db = e.target.result; resolve(db); };
+          req.onerror = () => resolve(null);
+        } catch(err) { resolve(null); }
       });
     }
 
     async function getAllFiles() {
       return new Promise((resolve) => {
         if (!db) return resolve([]);
-        const tx = db.transaction("filesStore", "readonly");
-        const store = tx.objectStore("filesStore");
-        const req = store.getAll();
-        req.onsuccess = () => resolve(req.result || []);
-        req.onerror = () => resolve([]);
+        try {
+          const tx = db.transaction("filesStore", "readonly");
+          const store = tx.objectStore("filesStore");
+          const req = store.getAll();
+          req.onsuccess = () => resolve(req.result || []);
+          req.onerror = () => resolve([]);
+        } catch(e) { resolve([]); }
       });
     }
 
     async function saveFileRecord(record) {
       return new Promise((resolve, reject) => {
-        const tx = db.transaction("filesStore", "readwrite");
-        const store = tx.objectStore("filesStore");
-        const req = store.put(record);
-        req.onsuccess = () => resolve(true);
-        req.onerror = () => reject(false);
+        if (!db) return reject(false);
+        try {
+          const tx = db.transaction("filesStore", "readwrite");
+          const store = tx.objectStore("filesStore");
+          const req = store.put(record);
+          req.onsuccess = () => resolve(true);
+          req.onerror = () => reject(false);
+        } catch(e) { reject(false); }
       });
     }
 
     async function deleteFileRecord(id) {
       return new Promise((resolve) => {
-        const tx = db.transaction("filesStore", "readwrite");
-        const store = tx.objectStore("filesStore");
-        const req = store.delete(id);
-        req.onsuccess = () => resolve(true);
-        req.onerror = () => resolve(false);
+        if (!db) return resolve(false);
+        try {
+          const tx = db.transaction("filesStore", "readwrite");
+          const store = tx.objectStore("filesStore");
+          const req = store.delete(id);
+          req.onsuccess = () => resolve(true);
+          req.onerror = () => resolve(false);
+        } catch(e) { resolve(false); }
       });
     }
+
+    // Secure Event Listeners on DOMContentLoaded
+    document.addEventListener("DOMContentLoaded", () => {
+      const bind = (id, event, fn) => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener(event, fn);
+      };
+
+      bind("tabFilesBtn", "click", () => switchPortalTab('files'));
+      bind("tabFoldersBtn", "click", () => switchPortalTab('folders'));
+      bind("tabQuizBtn", "click", () => switchPortalTab('quiz'));
+
+      bind("uploadModalOpenBtn", "click", () => toggleModal('uploadModal'));
+      bind("uploadModalCloseBtn", "click", () => toggleModal('uploadModal'));
+      bind("folderModalOpenBtn", "click", () => toggleModal('createFolderModal'));
+      bind("folderModalCloseBtn", "click", () => toggleModal('createFolderModal'));
+
+      bind("logoutBtn", "click", logoutAdmin);
+      bind("clearFolderFilterBtn", "click", clearFolderFilter);
+      bind("clearQuizBtn", "click", clearCurrentQuiz);
+
+      const searchInput = document.getElementById("fileSearchInput");
+      if (searchInput) searchInput.addEventListener("input", handleSearch);
+
+      document.querySelectorAll(".filter-pill").forEach(btn => {
+        btn.addEventListener("click", () => filterFiles(btn.getAttribute("data-filter"), btn));
+      });
+
+      bind("uploadFileForm", "submit", handleUploadSubmit);
+      bind("createFolderForm", "submit", handleCreateFolderSubmit);
+
+      const filePicker = document.getElementById("filePicker");
+      if (filePicker) filePicker.addEventListener("change", (e) => handleFilePicked(e.target));
+
+      const quizFileInput = document.getElementById("quizFileInput");
+      if (quizFileInput) quizFileInput.addEventListener("change", processQuizUpload);
+
+      bind("triggerQuizUploadBtn", "click", () => {
+        const qInput = document.getElementById("quizFileInput");
+        if (qInput) qInput.click();
+      });
+
+      initIndexedDB().then(() => {
+        try {
+          populateFolderDropdown();
+          renderFilesList();
+          renderFolders();
+          renderQuizPreview();
+        } catch(e) {}
+      });
+    });
 
     function handleCreateFolderSubmit(e) {
       e.preventDefault();
       const input = document.getElementById("newFolderNameInput");
+      if (!input) return;
       const name = input.value.trim();
       if (!name) return;
 
@@ -356,68 +431,88 @@
     }
 
     async function deleteFolder(folderName) {
-      const all = await getAllFiles();
-      const filesInFolder = all.filter(f => f.folder === folderName);
+      try {
+        const all = await getAllFiles();
+        const filesInFolder = all.filter(f => f.folder === folderName);
 
-      const msg = filesInFolder.length > 0
-        ? `"${folderName}" folder me ${filesInFolder.length} files hain. Kya aap sach me ise delete karna chahte hain?`
-        : `Kya aap "${folderName}" folder ko delete karna chahte hain?`;
+        const msg = filesInFolder.length > 0
+          ? `"${folderName}" folder me ${filesInFolder.length} files hain. Kya aap sach me ise delete karna chahte hain?`
+          : `Kya aap "${folderName}" folder ko delete karna chahte hain?`;
 
-      if (confirm(msg)) {
-        let current = getStoredFolders();
-        current = current.filter(f => f !== folderName);
-        saveStoredFolders(current);
-      }
+        if (confirm(msg)) {
+          let current = getStoredFolders();
+          current = current.filter(f => f !== folderName);
+          saveStoredFolders(current);
+          if (activeFolderFilter === folderName) {
+            clearFolderFilter();
+          }
+        }
+      } catch(e) {}
     }
 
     async function renderFolders() {
-      const container = document.getElementById("foldersGridContainer");
-      if (!container) return;
-      container.innerHTML = "";
+      try {
+        const container = document.getElementById("foldersGridContainer");
+        if (!container) return;
+        container.innerHTML = "";
 
-      const folders = getStoredFolders();
-      const allFiles = await getAllFiles();
+        const folders = getStoredFolders();
+        const allFiles = await getAllFiles();
 
-      document.getElementById("totalFolderCountLabel").innerText = `${folders.length} ${folders.length === 1 ? 'folder' : 'folders'}`;
+        const label = document.getElementById("totalFolderCountLabel");
+        if (label) label.innerText = `${folders.length} ${folders.length === 1 ? 'folder' : 'folders'}`;
 
-      folders.forEach((folder, idx) => {
-        const count = allFiles.filter(item => item.folder === folder).length;
-        const color = FOLDER_COLORS[idx % FOLDER_COLORS.length];
+        folders.forEach((folder, idx) => {
+          const count = allFiles.filter(item => item.folder === folder).length;
+          const color = FOLDER_COLORS[idx % FOLDER_COLORS.length];
 
-        const card = document.createElement("div");
-        card.className = "folder-card p-4 rounded-2xl cursor-pointer relative group flex flex-col justify-between";
-        card.onclick = () => openFolder(folder);
+          const card = document.createElement("div");
+          card.className = "folder-card p-4 rounded-2xl cursor-pointer relative group flex flex-col justify-between";
+          card.addEventListener("click", () => openFolder(folder));
 
-        card.innerHTML = `
-          <button onclick="event.stopPropagation(); deleteFolder('${folder}')" 
-                  title="Delete Folder" 
-                  class="absolute top-2.5 right-2.5 w-6 h-6 rounded-lg bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white flex items-center justify-center text-[10px] transition opacity-0 group-hover:opacity-100 shadow-xs">
-            <i class="fa-solid fa-trash-can"></i>
-          </button>
+          const delBtn = document.createElement("button");
+          delBtn.type = "button";
+          delBtn.className = "absolute top-2.5 right-2.5 w-6 h-6 rounded-lg bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white flex items-center justify-center text-[10px] transition opacity-0 group-hover:opacity-100 shadow-xs";
+          delBtn.title = "Delete Folder";
+          delBtn.innerHTML = '<i class="fa-solid fa-trash-can"></i>';
+          delBtn.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            deleteFolder(folder);
+          });
+          card.appendChild(delBtn);
 
-          <div>
+          const innerDiv = document.createElement("div");
+          innerDiv.innerHTML = `
             <div class="w-10 h-10 rounded-xl ${color.bg} flex items-center justify-center ${color.text} text-lg mb-3">
               <i class="fa-solid fa-folder"></i>
             </div>
             <h4 class="font-bold text-xs sm:text-sm text-slate-800 mb-0.5 truncate" title="${folder}">${folder}</h4>
-          </div>
-          <p class="text-[11px] text-slate-400 mt-2">${count} ${count === 1 ? 'item' : 'items'}</p>
-        `;
-        container.appendChild(card);
-      });
+          `;
+          card.appendChild(innerDiv);
+
+          const countP = document.createElement("p");
+          countP.className = "text-[11px] text-slate-400 mt-2";
+          countP.innerText = `${count} ${count === 1 ? 'item' : 'items'}`;
+          card.appendChild(countP);
+
+          container.appendChild(card);
+        });
+      } catch(e) {}
     }
 
     function populateFolderDropdown() {
-      const select = document.getElementById("fileFolderDest");
-      if (!select) return;
-      const folders = getStoredFolders();
-      select.innerHTML = '<option value="">No Folder (General)</option>';
-      folders.forEach(f => {
-        const opt = document.createElement("option");
-        opt.value = f;
-        opt.innerText = f;
-        select.appendChild(opt);
-      });
+      try {
+        const select = document.getElementById("fileFolderDest");
+        if (!select) return;
+        const folders = getStoredFolders();
+        select.innerHTML = '<option value="">No Folder (General)</option>';
+        folders.forEach(f => {
+          const opt = document.createElement("option");
+          opt.value = f;
+          opt.innerText = f;
+          select.appendChild(opt);
+        });
+      } catch(e) {}
     }
 
     let selectedFileBlob = null;
@@ -425,240 +520,284 @@
     let selectedFileType = "pdf";
 
     function handleFilePicked(input) {
-      if (input.files && input.files[0]) {
-        const file = input.files[0];
-        document.getElementById("fileCustomTitle").value = file.name;
-        const mb = file.size / (1024 * 1024);
-        selectedFileSize = mb >= 1 ? `${mb.toFixed(1)} MB` : `${(file.size / 1024).toFixed(0)} KB`;
-        if (file.type.includes("image")) selectedFileType = "image";
-        else if (file.type.includes("video")) selectedFileType = "video";
-        else selectedFileType = "pdf";
-        selectedFileBlob = file;
-      }
+      try {
+        if (input.files && input.files[0]) {
+          const file = input.files[0];
+          const titleInput = document.getElementById("fileCustomTitle");
+          if (titleInput) titleInput.value = file.name;
+          const mb = file.size / (1024 * 1024);
+          selectedFileSize = mb >= 1 ? `${mb.toFixed(1)} MB` : `${(file.size / 1024).toFixed(0)} KB`;
+          if (file.type.includes("image")) selectedFileType = "image";
+          else if (file.type.includes("video")) selectedFileType = "video";
+          else selectedFileType = "pdf";
+          selectedFileBlob = file;
+        }
+      } catch(e) {}
     }
 
     async function handleUploadSubmit(e) {
-      e.preventDefault();
-      if (!selectedFileBlob) return;
+      try {
+        e.preventDefault();
+        if (!selectedFileBlob) return;
 
-      const title = document.getElementById("fileCustomTitle").value.trim();
-      // If a specific folder is active, use it automatically; otherwise use dropdown selection
-      const folder = activeFolderFilter || document.getElementById("fileFolderDest").value || null;
-      const tag = document.getElementById("fileCustomTag").value.trim();
+        const titleInput = document.getElementById("fileCustomTitle");
+        const folderDest = document.getElementById("fileFolderDest");
+        const tagInput = document.getElementById("fileCustomTag");
+        const impCheck = document.getElementById("checkImportant");
+        const newCheck = document.getElementById("checkNew");
 
-      const newRecord = {
-        id: "file_" + Date.now(),
-        name: title,
-        folder: folder,
-        tag: tag ? (tag.startsWith("#") ? tag : `#${tag}`) : null,
-        size: selectedFileSize,
-        type: selectedFileType,
-        time: "Just now",
-        isImportant: document.getElementById("checkImportant").checked,
-        isNew: document.getElementById("checkNew").checked,
-        blob: selectedFileBlob
-      };
+        const title = titleInput ? titleInput.value.trim() : "Untitled";
+        const folder = activeFolderFilter || (folderDest ? folderDest.value || null : null);
+        const tag = tagInput ? tagInput.value.trim() : "";
 
-      await saveFileRecord(newRecord);
-      toggleModal('uploadModal');
-      e.target.reset();
-      selectedFileBlob = null;
-      renderFilesList();
-      renderFolders();
+        const newRecord = {
+          id: "file_" + Date.now(),
+          name: title,
+          folder: folder,
+          tag: tag ? (tag.startsWith("#") ? tag : `#${tag}`) : null,
+          size: selectedFileSize,
+          type: selectedFileType,
+          time: "Just now",
+          isImportant: impCheck ? impCheck.checked : false,
+          isNew: newCheck ? newCheck.checked : true,
+          blob: selectedFileBlob
+        };
+
+        await saveFileRecord(newRecord);
+        toggleModal('uploadModal');
+        e.target.reset();
+        selectedFileBlob = null;
+        renderFilesList();
+        renderFolders();
+      } catch(err) {}
     }
 
     async function deleteFile(id) {
-      if (confirm("Permanently delete this file?")) {
-        await deleteFileRecord(id);
-        renderFilesList();
-        renderFolders();
-      }
+      try {
+        if (confirm("Permanently delete this file?")) {
+          await deleteFileRecord(id);
+          renderFilesList();
+          renderFolders();
+        }
+      } catch(e) {}
     }
 
     async function downloadFile(id) {
-      const all = await getAllFiles();
-      const item = all.find(f => f.id === id);
-      if (!item || !item.blob) return alert("File not found.");
+      try {
+        const all = await getAllFiles();
+        const item = all.find(f => f.id === id);
+        if (!item || !item.blob) return alert("File not found.");
 
-      const url = URL.createObjectURL(item.blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = item.name;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(() => URL.revokeObjectURL(url), 1500);
+        const url = URL.createObjectURL(item.blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = item.name;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1500);
+      } catch(e) {}
     }
 
     async function renderFilesList(filter = currentFilter, searchQuery = '') {
-      const container = document.getElementById("fileCardsContainer");
-      container.innerHTML = "";
-      const all = await getAllFiles();
-      const query = (searchQuery || document.getElementById("fileSearchInput").value || "").toLowerCase();
+      try {
+        const container = document.getElementById("fileCardsContainer");
+        if (!container) return;
+        container.innerHTML = "";
+        const all = await getAllFiles();
+        const searchInput = document.getElementById("fileSearchInput");
+        const query = (searchQuery || (searchInput ? searchInput.value : "")).toLowerCase();
 
-      const matching = all.filter(f => {
-        // Enforce folder filter if an active folder is selected
-        if (activeFolderFilter && f.folder !== activeFolderFilter) return false;
+        const matching = all.filter(f => {
+          if (activeFolderFilter && f.folder !== activeFolderFilter) return false;
 
-        const matchesQuery = f.name.toLowerCase().includes(query) ||
-                           (f.tag && f.tag.toLowerCase().includes(query)) ||
-                           (f.folder && f.folder.toLowerCase().includes(query));
-        if (!matchesQuery) return false;
-        if (filter === 'all') return true;
-        if (filter === 'new') return f.isNew;
-        if (filter === 'important') return f.isImportant;
-        if (filter === 'pdf') return f.type === 'pdf';
-        if (filter === 'image') return f.type === 'image';
-        if (filter === 'video') return f.type === 'video';
-        return true;
-      });
+          const matchesQuery = f.name.toLowerCase().includes(query) ||
+                             (f.tag && f.tag.toLowerCase().includes(query)) ||
+                             (f.folder && f.folder.toLowerCase().includes(query));
+          if (!matchesQuery) return false;
+          if (filter === 'all') return true;
+          if (filter === 'new') return f.isNew;
+          if (filter === 'important') return f.isImportant;
+          if (filter === 'pdf') return f.type === 'pdf';
+          if (filter === 'image') return f.type === 'image';
+          if (filter === 'video') return f.type === 'video';
+          return true;
+        });
 
-      document.getElementById("badgeNewCount").innerText = `• ${all.filter(f => f.isNew).length}`;
+        const badge = document.getElementById("badgeNewCount");
+        if (badge) badge.innerText = `• ${all.filter(f => f.isNew).length}`;
 
-      if (matching.length === 0) {
-        container.innerHTML = `
-          <div class="py-16 text-center">
-            <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-400 mx-auto flex items-center justify-center text-xl mb-3">
-              <i class="fa-regular fa-folder-open"></i>
-            </div>
-            <p class="text-sm font-semibold text-slate-700">No files found ${activeFolderFilter ? 'in folder "' + activeFolderFilter + '"' : ''}</p>
-          </div>
-        `;
-        return;
-      }
-
-      const secDiv = document.createElement("div");
-      secDiv.className = "space-y-2.5";
-      secDiv.innerHTML = `
-        <div class="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase tracking-wide">
-          <span>PORTAL FILES ${activeFolderFilter ? '— ' + activeFolderFilter.toUpperCase() : ''}</span>
-          <span class="text-slate-400 font-semibold text-[11px]">${matching.length}</span>
-        </div>
-        <div class="space-y-2.5" id="fileItemsList"></div>
-      `;
-      container.appendChild(secDiv);
-      const itemsList = secDiv.querySelector("#fileItemsList");
-
-      matching.forEach(f => {
-        const card = document.createElement("div");
-        card.className = "soft-card p-3 sm:p-3.5 rounded-2xl flex items-center justify-between";
-
-        let iconBox = `<div class="relative w-10 h-11 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center flex-shrink-0"><div class="w-5 h-7 rounded-sm bg-rose-500 border border-rose-600 flex flex-col justify-center items-center text-white"><div class="w-3 h-0.5 bg-white/70 mb-1"></div><div class="w-3 h-0.5 bg-white/70"></div></div>${f.isNew ? '<div class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-400 rounded-full border border-white"></div>' : ''}</div>`;
-        if (f.type === 'image') iconBox = `<div class="w-10 h-11 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600 text-lg flex-shrink-0"><i class="fa-regular fa-image"></i></div>`;
-        if (f.type === 'video') iconBox = `<div class="w-10 h-11 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center text-purple-600 text-lg flex-shrink-0"><i class="fa-solid fa-play text-sm"></i></div>`;
-
-        card.innerHTML = `
-          <div class="flex items-center gap-3 min-w-0">
-            ${iconBox}
-            <div class="truncate">
-              <div class="flex items-center gap-2">
-                ${f.isImportant ? '<i class="fa-solid fa-star text-amber-400 text-xs"></i>' : ''}
-                <span class="text-xs sm:text-sm font-bold text-slate-900 truncate">${f.name}</span>
-                ${f.isNew ? '<span class="text-[9px] font-bold px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded-md">NEW</span>' : ''}
+        if (matching.length === 0) {
+          container.innerHTML = `
+            <div class="py-16 text-center">
+              <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-400 mx-auto flex items-center justify-center text-xl mb-3">
+                <i class="fa-regular fa-folder-open"></i>
               </div>
-              <div class="flex items-center gap-2 text-[11px] text-slate-400 mt-0.5">
-                ${f.folder ? `<span class="flex items-center gap-1 text-slate-500"><i class="fa-solid fa-folder text-amber-400 text-[10px]"></i> ${f.folder}</span>` : ''}
-                <span>${f.size}</span>
-                <span>•</span>
-                <span>${f.time}</span>
+              <p class="text-sm font-semibold text-slate-700">No files found ${activeFolderFilter ? 'in folder "' + activeFolderFilter + '"' : ''}</p>
+            </div>
+          `;
+          return;
+        }
+
+        const secDiv = document.createElement("div");
+        secDiv.className = "space-y-2.5";
+        secDiv.innerHTML = `
+          <div class="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase tracking-wide">
+            <span>PORTAL FILES ${activeFolderFilter ? '— ' + activeFolderFilter.toUpperCase() : ''}</span>
+            <span class="text-slate-400 font-semibold text-[11px]">${matching.length}</span>
+          </div>
+          <div class="space-y-2.5" id="fileItemsList"></div>
+        `;
+        container.appendChild(secDiv);
+        const itemsList = secDiv.querySelector("#fileItemsList");
+
+        matching.forEach(f => {
+          const card = document.createElement("div");
+          card.className = "soft-card p-3 sm:p-3.5 rounded-2xl flex items-center justify-between";
+
+          let iconBox = `<div class="relative w-10 h-11 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center flex-shrink-0"><div class="w-5 h-7 rounded-sm bg-rose-500 border border-rose-600 flex flex-col justify-center items-center text-white"><div class="w-3 h-0.5 bg-white/70 mb-1"></div><div class="w-3 h-0.5 bg-white/70"></div></div></div>`;
+          if (f.type === 'image') iconBox = `<div class="w-10 h-11 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600 text-lg flex-shrink-0"><i class="fa-regular fa-image"></i></div>`;
+          if (f.type === 'video') iconBox = `<div class="w-10 h-11 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center text-purple-600 text-lg flex-shrink-0"><i class="fa-solid fa-play text-sm"></i></div>`;
+
+          card.innerHTML = `
+            <div class="flex items-center gap-3 min-w-0">
+              ${iconBox}
+              <div class="truncate">
+                <div class="flex items-center gap-2">
+                  ${f.isImportant ? '<i class="fa-solid fa-star text-amber-400 text-xs"></i>' : ''}
+                  <span class="text-xs sm:text-sm font-bold text-slate-900 truncate">${f.name}</span>
+                  ${f.isNew ? '<span class="text-[9px] font-bold px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded-md">NEW</span>' : ''}
+                </div>
+                <div class="flex items-center gap-2 text-[11px] text-slate-400 mt-0.5">
+                  ${f.folder ? `<span class="flex items-center gap-1 text-slate-500"><i class="fa-solid fa-folder text-amber-400 text-[10px]"></i> ${f.folder}</span>` : ''}
+                  <span>${f.size}</span>
+                  <span>•</span>
+                  <span>${f.time}</span>
+                </div>
               </div>
             </div>
-          </div>
-          <div class="flex items-center gap-1.5 flex-shrink-0 ml-2">
-            <button onclick="deleteFile('${f.id}')" title="Delete File" class="w-9 h-9 rounded-xl border border-rose-100 bg-rose-50/50 hover:bg-rose-100 text-rose-600 flex items-center justify-center transition">
-              <i class="fa-solid fa-trash-can text-xs"></i>
-            </button>
-            <button onclick="downloadFile('${f.id}')" title="Download" class="w-9 h-9 rounded-xl border border-slate-200/80 hover:bg-slate-100 text-slate-600 flex items-center justify-center transition">
-              <i class="fa-solid fa-arrow-down text-xs"></i>
-            </button>
-          </div>
-        `;
-        itemsList.appendChild(card);
-      });
+            <div class="flex items-center gap-1.5 flex-shrink-0 ml-2">
+              <button type="button" class="del-btn w-9 h-9 rounded-xl border border-rose-100 bg-rose-50/50 hover:bg-rose-100 text-rose-600 flex items-center justify-center transition" title="Delete">
+                <i class="fa-solid fa-trash-can text-xs"></i>
+              </button>
+              <button type="button" class="down-btn w-9 h-9 rounded-xl border border-slate-200/80 hover:bg-slate-100 text-slate-600 flex items-center justify-center transition" title="Download">
+                <i class="fa-solid fa-arrow-down text-xs"></i>
+              </button>
+            </div>
+          `;
+          card.querySelector(".del-btn").addEventListener("click", () => deleteFile(f.id));
+          card.querySelector(".down-btn").addEventListener("click", () => downloadFile(f.id));
+          itemsList.appendChild(card);
+        });
+      } catch(e) {}
     }
 
     function filterFiles(filter, btn) {
-      currentFilter = filter;
-      document.querySelectorAll(".filter-pill").forEach(p => p.classList.remove("pill-active"));
-      btn.classList.add("pill-active");
-      renderFilesList(filter, document.getElementById("fileSearchInput").value);
+      try {
+        currentFilter = filter;
+        document.querySelectorAll(".filter-pill").forEach(p => p.classList.remove("pill-active"));
+        if (btn) btn.classList.add("pill-active");
+        const searchInput = document.getElementById("fileSearchInput");
+        renderFilesList(filter, searchInput ? searchInput.value : '');
+      } catch(e) {}
     }
 
     function handleSearch() {
-      renderFilesList(currentFilter, document.getElementById("fileSearchInput").value);
+      try {
+        const searchInput = document.getElementById("fileSearchInput");
+        renderFilesList(currentFilter, searchInput ? searchInput.value : '');
+      } catch(e) {}
     }
 
     function switchPortalTab(tab) {
-      const filesSec = document.getElementById("tabFilesContent");
-      const foldersSec = document.getElementById("tabFoldersContent");
-      const quizSec = document.getElementById("tabQuizContent");
+      try {
+        const filesSec = document.getElementById("tabFilesContent");
+        const foldersSec = document.getElementById("tabFoldersContent");
+        const quizSec = document.getElementById("tabQuizContent");
 
-      const btnFiles = document.getElementById("tabFilesBtn");
-      const btnFolders = document.getElementById("tabFoldersBtn");
-      const btnQuiz = document.getElementById("tabQuizBtn");
+        if (filesSec) filesSec.classList.add("hidden");
+        if (foldersSec) foldersSec.classList.add("hidden");
+        if (quizSec) quizSec.classList.add("hidden");
 
-      const inactiveClass = "px-3.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition";
-      const activeClass = "px-3.5 py-1.5 rounded-lg bg-white text-purple-900 shadow-sm transition";
+        const btnFiles = document.getElementById("tabFilesBtn");
+        const btnFolders = document.getElementById("tabFoldersBtn");
+        const btnQuiz = document.getElementById("tabQuizBtn");
 
-      filesSec.classList.add("hidden");
-      foldersSec.classList.add("hidden");
-      quizSec.classList.add("hidden");
+        const inactiveClass = "px-3.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition";
+        const activeClass = "px-3.5 py-1.5 rounded-lg bg-white text-purple-900 shadow-sm transition";
 
-      btnFiles.className = inactiveClass;
-      btnFolders.className = inactiveClass;
-      btnQuiz.className = inactiveClass;
+        if (btnFiles) btnFiles.className = inactiveClass;
+        if (btnFolders) btnFolders.className = inactiveClass;
+        if (btnQuiz) btnQuiz.className = inactiveClass;
 
-      if (tab === 'files') {
-        filesSec.classList.remove("hidden");
-        btnFiles.className = activeClass;
-      } else if (tab === 'folders') {
-        foldersSec.classList.remove("hidden");
-        btnFolders.className = activeClass;
-        renderFolders();
-      } else if (tab === 'quiz') {
-        quizSec.classList.remove("hidden");
-        btnQuiz.className = activeClass;
-        renderQuizPreview();
-      }
+        if (tab === 'files') {
+          if (filesSec) filesSec.classList.remove("hidden");
+          if (btnFiles) btnFiles.className = activeClass;
+        } else if (tab === 'folders') {
+          if (foldersSec) foldersSec.classList.remove("hidden");
+          if (btnFolders) btnFolders.className = activeClass;
+          renderFolders();
+        } else if (tab === 'quiz') {
+          if (quizSec) quizSec.classList.remove("hidden");
+          if (btnQuiz) btnQuiz.className = activeClass;
+          renderQuizPreview();
+        }
+      } catch(e) {}
     }
 
     function openFolder(name) {
-      activeFolderFilter = name; // Set folder context
-      switchPortalTab('files');
-      
-      // Update header banner to show active folder filter
-      document.getElementById("filesHeaderTitle").innerText = `Folder: ${name}`;
-      document.getElementById("filesHeaderSubtitle").innerText = `Viewing files inside ${name}`;
-      document.getElementById("clearFolderFilterBtn").classList.remove("hidden");
+      try {
+        activeFolderFilter = name;
+        switchPortalTab('files');
+        const hTitle = document.getElementById("filesHeaderTitle");
+        const hSub = document.getElementById("filesHeaderSubtitle");
+        const clearBtn = document.getElementById("clearFolderFilterBtn");
 
-      renderFilesList('all', '');
+        if (hTitle) hTitle.innerText = `Folder: ${name}`;
+        if (hSub) hSub.innerText = `Viewing files inside ${name}`;
+        if (clearBtn) clearBtn.classList.remove("hidden");
+
+        renderFilesList('all', '');
+      } catch(e) {}
     }
 
     function clearFolderFilter() {
-      activeFolderFilter = null;
-      document.getElementById("filesHeaderTitle").innerText = "Files";
-      document.getElementById("filesHeaderSubtitle").innerText = "Latest from class";
-      document.getElementById("clearFolderFilterBtn").classList.add("hidden");
-      renderFilesList('all', '');
-    }
+      try {
+        activeFolderFilter = null;
+        const hTitle = document.getElementById("filesHeaderTitle");
+        const hSub = document.getElementById("filesHeaderSubtitle");
+        const clearBtn = document.getElementById("clearFolderFilterBtn");
 
-    function openUploadModalWithFolder() {
-      toggleModal('uploadModal');
-      if (activeFolderFilter) {
-        const destSelect = document.getElementById("fileFolderDest");
-        if (destSelect) destSelect.value = activeFolderFilter;
-      }
+        if (hTitle) hTitle.innerText = "Files";
+        if (hSub) hSub.innerText = "Latest from class";
+        if (clearBtn) clearBtn.classList.add("hidden");
+
+        renderFilesList('all', '');
+      } catch(e) {}
     }
 
     function toggleModal(id) {
-      document.getElementById(id).classList.toggle("hidden");
+      try {
+        const modal = document.getElementById(id);
+        if (modal) {
+          modal.classList.toggle("hidden");
+          if (!modal.classList.contains("hidden") && id === 'uploadModal') {
+            if (activeFolderFilter) {
+              const dest = document.getElementById("fileFolderDest");
+              if (dest) dest.value = activeFolderFilter;
+            }
+          }
+        }
+      } catch(e) {}
     }
 
     function logoutAdmin() {
-      if (confirm("Log out from Management mode?")) {
-        sessionStorage.removeItem("shoaib_admin_auth");
-        window.location.href = "nitrence.html";
-      }
+      try {
+        if (confirm("Log out from Management mode?")) {
+          sessionStorage.removeItem("shoaib_admin_auth");
+          window.location.href = "nitrence.html";
+        }
+      } catch(e) {}
     }
 
     // ==========================================
@@ -673,7 +812,7 @@
       let extractedText = "";
 
       try {
-        if (file.type === "application/pdf" || file.name.endsWith('.pdf')) {
+        if ((file.type === "application/pdf" || file.name.endsWith('.pdf')) && typeof pdfjsLib !== 'undefined') {
           const arrayBuffer = await file.arrayBuffer();
           const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
           for (let i = 1; i <= pdf.numPages; i++) {
@@ -687,7 +826,6 @@
             reader.onload = () => resolve(reader.result.split(',')[1]);
             reader.readAsDataURL(file);
           });
-
           extractedText = await callGeminiVisionAPI(base64Data, file.type);
         } else {
           extractedText = await file.text();
@@ -695,7 +833,7 @@
 
         const questions = parseBilingualMCQ(extractedText);
         if (questions.length === 0) {
-          alert("Could not detect MCQ format. Please make sure questions and options (English or Hindi) are clearly listed.");
+          alert("Could not detect MCQ format. Please make sure questions and options are clearly listed.");
           return;
         }
 
@@ -703,7 +841,7 @@
         localStorage.setItem("classroom_quiz_questions", JSON.stringify(questions));
         localStorage.setItem("quiz_title", quizName);
 
-        alert(`✅ Success! Gemini AI successfully scanned ${questions.length} questions (English & Hindi). Quiz is now LIVE!`);
+        alert(`✅ Success! Gemini AI successfully scanned ${questions.length} questions. Quiz is now LIVE!`);
         renderQuizPreview();
       } catch (err) {
         console.error(err);
@@ -734,15 +872,13 @@
       throw new Error("Invalid response received from Gemini API.");
     }
 
-    // Flexible Parser supporting English & Hindi text structures
     function parseBilingualMCQ(rawText) {
       const lines = rawText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
       const parsed = [];
       let currentQ = null;
 
       for (let line of lines) {
-        // Matches English/Hindi numbers like "1.", "1-", "प्रश्न 1:", "Q1."
-        const qMatch = line.match(/^(?:Q\d+|प्रश्न\s*\d+|प्र\.\s*\d+|\d+)[\.\-\):\s]+(.+)/i);
+        const qMatch = line.match(/^(?:Q\d+|प्रश्न\s*\d+|प्र\s*\d+|\d+)[\.\-\):\s]+(.+)/i);
         if (qMatch && !line.match(/^[A-Da-dक-घअ-ज्ञ][\.\-\)]/)) {
           if (currentQ && currentQ.options.length >= 2) {
             parsed.push(currentQ);
@@ -755,8 +891,7 @@
           continue;
         }
 
-        // Matches options like A., A), a., क., ख.
-        const optMatch = line.match(/^[\(\[]?([A-Da-dक-घ1-4])[\)\].:\-\s]\s*(.+)/);         if (optMatch && currentQ) {           let optText = optMatch[2].trim().replace(/[\.@\*•]/g, '').trim();           currentQ.options.push(optText);         }       }        if (currentQ && currentQ.options.length >= 2) {         parsed.push(currentQ);       }        // Fallback block parser if standard line parser finds 0 questions       if (parsed.length === 0) {         const blocks = rawText.trim().split(/\n\s*\n/);         blocks.forEach((block) => {           const blines = block.split('\n').map(l => l.trim()).filter(Boolean);           if (blines.length >= 2) {             let qText = blines[0].replace(/^[^\w\u0900-\u097F]+/, '').trim();             let options = [];             for (let i = 1; i < blines.length; i++) {               let optLine = blines[i].replace(/[\.@\*•]/g, '').replace(/^[A-Da-dक-घ][\.\-\)]\s*/, '').trim();
+        const optMatch = line.match(/^[\(\[]?([A-Da-dक-घ1-4])[\)\].:\-\s]\s*(.+)/);         if (optMatch && currentQ) {           let optText = optMatch[2].trim().replace(/[\.@\*•]/g, '').trim();           currentQ.options.push(optText);         }       }        if (currentQ && currentQ.options.length >= 2) {         parsed.push(currentQ);       }        if (parsed.length === 0) {         const blocks = rawText.trim().split(/\n\s*\n/);         blocks.forEach((block) => {           const blines = block.split('\n').map(l => l.trim()).filter(Boolean);           if (blines.length >= 2) {             let qText = blines[0].replace(/^[^\w\u0900-\u097F]+/, '').trim();             let options = [];             for (let i = 1; i < blines.length; i++) {               let optLine = blines[i].replace(/[\.@\*•]/g, '').replace(/^[A-Da-dक-घ][\.\-\)]\s*/, '').trim();
               options.push(optLine);
             }
             if (options.length >= 2) {
@@ -770,15 +905,14 @@
         });
       }
 
-      // Smart AI Evaluation for both English and Hindi topics
       parsed.forEach(q => {
         let t = q.question.toLowerCase();
-        if (t.includes("capital") || t.includes("राजधानी")) q.answer = 2; // New Delhi
-        else if (t.includes("longest") || t.includes("लंबी नदी") || t.includes("नदी")) q.answer = 1; // Ganga
-        else if (t.includes("planet") || t.includes("ग्रह")) q.answer = 1; // Jupiter
-        else if (t.includes("photosynthesis") || t.includes("प्रकाश संश्लेषण")) q.answer = 2; // Carbon Dioxide
-        else if (t.includes("gold") || t.includes("सोना")) q.answer = 2; // Au
-        else if (t.includes("ocean") || t.includes("महासागर")) q.answer = 3; // Pacific
+        if (t.includes("capital") || t.includes("राजधानी")) q.answer = 2;
+        else if (t.includes("longest") || t.includes("लंबी नदी") || t.includes("नदी")) q.answer = 1;
+        else if (t.includes("planet") || t.includes("ग्रह")) q.answer = 1;
+        else if (t.includes("photosynthesis") || t.includes("प्रकाश संश्लेषण")) q.answer = 2;
+        else if (t.includes("gold") || t.includes("सोना")) q.answer = 2;
+        else if (t.includes("ocean") || t.includes("महासागर")) q.answer = 3;
         else q.answer = 0;
       });
 
@@ -786,59 +920,59 @@
     }
 
     function renderQuizPreview() {
-      const container = document.getElementById("quizPreviewContainer");
-      const titleElem = document.getElementById("currentQuizTitle");
-      const metaElem = document.getElementById("currentQuizMeta");
+      try {
+        const container = document.getElementById("quizPreviewContainer");
+        const titleElem = document.getElementById("currentQuizTitle");
+        const metaElem = document.getElementById("currentQuizMeta");
 
-      const stored = localStorage.getItem("classroom_quiz_questions");
-      const title = localStorage.getItem("quiz_title") || "Untitled Quiz";
+        const stored = localStorage.getItem("classroom_quiz_questions");
+        const title = localStorage.getItem("quiz_title") || "Untitled Quiz";
 
-      if (!stored) {
-        titleElem.innerText = "No active quiz uploaded";
-        metaElem.innerText = "Upload a document above to create an MCQ quiz.";
-        container.innerHTML = `<p class="text-xs text-slate-400 py-6 text-center">No questions found.</p>`;
-        return;
-      }
+        if (!stored) {
+          if (titleElem) titleElem.innerText = "No active quiz uploaded";
+          if (metaElem) metaElem.innerText = "Upload a document above to create an MCQ quiz.";
+          if (container) container.innerHTML = `<p class="text-xs text-slate-400 py-6 text-center">No questions found.</p>`;
+          return;
+        }
 
-      const questions = JSON.parse(stored);
-      titleElem.innerText = title;
-      metaElem.innerText = `${questions.length} questions live on student portal (Bilingual AI Scanned)`;
+        const questions = JSON.parse(stored);
+        if (titleElem) titleElem.innerText = title;
+        if (metaElem) metaElem.innerText = `${questions.length} questions live on student portal (Bilingual AI Scanned)`;
 
-      container.innerHTML = "";
-      questions.forEach((q, qIdx) => {
-        const item = document.createElement("div");
-        item.className = "p-3 bg-purple-50/50 rounded-xl border border-purple-100/70 text-xs";
-        
-        let optsHtml = q.options.map((opt, oIdx) => {
-          const isAns = oIdx === q.answer;
-          return `<div class="flex items-center gap-2 mt-1 ${isAns ? 'font-bold text-emerald-700' : 'text-slate-600'}">
-                    <span>${String.fromCharCode(65 + oIdx)})</span>
-                    <span>${opt}</span>
-                    ${isAns ? '<span class="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold">AI CORRECT</span>' : ''}
-                  </div>`;
-        }).join("");
+        if (container) {
+          container.innerHTML = "";
+          questions.forEach((q, qIdx) => {
+            const item = document.createElement("div");
+            item.className = "p-3 bg-purple-50/50 rounded-xl border border-purple-100/70 text-xs";
+            
+            let optsHtml = q.options.map((opt, oIdx) => {
+              const isAns = oIdx === q.answer;
+              return `<div class="flex items-center gap-2 mt-1 ${isAns ? 'font-bold text-emerald-700' : 'text-slate-600'}">
+                        <span>${String.fromCharCode(65 + oIdx)})</span>
+                        <span>${opt}</span>
+                        ${isAns ? '<span class="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold">AI CORRECT</span>' : ''}
+                      </div>`;
+            }).join("");
 
-        item.innerHTML = `
-          <p class="font-bold text-slate-900">${qIdx + 1}. ${q.question}</p>
-          <div class="mt-1 pl-2 border-l-2 border-purple-200">${optsHtml}</div>
-        `;
-        container.appendChild(item);
-      });
+            item.innerHTML = `
+              <p class="font-bold text-slate-900">${qIdx + 1}. ${q.question}</p>
+              <div class="mt-1 pl-2 border-l-2 border-purple-200">${optsHtml}</div>
+            `;
+            container.appendChild(item);
+          });
+        }
+      } catch(e) {}
     }
 
     function clearCurrentQuiz() {
-      if (confirm("Are you sure you want to remove the current quiz from student portal?")) {
-        localStorage.removeItem("classroom_quiz_questions");
-        localStorage.removeItem("quiz_title");
-        renderQuizPreview();
-      }
+      try {
+        if (confirm("Are you sure you want to remove the current quiz from student portal?")) {
+          localStorage.removeItem("classroom_quiz_questions");
+          localStorage.removeItem("quiz_title");
+          renderQuizPreview();
+        }
+      } catch(e) {}
     }
-
-    initIndexedDB().then(() => {
-      populateFolderDropdown();
-      renderFilesList();
-      renderFolders();
-    });
   </script>
 </body>
 </html>
