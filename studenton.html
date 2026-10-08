@@ -6,16 +6,15 @@
   <title>Shoaib Akhter — Student Repository</title>
   <style>
     :root {
-      --bg-sidebar: rgba(15, 5, 33, 0.92);
-      --card-bg: rgba(255, 255, 255, 0.92);
-      --card-hover: rgba(255, 255, 255, 1);
+      --bg-sidebar: rgba(18, 7, 38, 0.88);
+      --card-bg: rgba(255, 255, 255, 0.65);
+      --card-hover: rgba(255, 255, 255, 0.88);
       --accent-purple: #7c3aed;
       --accent-gold: #f59e0b;
       --text-main: #1e1b2e;
       --text-muted: #64748b;
       --text-sub: #551a8b;
-      --danger-pink: #f472b6;
-      --border-subtle: rgba(118, 92, 168, 0.2);
+      --border-subtle: rgba(255, 255, 255, 0.4);
     }
 
     * {
@@ -34,13 +33,14 @@
       overflow-x: hidden;
     }
 
-    /* ─── Sidebar Navigation ─── */
+    /* Glossy Translucent Sidebar */
     .sidebar {
       width: 290px;
       min-width: 290px;
       background: var(--bg-sidebar);
-      backdrop-filter: blur(10px);
-      border-right: 1px solid var(--border-subtle);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-right: 1px solid rgba(255, 255, 255, 0.15);
       display: flex;
       flex-direction: column;
       padding: 1.75rem 1.25rem;
@@ -62,12 +62,12 @@
       width: 48px;
       height: 48px;
       border-radius: 50%;
-      background: radial-gradient(circle, #5b21b6 0%, #311068 100%);
-      border: 1.5px solid #a855f7;
+      background: radial-gradient(circle, #7c3aed 0%, #3b0764 100%);
+      border: 1.5px solid rgba(255, 255, 255, 0.4);
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 0 16px rgba(168, 85, 247, 0.35);
+      box-shadow: 0 0 18px rgba(168, 85, 247, 0.35);
     }
 
     .brand-logo-letter {
@@ -112,9 +112,9 @@
     }
 
     .nav-item.active {
-      background: rgba(49, 16, 104, 0.8);
-      border-color: var(--accent-gold);
-      box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
+      background: rgba(124, 58, 237, 0.35);
+      border-color: rgba(245, 158, 11, 0.8);
+      box-shadow: 0 0 20px rgba(245, 158, 11, 0.25);
     }
 
     .nav-item:not(.active):hover {
@@ -134,15 +134,15 @@
     }
 
     .nav-item.active .nav-icon-box {
-      background: rgba(245, 158, 11, 0.18);
-      border: 1px solid rgba(245, 158, 11, 0.35);
+      background: rgba(245, 158, 11, 0.2);
+      border: 1px solid rgba(245, 158, 11, 0.4);
       color: var(--accent-gold);
     }
 
     .nav-item:not(.active) .nav-icon-box {
       background: rgba(124, 58, 237, 0.18);
       border: 1px solid rgba(124, 58, 237, 0.3);
-      color: #a78bfa;
+      color: #c4b5fd;
     }
 
     .nav-title {
@@ -177,17 +177,16 @@
       transition: opacity 0.2s ease;
     }
 
-    .btn-signout:hover {
-      opacity: 0.8;
-    }
+    .btn-signout:hover { opacity: 0.8; }
 
-    /* ─── Main Content ─── */
+    /* Translucent Glossy Main Content */
     .main-wrapper {
       flex: 1;
       padding: 2.25rem 2.5rem;
       max-width: 1200px;
-      background: rgba(248, 250, 252, 0.88);
-      backdrop-filter: blur(8px);
+      background: rgba(248, 250, 252, 0.82);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
       min-height: 100vh;
     }
 
@@ -202,7 +201,7 @@
 
     .view-heading h2 {
       font-size: 1.75rem;
-      font-weight: 700;
+      font-weight: 800;
       color: #0f172a;
     }
 
@@ -220,18 +219,20 @@
 
     .search-box input {
       width: 100%;
-      background: #ffffff;
-      border: 1px solid #cbd5e1;
-      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      border-radius: 14px;
       padding: 0.75rem 1rem 0.75rem 2.5rem;
       color: #0f172a;
       font-size: 0.9rem;
       outline: none;
-      transition: border-color 0.2s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+      transition: all 0.2s ease;
     }
 
     .search-box input:focus {
       border-color: #7c3aed;
+      background: #ffffff;
     }
 
     .search-box svg {
@@ -253,21 +254,23 @@
     }
 
     .chip {
-      background: #ffffff;
-      border: 1px solid #cbd5e1;
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.9);
       color: var(--text-muted);
       padding: 0.45rem 1rem;
       border-radius: 9999px;
       font-size: 0.82rem;
+      font-weight: 600;
       cursor: pointer;
       white-space: nowrap;
       transition: all 0.2s ease;
     }
 
     .chip.active, .chip:hover {
-      background: #7c3aed;
-      border-color: #7c3aed;
+      background: linear-gradient(135deg, #7c3aed, #6d28d9);
+      border-color: transparent;
       color: #ffffff;
+      box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
     }
 
     .file-grid {
@@ -278,19 +281,23 @@
 
     .file-card {
       background: var(--card-bg);
-      border: 1px solid #e2e8f0;
-      border-radius: 16px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      border-radius: 20px;
       padding: 1.25rem;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-      transition: transform 0.2s ease, border-color 0.2s ease;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04), inset 0 1px 2px #ffffff;
+      transition: all 0.25s ease;
     }
 
     .file-card:hover {
       transform: translateY(-3px);
-      border-color: #7c3aed;
+      background: var(--card-hover);
+      border-color: rgba(124, 58, 237, 0.4);
+      box-shadow: 0 10px 24px rgba(124, 58, 237, 0.1), inset 0 1px 2px #ffffff;
     }
 
     .file-top {
@@ -303,9 +310,9 @@
     .file-badge-icon {
       width: 40px;
       height: 40px;
-      border-radius: 10px;
-      background: rgba(124, 58, 237, 0.1);
-      border: 1px solid rgba(124, 58, 237, 0.2);
+      border-radius: 12px;
+      background: rgba(124, 58, 237, 0.12);
+      border: 1px solid rgba(124, 58, 237, 0.25);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -313,13 +320,11 @@
       flex-shrink: 0;
     }
 
-    .file-info {
-      overflow: hidden;
-    }
+    .file-info { overflow: hidden; }
 
     .file-name {
       font-size: 0.95rem;
-      font-weight: 600;
+      font-weight: 700;
       color: #0f172a;
       white-space: nowrap;
       overflow: hidden;
@@ -330,11 +335,11 @@
       display: inline-block;
       font-size: 0.72rem;
       color: #6d28d9;
-      background: rgba(124, 58, 237, 0.1);
+      background: rgba(124, 58, 237, 0.12);
       padding: 0.15rem 0.5rem;
       border-radius: 6px;
       margin-top: 0.35rem;
-      font-weight: 600;
+      font-weight: 700;
     }
 
     .file-meta {
@@ -343,7 +348,7 @@
       display: flex;
       justify-content: space-between;
       padding-top: 0.85rem;
-      border-top: 1px solid #e2e8f0;
+      border-top: 1px solid rgba(226, 232, 240, 0.8);
       margin-bottom: 0.85rem;
     }
 
@@ -351,38 +356,42 @@
       background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
       color: #ffffff;
       border: none;
-      padding: 0.6rem;
-      border-radius: 10px;
+      padding: 0.65rem;
+      border-radius: 12px;
       font-size: 0.85rem;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 0.45rem;
-      transition: opacity 0.2s ease;
+      box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
+      transition: all 0.2s ease;
     }
 
     .btn-download:hover {
-      opacity: 0.9;
+      box-shadow: 0 6px 16px rgba(124, 58, 237, 0.35);
+      transform: translateY(-1px);
     }
 
     .folder-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
       gap: 1.25rem;
     }
 
     .folder-card {
       background: var(--card-bg);
-      border: 1px solid #e2e8f0;
-      border-radius: 16px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      border-radius: 20px;
       padding: 1.25rem;
       cursor: pointer;
       display: flex;
       align-items: center;
       gap: 1rem;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04), inset 0 1px 2px #ffffff;
       transition: all 0.2s ease;
     }
 
@@ -390,24 +399,23 @@
       background: #ffffff;
       border-color: #7c3aed;
       transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(124, 58, 237, 0.12);
     }
 
-    .folder-icon {
-      font-size: 2rem;
-    }
-
-    .folder-card-title {
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: #0f172a;
-    }
+    .folder-icon { font-size: 2rem; }
 
     .folder-parent-crumb {
       font-size: 0.72rem;
       color: #7c3aed;
-      font-weight: 600;
+      font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.05em;
+    }
+
+    .folder-card-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #0f172a;
     }
 
     .folder-card-count {
@@ -431,26 +439,22 @@
     }
 
     @media (max-width: 820px) {
-      body {
-        flex-direction: column;
-      }
+      body { flex-direction: column; }
       .sidebar {
         width: 100%;
         min-width: 100%;
         min-height: auto;
         position: relative;
         border-right: none;
-        border-bottom: 1px solid var(--border-subtle);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
       }
-      .main-wrapper {
-        padding: 1.5rem;
-      }
+      .main-wrapper { padding: 1.5rem; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Left Sidebar Navigation -->
+  <!-- Left Sidebar -->
   <aside class="sidebar">
     <div class="brand-header">
       <div class="brand-logo">
@@ -474,7 +478,7 @@
         </div>
         <div>
           <div class="nav-title">Files</div>
-          <div class="nav-sub">Latest from class</div>
+          <div class="nav-sub">Latest general notes</div>
         </div>
       </li>
 
@@ -490,7 +494,6 @@
         </div>
       </li>
 
-      <!-- Quiz Navigation Link -->
       <a href="quiz.html" class="nav-item">
         <div class="nav-icon-box">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -515,8 +518,8 @@
   <main class="main-wrapper">
     <div class="header-bar">
       <div class="view-heading">
-        <h2 id="viewTitle">Latest Files</h2>
-        <p id="viewSubtitle">Verified classroom modules, notes &amp; study materials</p>
+        <h2 id="viewTitle">General Files</h2>
+        <p id="viewSubtitle">Verified classroom modules & study materials</p>
       </div>
 
       <div class="search-box">
@@ -528,6 +531,16 @@
     </div>
 
     <div id="chipsContainer" class="chips-bar"></div>
+    
+    <!-- Hierarchical Breadcrumb for Student Folders -->
+    <div id="studentFolderBreadcrumbBar" class="hidden bg-white/70 backdrop-blur-md px-4 py-2.5 rounded-2xl mb-4 border border-white/80 flex items-center gap-2 text-xs shadow-sm">
+      <button onclick="renderStudentFoldersHierarchy('')" class="text-purple-800 font-bold hover:underline flex items-center gap-1">
+        <i class="fa-solid fa-house text-[10px]"></i> Root Folders
+      </button>
+      <span class="text-slate-400">/</span>
+      <span id="studentCurrentBreadcrumbText" class="font-bold text-slate-800"></span>
+    </div>
+
     <div id="filesContainer" class="file-grid"></div>
     <div id="foldersContainer" class="folder-grid" style="display:none;"></div>
   </main>
@@ -535,6 +548,7 @@
   <script>
     let currentTab = 'files';
     let activeFilter = 'All';
+    let activeStudentFolderHierarchy = ''; // Tracks student folder drill down
     let dbInstance = null;
     let allFiles = [];
     let foldersList = [];
@@ -560,9 +574,7 @@
           dbInstance = e.target.result;
           resolve(dbInstance);
         };
-        req.onerror = (e) => {
-          reject(e);
-        };
+        req.onerror = (e) => reject(e);
       });
     }
 
@@ -607,7 +619,7 @@
         filesContainer.style.display = 'grid';
         foldersContainer.style.display = 'none';
         chipsContainer.style.display = 'flex';
-        viewTitle.textContent = activeFilter === 'All' ? "Latest Files" : `Folder: ${activeFilter}`;
+        viewTitle.textContent = activeFilter === 'All' ? "General Files" : `Folder: ${activeFilter}`;
         viewSubtitle.textContent = activeFilter === 'All' ? "Verified general modules & materials" : `Viewing materials inside ${activeFilter}`;
         renderFiles();
       } else {
@@ -617,8 +629,8 @@
         foldersContainer.style.display = 'grid';
         chipsContainer.style.display = 'none';
         viewTitle.textContent = "Class Folders";
-        viewSubtitle.textContent = "Organized repository categories";
-        renderFolders();
+        viewSubtitle.textContent = "Organized repository categories & subfolders";
+        renderStudentFoldersHierarchy('');
       }
     }
 
@@ -636,7 +648,7 @@
       activeFilter = cat;
       const viewTitle = document.getElementById('viewTitle');
       const viewSubtitle = document.getElementById('viewSubtitle');
-      viewTitle.textContent = activeFilter === 'All' ? "Latest Files" : `Folder: ${activeFilter}`;
+      viewTitle.textContent = activeFilter === 'All' ? "General Files" : `Folder: ${activeFilter}`;
       viewSubtitle.textContent = activeFilter === 'All' ? "Verified general modules & materials" : `Viewing materials inside ${activeFilter}`;
       renderChips();
       renderFiles();
@@ -651,12 +663,10 @@
         const fileName = (file.name || '').toLowerCase();
         const matchesSearch = fileName.includes(search);
 
-        // When in "All" view: Do NOT show files that belong to specific folders
         if (activeFilter === 'All') {
           return !fileFolder && matchesSearch;
         }
 
-        // When a folder/subfolder chip is clicked: Show only files in that folder
         const matchesCategory = (fileFolder === activeFilter);
         return matchesCategory && matchesSearch;
       });
@@ -706,36 +716,70 @@
       }).join('');
     }
 
-    function renderFolders() {
+    function renderStudentFoldersHierarchy(folderPath = '') {
+      activeStudentFolderHierarchy = folderPath;
       const container = document.getElementById('foldersContainer');
-      if (foldersList.length === 0) {
+      const bBar = document.getElementById('studentFolderBreadcrumbBar');
+      const bText = document.getElementById('studentCurrentBreadcrumbText');
+      if (!container) return;
+
+      if (folderPath) {
+        bBar.classList.remove('hidden');
+        bText.innerText = folderPath;
+      } else {
+        bBar.classList.add('hidden');
+      }
+
+      // Filter folders belonging to current drill-down level
+      const currentLevelFolders = foldersList.filter(f => {
+        if (!folderPath) {
+          return !f.includes(" / "); // Root folders only
+        } else {
+          if (f.startsWith(folderPath + " / ")) {
+            const remainder = f.slice((folderPath + " / ").length);
+            return !remainder.includes(" / ");
+          }
+          return false;
+        }
+      });
+
+      if (currentLevelFolders.length === 0) {
         container.innerHTML = `
           <div class="empty-state">
             <span>&#128193;</span>
-            <h3>No folders created</h3>
-            <p>Admin has not added any class folders yet.</p>
+            <h3>No subfolders here</h3>
+            <p>Click <button onclick="renderStudentFoldersHierarchy('')" class="text-purple-700 font-bold underline">Root Folders</button> to go back.</p>
           </div>
         `;
         return;
       }
 
-      container.innerHTML = foldersList.map(folderName => {
+      container.innerHTML = currentLevelFolders.map(folderName => {
         const count = allFiles.filter(f => (f.folder || null) === folderName).length;
+        const subfoldersCount = foldersList.filter(f => f.startsWith(folderName + " / ")).length;
         const isSubfolder = folderName.includes(" / ");
         const displayName = isSubfolder ? folderName.split(" / ").pop() : folderName;
         const parentCrumb = isSubfolder ? `<div class="folder-parent-crumb">${folderName.split(" / ")[0]}</div>` : '';
 
         return `
-          <div class="folder-card" onclick="openFolder('${folderName.replace(/'/g, "\\'")}')">
-            <div class="folder-icon">${isSubfolder ? '📁' : '📂'}</div>
+          <div class="folder-card" onclick="handleFolderCardClick('${folderName.replace(/'/g, "\\'")}', ${subfoldersCount})">
+            <div class="folder-icon">${subfoldersCount > 0 ? '📂' : '📁'}</div>
             <div>
               ${parentCrumb}
               <div class="folder-card-title">${displayName}</div>
-              <div class="folder-card-count">${count} ${count === 1 ? 'file' : 'files'}</div>
+              <div class="folder-card-count">${count} files ${subfoldersCount > 0 ? '• ' + subfoldersCount + ' subfolders' : ''}</div>
             </div>
           </div>
         `;
       }).join('');
+    }
+
+    function handleFolderCardClick(folderName, subfoldersCount) {
+      if (subfoldersCount > 0) {
+        renderStudentFoldersHierarchy(folderName);
+      } else {
+        openFolder(folderName);
+      }
     }
 
     function openFolder(folderName) {
@@ -768,7 +812,7 @@
         loadTaxonomies();
         renderChips();
         if (currentTab === 'folders') {
-          renderFolders();
+          renderStudentFoldersHierarchy(activeStudentFolderHierarchy);
         } else {
           renderFiles();
         }
@@ -783,7 +827,7 @@
         allFiles = await fetchFiles();
       } catch (err) {}
       if (currentTab === 'folders') {
-        renderFolders();
+        renderStudentFoldersHierarchy('');
       } else {
         renderFiles();
       }
