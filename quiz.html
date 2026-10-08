@@ -10,7 +10,6 @@
         }
         body { 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            /* Bulletproof background: Dark moody gradient fallback + Wallpaper image */
             background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%), url('image_9a617e.jpg') no-repeat center center fixed; 
             background-size: cover; 
             background-blend-mode: overlay;
@@ -56,7 +55,8 @@
 <div class="container">
     <h1>Online Quiz Portal</h1>
 
-    <div class="select-box">
+    <!-- Added id="selectBoxContainer" to hide it once a quiz is chosen -->
+    <div class="select-box" id="selectBoxContainer">
         <label for="quizDropdown" style="font-size: 0.85rem; font-weight: bold; color: #475569; display: block; margin-bottom: 5px;">Select Quiz to Attempt:</label>
         <select id="quizDropdown" onchange="loadChosenQuiz()">
             <option value="">-- Choose Uploaded Quiz --</option>
@@ -85,7 +85,6 @@
 
     function populateQuizSelector() {
         let quizzes = JSON.parse(localStorage.getItem("shoaib_all_quizzes") || "[]");
-        // Sort quizzes newest first
         quizzes.sort((a, b) => new Date(b.id || 0) - new Date(a.id || 0));
 
         const dropdown = document.getElementById("quizDropdown");
@@ -105,8 +104,12 @@
             document.getElementById("quiz-container").innerHTML = "";
             document.getElementById("controls").style.display = "none";
             document.getElementById("result-container").style.display = "none";
+            document.getElementById("selectBoxContainer").style.display = "block";
             return;
         }
+
+        // Hide the dropdown selection container once a quiz is selected
+        document.getElementById("selectBoxContainer").style.display = "none";
 
         let quizzes = JSON.parse(localStorage.getItem("shoaib_all_quizzes") || "[]");
         activeQuizQuestions = quizzes[index].questions;
@@ -205,6 +208,8 @@
     function showResults() {
         document.getElementById("quiz-container").innerHTML = "";
         document.getElementById("controls").style.display = "none";
+        // Show selection box again if they want to retake or choose another quiz
+        document.getElementById("selectBoxContainer").style.display = "block";
 
         let correctCount = 0;
         let incorrectCount = 0;
