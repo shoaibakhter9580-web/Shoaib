@@ -5,30 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz Portal — Shoaib Akhter</title>
     <style>
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
         body { 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
             background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%), url('image_9a617e.jpg') no-repeat center center fixed; 
             background-size: cover; 
             background-blend-mode: overlay;
-            color: #1e293b; 
-            margin: 0; 
-            padding: 20px; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            min-height: 100vh; 
+            color: #1e293b; margin: 0; padding: 20px; 
+            display: flex; justify-content: center; align-items: center; min-height: 100vh; 
         }
         .container { 
-            width: 100%; 
-            max-width: 650px; 
-            background: rgba(255, 255, 255, 0.95); 
-            backdrop-filter: blur(10px);
-            padding: 30px; 
-            border-radius: 16px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.4); 
+            width: 100%; max-width: 650px; 
+            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);
+            padding: 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); 
             border: 1px solid rgba(255, 255, 255, 0.2); 
         }
         h1 { text-align: center; color: #312e81; margin-bottom: 20px; font-size: 1.5rem; }
@@ -55,7 +44,6 @@
 <div class="container">
     <h1>Online Quiz Portal</h1>
 
-    <!-- Added id="selectBoxContainer" to hide it once a quiz is chosen -->
     <div class="select-box" id="selectBoxContainer">
         <label for="quizDropdown" style="font-size: 0.85rem; font-weight: bold; color: #475569; display: block; margin-bottom: 5px;">Select Quiz to Attempt:</label>
         <select id="quizDropdown" onchange="loadChosenQuiz()">
@@ -76,6 +64,7 @@
 
 <script>
     let activeQuizQuestions = [];
+    let activeQuizPenalty = 0.5;
     let currentIndex = 0;
     let userAnswers = {};
 
@@ -108,11 +97,13 @@
             return;
         }
 
-        // Hide the dropdown selection container once a quiz is selected
         document.getElementById("selectBoxContainer").style.display = "none";
 
         let quizzes = JSON.parse(localStorage.getItem("shoaib_all_quizzes") || "[]");
-        activeQuizQuestions = quizzes[index].questions;
+        const selectedQuiz = quizzes[index];
+        activeQuizQuestions = selectedQuiz.questions;
+        activeQuizPenalty = selectedQuiz.negativeMarking !== undefined ? parseFloat(selectedQuiz.negativeMarking) : 0.5;
+
         currentIndex = 0;
         userAnswers = {};
         document.getElementById("result-container").style.display = "none";
@@ -208,7 +199,6 @@
     function showResults() {
         document.getElementById("quiz-container").innerHTML = "";
         document.getElementById("controls").style.display = "none";
-        // Show selection box again if they want to retake or choose another quiz
         document.getElementById("selectBoxContainer").style.display = "block";
 
         let correctCount = 0;
@@ -226,8 +216,14 @@
             }
         });
 
-        const penalty = parseFloat(localStorage.getItem("shoaib_negative_marking") || "0.5");
+        const penalty = activeQuizPenalty;
         let finalScore = (correctCount * 1) - (incorrectCount * penalty);
+
+        let penaltyDisplay = "-1/2";
+        if (penalty == 1) penaltyDisplay = "-1";
+        else if (penalty == 0.3333) penaltyDisplay = "-1/3";
+        else if (penalty == 0.25) penaltyDisplay = "-1/4";
+        else if (penalty == 0) penaltyDisplay = "0 (None)";
 
         const resDiv = document.getElementById("result-container");
         resDiv.style.display = "block";
@@ -237,7 +233,7 @@
                 Correct: <strong style="color: #10b981;">${correctCount}</strong> | 
                 Incorrect: <strong style="color: #ef4444;">${incorrectCount}</strong> | 
                 Skipped: <strong>${skippedCount}</strong><br>
-                Negative Penalty Rate: <strong>-${penalty}</strong>
+                Negative Penalty Rate: <strong>${penaltyDisplay}</strong>
             </div>
             <br>
             Final Calculated Score: <span style="color: #551a8b; font-size: 1.4rem;">${finalScore.toFixed(2)}</span> / ${activeQuizQuestions.length}
