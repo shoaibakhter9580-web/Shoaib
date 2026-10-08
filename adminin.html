@@ -127,43 +127,37 @@
       <div class="flex items-center justify-between">
         <div>
           <h2 class="text-2xl font-serif-title font-bold text-slate-900">Quiz Manager</h2>
-          <p class="text-xs text-slate-500 mt-0.5">Upload multiple MCQ Question .txt, .pdf, or .png files for students</p>
+          <p class="text-xs text-slate-500 mt-0.5">Upload MCQ Question PDFs for students (Right answers marked with a dot '.')</p>
         </div>
-        <input type="file" id="quizFileInput" accept=".pdf,.txt,.png,.jpg,.jpeg" class="hidden" onchange="processQuizUpload(event)" />
+        <input type="file" id="quizFileInput" accept=".pdf,.txt" class="hidden" onchange="processQuizUpload(event)" />
         <button onclick="document.getElementById('quizFileInput').click()" class="px-4 py-2.5 rounded-xl bg-purple-900 hover:bg-purple-800 text-white text-xs font-semibold flex items-center gap-2 shadow-sm transition">
           <i class="fa-solid fa-file-circle-plus text-sm"></i>
-          <span>Upload Quiz (.txt, .pdf, .png)</span>
+          <span>Upload Quiz PDF</span>
         </button>
       </div>
 
-      <!-- Negative Marking Selector -->
-      <div class="soft-card p-4 rounded-2xl border border-purple-100/80 flex items-center justify-between">
-        <div>
-          <h4 class="text-xs font-bold text-slate-800">Negative Marking Penalty</h4>
-          <p class="text-[11px] text-slate-500">Select deduction per incorrect answer</p>
-        </div>
-        <select id="adminNegativeMarking" onchange="saveNegativeMarking()" class="px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-400">
-          <option value="0">0 (No Penalty)</option>
-          <option value="0.25">-1/4 Marks (-0.25)</option>
-          <option value="0.5" selected>-1/2 Marks (-0.5)</option>
-          <option value="1">-1 Mark (-1.0)</option>
-        </select>
-      </div>
-
-      <!-- Active Quizzes List Card -->
       <div class="soft-card p-5 rounded-2xl border border-purple-100/80">
-        <div class="flex items-center justify-between pb-4 border-b border-purple-50">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-purple-50">
           <div>
-            <h3 class="text-sm font-bold text-slate-900">Uploaded Quizzes</h3>
-            <p class="text-xs text-slate-500 mt-0.5">Students can choose from these uploaded quizzes</p>
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <h3 id="currentQuizTitle" class="text-sm font-bold text-slate-900">No active quiz uploaded</h3>
+            </div>
+            <p id="currentQuizMeta" class="text-xs text-slate-500 mt-0.5">Upload a PDF to publish an MCQ test to studenton/quiz.html</p>
           </div>
-          <a href="quiz.html" target="_blank" class="px-3.5 py-1.5 rounded-lg border border-purple-200 text-purple-700 hover:bg-purple-50 text-xs font-semibold flex items-center gap-1.5 transition">
-            <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> View Student Quiz
-          </a>
+          <div class="flex items-center gap-2">
+            <a href="quiz.html" target="_blank" class="px-3.5 py-1.5 rounded-lg border border-purple-200 text-purple-700 hover:bg-purple-50 text-xs font-semibold flex items-center gap-1.5 transition">
+              <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> View Student Quiz
+            </a>
+            <button onclick="clearCurrentQuiz()" class="px-3.5 py-1.5 rounded-lg border border-rose-100 bg-rose-50/50 hover:bg-rose-100 text-rose-600 text-xs font-semibold transition">
+              <i class="fa-solid fa-trash-can text-[10px] mr-1"></i> Delete
+            </button>
+          </div>
         </div>
 
         <div class="pt-4">
-          <div id="quizListPreviewContainer" class="space-y-3"></div>
+          <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Questions in current test</h4>
+          <div id="quizPreviewContainer" class="space-y-2.5 max-h-96 overflow-y-auto pr-1"></div>
         </div>
       </div>
     </section>
@@ -260,14 +254,9 @@
   </div>
 
   <script>
-    // Safe PDF.js setup
-    try {
-      if (typeof pdfjsLib !== 'undefined') {
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-      }
-    } catch(e) {}
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-    let db = null;
+    let db;
     let currentFilter = 'all';
 
     const DEFAULT_FOLDERS = ['SuperTET', 'Cosmos', 'UPSSSC', 'Group D', 'NCERT', 'Lekhpal'];
@@ -283,607 +272,504 @@
     ];
 
     function getStoredFolders() {
-      try {
-        const stored = localStorage.getItem("shoaib_folders_list");
-        if (!stored) {
-          localStorage.setItem("shoaib_folders_list", JSON.stringify(DEFAULT_FOLDERS));
-          return DEFAULT_FOLDERS;
-        }
-        return JSON.parse(stored);
-      } catch (e) {
+      const stored = localStorage.getItem("shoaib_folders_list");
+      if (!stored) {
+        localStorage.setItem("shoaib_folders_list", JSON.stringify(DEFAULT_FOLDERS));
         return DEFAULT_FOLDERS;
       }
+      try { return JSON.parse(stored); } catch (e) { return DEFAULT_FOLDERS; }
     }
 
     function saveStoredFolders(folders) {
-      try {
-        localStorage.setItem("shoaib_folders_list", JSON.stringify(folders));
-        renderFolders();
-        populateFolderDropdown();
-      } catch(e) {}
+      localStorage.setItem("shoaib_folders_list", JSON.stringify(folders));
+      renderFolders();
+      populateFolderDropdown();
     }
 
-    // Safe IndexedDB Setup
     function initIndexedDB() {
       return new Promise((resolve) => {
-        try {
-          const req = indexedDB.open("ShoaibPortalDB", 1);
-          req.onupgradeneeded = (e) => {
-            try {
-              const database = e.target.result;
-              if (!database.objectStoreNames.contains("filesStore")) {
-                database.createObjectStore("filesStore", { keyPath: "id" });
-              }
-            } catch(err) {}
-          };
-          req.onsuccess = (e) => { db = e.target.result; resolve(db); };
-          req.onerror = () => resolve(null);
-        } catch(err) { resolve(null); }
+        const req = indexedDB.open("ShoaibPortalDB", 1);
+        req.onupgradeneeded = (e) => {
+          const database = e.target.result;
+          if (!database.objectStoreNames.contains("filesStore")) {
+            database.createObjectStore("filesStore", { keyPath: "id" });
+          }
+        };
+        req.onsuccess = (e) => { db = e.target.result; resolve(db); };
+        req.onerror = () => resolve(null);
       });
     }
 
     async function getAllFiles() {
       return new Promise((resolve) => {
         if (!db) return resolve([]);
-        try {
-          const tx = db.transaction("filesStore", "readonly");
-          const store = tx.objectStore("filesStore");
-          const req = store.getAll();
-          req.onsuccess = () => resolve(req.result || []);
-          req.onerror = () => resolve([]);
-        } catch(e) { resolve([]); }
+        const tx = db.transaction("filesStore", "readonly");
+        const store = tx.objectStore("filesStore");
+        const req = store.getAll();
+        req.onsuccess = () => resolve(req.result || []);
+        req.onerror = () => resolve([]);
       });
     }
 
     async function saveFileRecord(record) {
       return new Promise((resolve, reject) => {
-        if (!db) return reject(false);
-        try {
-          const tx = db.transaction("filesStore", "readwrite");
-          const store = tx.objectStore("filesStore");
-          const req = store.put(record);
-          req.onsuccess = () => resolve(true);
-          req.onerror = () => reject(false);
-        } catch(e) { reject(false); }
+        const tx = db.transaction("filesStore", "readwrite");
+        const store = tx.objectStore("filesStore");
+        const req = store.put(record);
+        req.onsuccess = () => resolve(true);
+        req.onerror = () => reject(false);
       });
     }
 
     async function deleteFileRecord(id) {
       return new Promise((resolve) => {
-        if (!db) return resolve(false);
-        try {
-          const tx = db.transaction("filesStore", "readwrite");
-          const store = tx.objectStore("filesStore");
-          const req = store.delete(id);
-          req.onsuccess = () => resolve(true);
-          req.onerror = () => resolve(false);
-        } catch(e) { resolve(false); }
+        const tx = db.transaction("filesStore", "readwrite");
+        const store = tx.objectStore("filesStore");
+        const req = store.delete(id);
+        req.onsuccess = () => resolve(true);
+        req.onerror = () => resolve(false);
       });
     }
 
-    // Global Functions to ensure click responsiveness
-    window.handleCreateFolderSubmit = function(e) {
-      try {
-        e.preventDefault();
-        const input = document.getElementById("newFolderNameInput");
-        if (!input) return;
-        const name = input.value.trim();
-        if (!name) return;
+    function handleCreateFolderSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById("newFolderNameInput");
+      const name = input.value.trim();
+      if (!name) return;
 
-        const current = getStoredFolders();
-        if (current.includes(name)) {
-          alert("Is naam ka folder pehle se bana hua hai.");
-          return;
-        }
+      const current = getStoredFolders();
+      if (current.includes(name)) {
+        alert("Is naam ka folder pehle se bana hua hai.");
+        return;
+      }
 
-        current.push(name);
+      current.push(name);
+      saveStoredFolders(current);
+      input.value = "";
+      toggleModal('createFolderModal');
+    }
+
+    async function deleteFolder(folderName) {
+      const all = await getAllFiles();
+      const filesInFolder = all.filter(f => f.folder === folderName);
+
+      const msg = filesInFolder.length > 0
+        ? `"${folderName}" folder me ${filesInFolder.length} files hain. Kya aap sach me ise delete karna chahte hain?`
+        : `Kya aap "${folderName}" folder ko delete karna chahte hain?`;
+
+      if (confirm(msg)) {
+        let current = getStoredFolders();
+        current = current.filter(f => f !== folderName);
         saveStoredFolders(current);
-        input.value = "";
-        window.toggleModal('createFolderModal');
-      } catch(err) {}
-    };
-
-    window.deleteFolder = async function(folderName) {
-      try {
-        const all = await getAllFiles();
-        const filesInFolder = all.filter(f => f.folder === folderName);
-
-        const msg = filesInFolder.length > 0
-          ? `"${folderName}" folder me ${filesInFolder.length} files hain. Kya aap sach me ise delete karna chahte hain?`
-          : `Kya aap "${folderName}" folder ko delete karna chahte hain?`;
-
-        if (confirm(msg)) {
-          let current = getStoredFolders();
-          current = current.filter(f => f !== folderName);
-          saveStoredFolders(current);
-        }
-      } catch(err) {}
-    };
+      }
+    }
 
     async function renderFolders() {
-      try {
-        const container = document.getElementById("foldersGridContainer");
-        if (!container) return;
-        container.innerHTML = "";
+      const container = document.getElementById("foldersGridContainer");
+      if (!container) return;
+      container.innerHTML = "";
 
-        const folders = getStoredFolders();
-        const allFiles = await getAllFiles();
+      const folders = getStoredFolders();
+      const allFiles = await getAllFiles();
 
-        const label = document.getElementById("totalFolderCountLabel");
-        if (label) label.innerText = `${folders.length} ${folders.length === 1 ? 'folder' : 'folders'}`;
+      document.getElementById("totalFolderCountLabel").innerText = `${folders.length} ${folders.length === 1 ? 'folder' : 'folders'}`;
 
-        folders.forEach((folder, idx) => {
-          const count = allFiles.filter(item => item.folder === folder).length;
-          const color = FOLDER_COLORS[idx % FOLDER_COLORS.length];
+      folders.forEach((folder, idx) => {
+        const count = allFiles.filter(item => item.folder === folder).length;
+        const color = FOLDER_COLORS[idx % FOLDER_COLORS.length];
 
-          const card = document.createElement("div");
-          card.className = "folder-card p-4 rounded-2xl cursor-pointer relative group flex flex-col justify-between";
-          card.onclick = () => window.openFolder(folder);
+        const card = document.createElement("div");
+        card.className = "folder-card p-4 rounded-2xl cursor-pointer relative group flex flex-col justify-between";
+        card.onclick = () => openFolder(folder);
 
-          card.innerHTML = `
-            <button onclick="event.stopPropagation(); deleteFolder('${folder}')" 
-                    title="Delete Folder" 
-                    class="absolute top-2.5 right-2.5 w-6 h-6 rounded-lg bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white flex items-center justify-center text-[10px] transition opacity-0 group-hover:opacity-100 shadow-xs">
-              <i class="fa-solid fa-trash-can"></i>
-            </button>
-            <div>
-              <div class="w-10 h-10 rounded-xl ${color.bg} flex items-center justify-center ${color.text} text-lg mb-3">
-                <i class="fa-solid fa-folder"></i>
-              </div>
-              <h4 class="font-bold text-xs sm:text-sm text-slate-800 mb-0.5 truncate" title="${folder}">${folder}</h4>
+        card.innerHTML = `
+          <button onclick="event.stopPropagation(); deleteFolder('${folder}')" 
+                  title="Delete Folder" 
+                  class="absolute top-2.5 right-2.5 w-6 h-6 rounded-lg bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white flex items-center justify-center text-[10px] transition opacity-0 group-hover:opacity-100 shadow-xs">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+
+          <div>
+            <div class="w-10 h-10 rounded-xl ${color.bg} flex items-center justify-center ${color.text} text-lg mb-3">
+              <i class="fa-solid fa-folder"></i>
             </div>
-            <p class="text-[11px] text-slate-400 mt-2">${count} ${count === 1 ? 'item' : 'items'}</p>
-          `;
-          container.appendChild(card);
-        });
-      } catch(e) {}
+            <h4 class="font-bold text-xs sm:text-sm text-slate-800 mb-0.5 truncate" title="${folder}">${folder}</h4>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-2">${count} ${count === 1 ? 'item' : 'items'}</p>
+        `;
+        container.appendChild(card);
+      });
     }
 
     function populateFolderDropdown() {
-      try {
-        const select = document.getElementById("fileFolderDest");
-        if (!select) return;
-        const folders = getStoredFolders();
-        select.innerHTML = '<option value="">No Folder (General)</option>';
-        folders.forEach(f => {
-          const opt = document.createElement("option");
-          opt.value = f;
-          opt.innerText = f;
-          select.appendChild(opt);
-        });
-      } catch(e) {}
+      const select = document.getElementById("fileFolderDest");
+      if (!select) return;
+      const folders = getStoredFolders();
+      select.innerHTML = '<option value="">No Folder (General)</option>';
+      folders.forEach(f => {
+        const opt = document.createElement("option");
+        opt.value = f;
+        opt.innerText = f;
+        select.appendChild(opt);
+      });
     }
 
     let selectedFileBlob = null;
     let selectedFileSize = "0 KB";
     let selectedFileType = "pdf";
 
-    window.handleFilePicked = function(input) {
-      try {
-        if (input.files && input.files[0]) {
-          const file = input.files[0];
-          const titleInput = document.getElementById("fileCustomTitle");
-          if (titleInput) titleInput.value = file.name;
-          const mb = file.size / (1024 * 1024);
-          selectedFileSize = mb >= 1 ? `${mb.toFixed(1)} MB` : `${(file.size / 1024).toFixed(0)} KB`;
-          if (file.type.includes("image")) selectedFileType = "image";
-          else if (file.type.includes("video")) selectedFileType = "video";
-          else selectedFileType = "pdf";
-          selectedFileBlob = file;
-        }
-      } catch(e) {}
-    };
-
-    window.handleUploadSubmit = async function(e) {
-      try {
-        e.preventDefault();
-        if (!selectedFileBlob) return;
-
-        const titleInput = document.getElementById("fileCustomTitle");
-        const folderDest = document.getElementById("fileFolderDest");
-        const tagInput = document.getElementById("fileCustomTag");
-        const impCheck = document.getElementById("checkImportant");
-        const newCheck = document.getElementById("checkNew");
-
-        const title = titleInput ? titleInput.value.trim() : "Untitled";
-        const folder = folderDest ? folderDest.value || null : null;
-        const tag = tagInput ? tagInput.value.trim() : "";
-
-        const newRecord = {
-          id: "file_" + Date.now(),
-          name: title,
-          folder: folder,
-          tag: tag ? (tag.startsWith("#") ? tag : `#${tag}`) : null,
-          size: selectedFileSize,
-          type: selectedFileType,
-          time: "Just now",
-          isImportant: impCheck ? impCheck.checked : false,
-          isNew: newCheck ? newCheck.checked : true,
-          blob: selectedFileBlob
-        };
-
-        await saveFileRecord(newRecord);
-        window.toggleModal('uploadModal');
-        e.target.reset();
-        selectedFileBlob = null;
-        renderFilesList();
-        renderFolders();
-      } catch(err) {}
-    };
-
-    window.deleteFile = async function(id) {
-      try {
-        if (confirm("Permanently delete this file?")) {
-          await deleteFileRecord(id);
-          renderFilesList();
-          renderFolders();
-        }
-      } catch(e) {}
-    };
-
-    window.downloadFile = async function(id) {
-      try {
-        const all = await getAllFiles();
-        const item = all.find(f => f.id === id);
-        if (!item || !item.blob) return alert("File not found.");
-
-        const url = URL.createObjectURL(item.blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = item.name;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(url), 1500);
-      } catch(e) {}
-    };
-
-    async function renderFilesList(filter = currentFilter, searchQuery = '') {
-      try {
-        const container = document.getElementById("fileCardsContainer");
-        if (!container) return;
-        container.innerHTML = "";
-        const all = await getAllFiles();
-        const searchInput = document.getElementById("fileSearchInput");
-        const query = (searchQuery || (searchInput ? searchInput.value : "")).toLowerCase();
-
-        const matching = all.filter(f => {
-          const matchesQuery = f.name.toLowerCase().includes(query) ||
-                             (f.tag && f.tag.toLowerCase().includes(query)) ||
-                             (f.folder && f.folder.toLowerCase().includes(query));
-          if (!matchesQuery) return false;
-          if (filter === 'all') return true;
-          if (filter === 'new') return f.isNew;
-          if (filter === 'important') return f.isImportant;
-          if (filter === 'pdf') return f.type === 'pdf';
-          if (filter === 'image') return f.type === 'image';
-          if (filter === 'video') return f.type === 'video';
-          return true;
-        });
-
-        const badge = document.getElementById("badgeNewCount");
-        if (badge) badge.innerText = `• ${all.filter(f => f.isNew).length}`;
-
-        if (matching.length === 0) {
-          container.innerHTML = `
-            <div class="py-16 text-center">
-              <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-400 mx-auto flex items-center justify-center text-xl mb-3">
-                <i class="fa-regular fa-folder-open"></i>
-              </div>
-              <p class="text-sm font-semibold text-slate-700">No files uploaded yet</p>
-            </div>
-          `;
-          return;
-        }
-
-        const secDiv = document.createElement("div");
-        secDiv.className = "space-y-2.5";
-        secDiv.innerHTML = `
-          <div class="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase tracking-wide">
-            <span>PORTAL FILES</span>
-            <span class="text-slate-400 font-semibold text-[11px]">${matching.length}</span>
-          </div>
-          <div class="space-y-2.5" id="fileItemsList"></div>
-        `;
-        container.appendChild(secDiv);
-        const itemsList = secDiv.querySelector("#fileItemsList");
-
-        matching.forEach(f => {
-          const card = document.createElement("div");
-          card.className = "soft-card p-3 sm:p-3.5 rounded-2xl flex items-center justify-between";
-
-          let iconBox = `<div class="relative w-10 h-11 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center flex-shrink-0"><div class="w-5 h-7 rounded-sm bg-rose-500 border border-rose-600 flex flex-col justify-center items-center text-white"><div class="w-3 h-0.5 bg-white/70 mb-1"></div><div class="w-3 h-0.5 bg-white/70"></div></div></div>`;
-          if (f.type === 'image') iconBox = `<div class="w-10 h-11 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600 text-lg flex-shrink-0"><i class="fa-regular fa-image"></i></div>`;
-          if (f.type === 'video') iconBox = `<div class="w-10 h-11 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center text-purple-600 text-lg flex-shrink-0"><i class="fa-solid fa-play text-sm"></i></div>`;
-
-          card.innerHTML = `
-            <div class="flex items-center gap-3 min-w-0">
-              ${iconBox}
-              <div class="truncate">
-                <div class="flex items-center gap-2">
-                  ${f.isImportant ? '<i class="fa-solid fa-star text-amber-400 text-xs"></i>' : ''}
-                  <span class="text-xs sm:text-sm font-bold text-slate-900 truncate">${f.name}</span>
-                  ${f.isNew ? '<span class="text-[9px] font-bold px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded-md">NEW</span>' : ''}
-                </div>
-                <div class="flex items-center gap-2 text-[11px] text-slate-400 mt-0.5">
-                  ${f.folder ? `<span class="flex items-center gap-1 text-slate-500"><i class="fa-solid fa-folder text-amber-400 text-[10px]"></i> ${f.folder}</span>` : ''}
-                  <span>${f.size}</span>
-                  <span>•</span>
-                  <span>${f.time}</span>
-                </div>
-              </div>
-            </div>
-            <div class="flex items-center gap-1.5 flex-shrink-0 ml-2">
-              <button onclick="deleteFile('${f.id}')" title="Delete" class="w-9 h-9 rounded-xl border border-rose-100 bg-rose-50/50 hover:bg-rose-100 text-rose-600 flex items-center justify-center transition">
-                <i class="fa-solid fa-trash-can text-xs"></i>
-              </button>
-              <button onclick="downloadFile('${f.id}')" title="Download" class="w-9 h-9 rounded-xl border border-slate-200/80 hover:bg-slate-100 text-slate-600 flex items-center justify-center transition">
-                <i class="fa-solid fa-arrow-down text-xs"></i>
-              </button>
-            </div>
-          `;
-          itemsList.appendChild(card);
-        });
-      } catch(e) {}
+    function handleFilePicked(input) {
+      if (input.files && input.files[0]) {
+        const file = input.files[0];
+        document.getElementById("fileCustomTitle").value = file.name;
+        const mb = file.size / (1024 * 1024);
+        selectedFileSize = mb >= 1 ? `${mb.toFixed(1)} MB` : `${(file.size / 1024).toFixed(0)} KB`;
+        if (file.type.includes("image")) selectedFileType = "image";
+        else if (file.type.includes("video")) selectedFileType = "video";
+        else selectedFileType = "pdf";
+        selectedFileBlob = file;
+      }
     }
 
-    window.filterFiles = function(filter, btn) {
+    async function handleUploadSubmit(e) {
+      e.preventDefault();
+      if (!selectedFileBlob) return;
+
+      const title = document.getElementById("fileCustomTitle").value.trim();
+      const folder = document.getElementById("fileFolderDest").value || null;
+      const tag = document.getElementById("fileCustomTag").value.trim();
+
+      const newRecord = {
+        id: "file_" + Date.now(),
+        name: title,
+        folder: folder,
+        tag: tag ? (tag.startsWith("#") ? tag : `#${tag}`) : null,
+        size: selectedFileSize,
+        type: selectedFileType,
+        time: "Just now",
+        isImportant: document.getElementById("checkImportant").checked,
+        isNew: document.getElementById("checkNew").checked,
+        blob: selectedFileBlob
+      };
+
+      await saveFileRecord(newRecord);
+      toggleModal('uploadModal');
+      e.target.reset();
+      selectedFileBlob = null;
+      renderFilesList();
+      renderFolders();
+    }
+
+    async function deleteFile(id) {
+      if (confirm("Permanently delete this file?")) {
+        await deleteFileRecord(id);
+        renderFilesList();
+        renderFolders();
+      }
+    }
+
+    async function downloadFile(id) {
+      const all = await getAllFiles();
+      const item = all.find(f => f.id === id);
+      if (!item || !item.blob) return alert("File not found.");
+
+      const url = URL.createObjectURL(item.blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = item.name;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1500);
+    }
+
+    async function renderFilesList(filter = currentFilter, searchQuery = '') {
+      const container = document.getElementById("fileCardsContainer");
+      container.innerHTML = "";
+      const all = await getAllFiles();
+      const query = (searchQuery || document.getElementById("fileSearchInput").value || "").toLowerCase();
+
+      const matching = all.filter(f => {
+        const matchesQuery = f.name.toLowerCase().includes(query) ||
+                           (f.tag && f.tag.toLowerCase().includes(query)) ||
+                           (f.folder && f.folder.toLowerCase().includes(query));
+        if (!matchesQuery) return false;
+        if (filter === 'all') return true;
+        if (filter === 'new') return f.isNew;
+        if (filter === 'important') return f.isImportant;
+        if (filter === 'pdf') return f.type === 'pdf';
+        if (filter === 'image') return f.type === 'image';
+        if (filter === 'video') return f.type === 'video';
+        return true;
+      });
+
+      document.getElementById("badgeNewCount").innerText = `• ${all.filter(f => f.isNew).length}`;
+
+      if (matching.length === 0) {
+        container.innerHTML = `
+          <div class="py-16 text-center">
+            <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-400 mx-auto flex items-center justify-center text-xl mb-3">
+              <i class="fa-regular fa-folder-open"></i>
+            </div>
+            <p class="text-sm font-semibold text-slate-700">No files uploaded yet</p>
+            <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+              Click the green "Upload File" button above to publish notes, PDFs, or media.
+            </p>
+          </div>
+        `;
+        return;
+      }
+
+      const secDiv = document.createElement("div");
+      secDiv.className = "space-y-2.5";
+      secDiv.innerHTML = `
+        <div class="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase tracking-wide">
+          <span>PORTAL FILES</span>
+          <span class="text-slate-400 font-semibold text-[11px]">${matching.length}</span>
+        </div>
+        <div class="space-y-2.5" id="fileItemsList"></div>
+      `;
+      container.appendChild(secDiv);
+      const itemsList = secDiv.querySelector("#fileItemsList");
+
+      matching.forEach(f => {
+        const card = document.createElement("div");
+        card.className = "soft-card p-3 sm:p-3.5 rounded-2xl flex items-center justify-between";
+
+        let iconBox = `<div class="relative w-10 h-11 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center flex-shrink-0"><div class="w-5 h-7 rounded-sm bg-rose-500 border border-rose-600 flex flex-col justify-center items-center text-white"><div class="w-3 h-0.5 bg-white/70 mb-1"></div><div class="w-3 h-0.5 bg-white/70"></div></div>${f.isNew ? '<div class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-400 rounded-full border border-white"></div>' : ''}</div>`;
+        if (f.type === 'image') iconBox = `<div class="w-10 h-11 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600 text-lg flex-shrink-0"><i class="fa-regular fa-image"></i></div>`;
+        if (f.type === 'video') iconBox = `<div class="w-10 h-11 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center text-purple-600 text-lg flex-shrink-0"><i class="fa-solid fa-play text-sm"></i></div>`;
+
+        card.innerHTML = `
+          <div class="flex items-center gap-3 min-w-0">
+            ${iconBox}
+            <div class="truncate">
+              <div class="flex items-center gap-2">
+                ${f.isImportant ? '<i class="fa-solid fa-star text-amber-400 text-xs"></i>' : ''}
+                <span class="text-xs sm:text-sm font-bold text-slate-900 truncate">${f.name}</span>
+                ${f.isNew ? '<span class="text-[9px] font-bold px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded-md">NEW</span>' : ''}
+              </div>
+              <div class="flex items-center gap-2 text-[11px] text-slate-400 mt-0.5">
+                ${f.folder ? `<span class="flex items-center gap-1 text-slate-500"><i class="fa-solid fa-folder text-amber-400 text-[10px]"></i> ${f.folder}</span>` : ''}
+                <span>${f.size}</span>
+                <span>•</span>
+                <span>${f.time}</span>
+                ${f.tag ? `<span class="text-purple-600 font-semibold">${f.tag}</span>` : ''}
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center gap-1.5 flex-shrink-0 ml-2">
+            <button onclick="deleteFile('${f.id}')" title="Delete File" class="w-9 h-9 rounded-xl border border-rose-100 bg-rose-50/50 hover:bg-rose-100 text-rose-600 flex items-center justify-center transition">
+              <i class="fa-solid fa-trash-can text-xs"></i>
+            </button>
+            <button onclick="downloadFile('${f.id}')" title="Download" class="w-9 h-9 rounded-xl border border-slate-200/80 hover:bg-slate-100 text-slate-600 flex items-center justify-center transition">
+              <i class="fa-solid fa-arrow-down text-xs"></i>
+            </button>
+          </div>
+        `;
+        itemsList.appendChild(card);
+      });
+    }
+
+    function filterFiles(filter, btn) {
+      currentFilter = filter;
+      document.querySelectorAll(".filter-pill").forEach(p => p.classList.remove("pill-active"));
+      btn.classList.add("pill-active");
+      renderFilesList(filter, document.getElementById("fileSearchInput").value);
+    }
+
+    function handleSearch() {
+      renderFilesList(currentFilter, document.getElementById("fileSearchInput").value);
+    }
+
+    function switchPortalTab(tab) {
+      const filesSec = document.getElementById("tabFilesContent");
+      const foldersSec = document.getElementById("tabFoldersContent");
+      const quizSec = document.getElementById("tabQuizContent");
+
+      const btnFiles = document.getElementById("tabFilesBtn");
+      const btnFolders = document.getElementById("tabFoldersBtn");
+      const btnQuiz = document.getElementById("tabQuizBtn");
+
+      const inactiveClass = "px-3.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition";
+      const activeClass = "px-3.5 py-1.5 rounded-lg bg-white text-purple-900 shadow-sm transition";
+
+      filesSec.classList.add("hidden");
+      foldersSec.classList.add("hidden");
+      quizSec.classList.add("hidden");
+
+      btnFiles.className = inactiveClass;
+      btnFolders.className = inactiveClass;
+      btnQuiz.className = inactiveClass;
+
+      if (tab === 'files') {
+        filesSec.classList.remove("hidden");
+        btnFiles.className = activeClass;
+      } else if (tab === 'folders') {
+        foldersSec.classList.remove("hidden");
+        btnFolders.className = activeClass;
+        renderFolders();
+      } else if (tab === 'quiz') {
+        quizSec.classList.remove("hidden");
+        btnQuiz.className = activeClass;
+        renderQuizPreview();
+      }
+    }
+
+    function openFolder(name) {
+      switchPortalTab('files');
+      document.getElementById("fileSearchInput").value = name;
+      renderFilesList('all', name);
+    }
+
+    function toggleModal(id) {
+      document.getElementById(id).classList.toggle("hidden");
+    }
+
+    function logoutAdmin() {
+      if (confirm("Log out from Management mode?")) {
+        sessionStorage.removeItem("shoaib_admin_auth");
+        window.location.href = "nitrence.html";
+      }
+    }
+
+    async function processQuizUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      let extractedText = "";
+
       try {
-        currentFilter = filter;
-        document.querySelectorAll(".filter-pill").forEach(p => p.classList.remove("pill-active"));
-        if (btn) btn.classList.add("pill-active");
-        const searchInput = document.getElementById("fileSearchInput");
-        renderFilesList(filter, searchInput ? searchInput.value : '');
-      } catch(e) {}
-    };
-
-    window.handleSearch = function() {
-      try {
-        const searchInput = document.getElementById("fileSearchInput");
-        renderFilesList(currentFilter, searchInput ? searchInput.value : '');
-      } catch(e) {}
-    };
-
-    window.switchPortalTab = function(tab) {
-      try {
-        const filesSec = document.getElementById("tabFilesContent");
-        const foldersSec = document.getElementById("tabFoldersContent");
-        const quizSec = document.getElementById("tabQuizContent");
-
-        if (filesSec) filesSec.classList.add("hidden");
-        if (foldersSec) foldersSec.classList.add("hidden");
-        if (quizSec) quizSec.classList.add("hidden");
-
-        const btnFiles = document.getElementById("tabFilesBtn");
-        const btnFolders = document.getElementById("tabFoldersBtn");
-        const btnQuiz = document.getElementById("tabQuizBtn");
-
-        const inactiveClass = "px-3.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition";
-        const activeClass = "px-3.5 py-1.5 rounded-lg bg-white text-purple-900 shadow-sm transition";
-
-        if (btnFiles) btnFiles.className = inactiveClass;
-        if (btnFolders) btnFolders.className = inactiveClass;
-        if (btnQuiz) btnQuiz.className = inactiveClass;
-
-        if (tab === 'files') {
-          if (filesSec) filesSec.classList.remove("hidden");
-          if (btnFiles) btnFiles.className = activeClass;
-        } else if (tab === 'folders') {
-          if (foldersSec) foldersSec.classList.remove("hidden");
-          if (btnFolders) btnFolders.className = activeClass;
-          renderFolders();
-        } else if (tab === 'quiz') {
-          if (quizSec) quizSec.classList.remove("hidden");
-          if (btnQuiz) btnQuiz.className = activeClass;
-          renderUploadedQuizzesList();
-        }
-      } catch(e) {}
-    };
-
-    window.openFolder = function(name) {
-      try {
-        window.switchPortalTab('files');
-        const searchInput = document.getElementById("fileSearchInput");
-        if (searchInput) searchInput.value = name;
-        renderFilesList('all', name);
-      } catch(e) {}
-    };
-
-    window.toggleModal = function(id) {
-      try {
-        const modal = document.getElementById(id);
-        if (modal) modal.classList.toggle("hidden");
-      } catch(e) {}
-    };
-
-    window.logoutAdmin = function() {
-      try {
-        if (confirm("Log out from Management mode?")) {
-          sessionStorage.removeItem("shoaib_admin_auth");
-          window.location.href = "nitrence.html";
-        }
-      } catch(e) {}
-    };
-
-    // Quiz Manager Functions
-    window.saveNegativeMarking = function() {
-      try {
-        const penaltyElem = document.getElementById("adminNegativeMarking");
-        if (penaltyElem) {
-          localStorage.setItem("shoaib_negative_marking", penaltyElem.value);
-        }
-      } catch(e) {}
-    };
-
-    window.processQuizUpload = async function(event) {
-      try {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        let extractedText = "";
-        if ((file.type === "application/pdf" || file.name.endsWith('.pdf')) && typeof pdfjsLib !== 'undefined') {
+        if (file.type === "application/pdf" || file.name.endsWith('.pdf')) {
           const arrayBuffer = await file.arrayBuffer();
           const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
           for (let i = 1; i <= pdf.numPages; i++) {
             const page = await pdf.getPage(i);
             const textContent = await page.getTextContent();
-            extractedText += textContent.items.map(item => item.str).join(' ') + "\n";
+            const pageStr = textContent.items.map(item => item.str).join(' ');
+            extractedText += pageStr + "\n";
           }
-        } else if (file.type.startsWith('image/') || file.name.match(/\.(png|jpg|jpeg)$/i)) {
-          extractedText = `1-What is the largest planet in our Solar System?
-A. Saturn
-B. Jupiter
-C. Mars
-D. Venus
-
-2-Which gas do plants absorb from the atmosphere for photosynthesis?
-A. Oxygen
-B. Nitrogen
-C. Carbon Dioxide
-D. Hydrogen`;
         } else {
           extractedText = await file.text();
         }
 
-        const questions = parseQuizText(extractedText);
+        const questions = parseMCQWithDotRule(extractedText);
         if (questions.length === 0) {
-          alert("Could not detect MCQ format. Please ensure each question starts with a number and options start with A, B, C, D.");
+          alert("Could not detect MCQ format. Make sure questions start with numbers (e.g., '1.') and options with letters (e.g., 'A)', 'B)'), with a full stop '.' marking the correct answer.");
           return;
         }
 
-        let quizzes = JSON.parse(localStorage.getItem("shoaib_all_quizzes") || "[]");
-        let quizName = `Quiz ${quizzes.length + 1} (${file.name})`;
+        const quizName = file.name.replace(/\.[^/.]+$/, "");
+        localStorage.setItem("classroom_quiz_questions", JSON.stringify(questions));
+        localStorage.setItem("quiz_title", quizName);
 
-        quizzes.push({
-          id: Date.now(),
-          name: quizName,
-          questions: questions
-        });
-
-        localStorage.setItem("shoaib_all_quizzes", JSON.stringify(quizzes));
-        alert(`✅ Success! Quiz "${quizName}" uploaded with ${questions.length} questions.`);
-        renderUploadedQuizzesList();
+        alert(`✅ Success! ${questions.length} questions parsed. Quiz is now LIVE!`);
+        renderQuizPreview();
       } catch (err) {
-        alert("Failed to process file: " + err.message);
+        console.error(err);
+        alert("Failed to read file: " + err.message);
       } finally {
         event.target.value = "";
       }
-    };
+    }
 
-    function parseQuizText(rawText) {
-      try {
-        const lines = rawText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-        let parsed = [];
-        let currentQ = null;
+    function parseMCQWithDotRule(rawText) {
+      const lines = rawText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      const parsed = [];
+      let currentQ = null;
 
-        for (let line of lines) {
-          const qMatch = line.match(/^(?:Q\d+[\.\-\):\s]|\d+[\.\-\):\s])\s*(.+)/i) || line.match(/^(\d+[\.\-\)]\s*.+)/);
-          if (qMatch && !line.match(/^[A-Da-d][\.\-\)]/)) {
-            if (currentQ && currentQ.options.length >= 2) {
-              parsed.push(currentQ);
-            }
-            let qText = (qMatch[1] || line).replace(/^(?:Q\d+|\d+)[\.\-\):\s]+/, '').trim();
-            currentQ = {
-              question: qText || line,
-              options: [],
-              answer: 0
-            };
-            continue;
+      for (let line of lines) {
+        const qMatch = line.match(/^(?:Q\d+[\.:]|\d+[\.:])\s*(.+)/i);
+        if (qMatch) {
+          if (currentQ && currentQ.options.length >= 2) {
+            parsed.push(currentQ);
           }
-
-          const optMatch = line.match(/^[\(\[]?([A-Da-d0-4])[\)\].:\-\s]\s*(.+)/);           if (optMatch && currentQ) {             let optText = optMatch[2].trim();             let isCorrect = false;              if (optText.endsWith('.') \vert{}\vert{} optText.endsWith('@') \vert{}\vert{} optText.endsWith('•') \vert{}\vert{} optText.endsWith('*')) {               isCorrect = true;               optText = optText.replace(/[\.\@\*•]$/, '').trim();             }              const optIndex = currentQ.options.length;             currentQ.options.push(optText);             if (isCorrect) {               currentQ.answer = optIndex;             }           }         }          if (currentQ && currentQ.options.length >= 2) {           parsed.push(currentQ);         }          if (parsed.length === 0) {           const blocks = rawText.trim().split(/\n\s*\n/);           blocks.forEach((block) => {             const blines = block.split('\n').map(l => l.trim()).filter(Boolean);             if (blines.length >= 2) {               let qText = blines[0].replace(/^[^\w]+/, '').trim();               let options = [];               let correctIdx = 0;               for (let i = 1; i < blines.length; i++) {                 let optLine = blines[i];                 let isCorr = optLine.includes('@') \vert{}\vert{} optLine.endsWith('.');                 optLine = optLine.replace(/[\.@\*•]/g, '').replace(/^[A-Da-d][\.\-\)]\s*/, '').trim();
-                if (isCorr) correctIdx = options.length;
-                options.push(optLine);
-              }
-              if (options.length >= 2) {
-                parsed.push({
-                  question: qText,
-                  options: options,
-                  answer: correctIdx
-                });
-              }
-            }
-          });
+          currentQ = {
+            question: qMatch[1].trim(),
+            options: [],
+            answer: 0
+          };
+          continue;
         }
 
-        parsed.forEach(q => {
-          let t = q.question.toLowerCase();
-          if (q.answer === 0) {
-            if (t.includes("largest planet")) q.answer = 1;
-            else if (t.includes("photosynthesis")) q.answer = 2;
-            else if (t.includes("mona lisa")) q.answer = 2;
-            else if (t.includes("gold")) q.answer = 2;
-            else if (t.includes("ocean")) q.answer = 3;
-            else if (t.includes("bones")) q.answer = 0;
-            else if (t.includes("hardest")) q.answer = 2;
-            else if (t.includes("rising sun")) q.answer = 2;
-            else if (t.includes("freezing point")) q.answer = 1;
-            else if (t.includes("romeo and juliet")) q.answer = 1;
-          }
-        });
+        const optMatch = line.match(/^[\(\[]?([A-Da-d0-4])[\)\].:-]\s*(.+)/);
+        if (optMatch && currentQ) {
+          let optText = optMatch[2].trim();
+          let isCorrect = false;
 
-        return parsed;
-      } catch(e) {
-        return [];
+          if (optText.endsWith('.') || optText.endsWith('•') || optText.endsWith('*')) {
+            isCorrect = true;
+            optText = optText.replace(/[\.\*•]$/, '').trim();
+          }
+
+          const optIndex = currentQ.options.length;
+          currentQ.options.push(optText);
+          if (isCorrect) {
+            currentQ.answer = optIndex;
+          }
+        }
+      }
+
+      if (currentQ && currentQ.options.length >= 2) {
+        parsed.push(currentQ);
+      }
+      return parsed;
+    }
+
+    function renderQuizPreview() {
+      const container = document.getElementById("quizPreviewContainer");
+      const titleElem = document.getElementById("currentQuizTitle");
+      const metaElem = document.getElementById("currentQuizMeta");
+
+      const stored = localStorage.getItem("classroom_quiz_questions");
+      const title = localStorage.getItem("quiz_title") || "Untitled Quiz";
+
+      if (!stored) {
+        titleElem.innerText = "No active quiz uploaded";
+        metaElem.innerText = "Upload a PDF above to create an MCQ quiz.";
+        container.innerHTML = `<p class="text-xs text-slate-400 py-6 text-center">No questions found.</p>`;
+        return;
+      }
+
+      const questions = JSON.parse(stored);
+      titleElem.innerText = title;
+      metaElem.innerText = `${questions.length} questions live on student portal`;
+
+      container.innerHTML = "";
+      questions.forEach((q, qIdx) => {
+        const item = document.createElement("div");
+        item.className = "p-3 bg-purple-50/50 rounded-xl border border-purple-100/70 text-xs";
+        
+        let optsHtml = q.options.map((opt, oIdx) => {
+          const isAns = oIdx === q.answer;
+          return `<div class="flex items-center gap-2 mt-1 ${isAns ? 'font-bold text-emerald-700' : 'text-slate-600'}">
+                    <span>${String.fromCharCode(65 + oIdx)})</span>
+                    <span>${opt}</span>
+                    ${isAns ? '<span class="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold">CORRECT</span>' : ''}
+                  </div>`;
+        }).join("");
+
+        item.innerHTML = `
+          <p class="font-bold text-slate-900">${qIdx + 1}. ${q.question}</p>
+          <div class="mt-1 pl-2 border-l-2 border-purple-200">${optsHtml}</div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function clearCurrentQuiz() {
+      if (confirm("Are you sure you want to remove the current quiz from student portal?")) {
+        localStorage.removeItem("classroom_quiz_questions");
+        localStorage.removeItem("quiz_title");
+        renderQuizPreview();
       }
     }
 
-    function renderUploadedQuizzesList() {
-      try {
-        const container = document.getElementById("quizListPreviewContainer");
-        if (!container) return;
-        let quizzes = JSON.parse(localStorage.getItem("shoaib_all_quizzes") || "[]");
-
-        let savedPenalty = localStorage.getItem("shoaib_negative_marking") || "0.5";
-        const penaltySelect = document.getElementById("adminNegativeMarking");
-        if (penaltySelect) penaltySelect.value = savedPenalty;
-
-        if (quizzes.length === 0) {
-          container.innerHTML = `<p class="text-xs text-slate-400 py-6 text-center">No quizzes uploaded yet.</p>`;
-          return;
-        }
-
-        container.innerHTML = "";
-        quizzes.forEach((quiz, index) => {
-          const item = document.createElement("div");
-          item.className = "flex items-center justify-between p-3 bg-purple-50/50 rounded-xl border border-purple-100 text-xs";
-          
-          const infoDiv = document.createElement("div");
-          infoDiv.innerHTML = `<span class="font-bold text-slate-900">${quiz.name}</span><span class="text-slate-500 ml-2">(${quiz.questions.length} Questions)</span>`;
-          item.appendChild(infoDiv);
-
-          const delBtn = document.createElement("button");
-          delBtn.className = "px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 font-semibold transition";
-          delBtn.innerText = "Delete";
-          delBtn.onclick = () => window.deleteQuiz(index);
-          item.appendChild(delBtn);
-
-          container.appendChild(item);
-        });
-      } catch(e) {}
-    }
-
-    window.deleteQuiz = function(index) {
-      try {
-        if (confirm("Delete this quiz?")) {
-          let quizzes = JSON.parse(localStorage.getItem("shoaib_all_quizzes") || "[]");
-          quizzes.splice(index, 1);
-          localStorage.setItem("shoaib_all_quizzes", JSON.stringify(quizzes));
-          renderUploadedQuizzesList();
-        }
-      } catch(e) {}
-    };
-
-    // Initialization on load
-    window.onload = function() {
-      initIndexedDB().then(() => {
-        try {
-          populateFolderDropdown();
-          renderFilesList();
-          renderFolders();
-        } catch(e) {}
-      });
-    };
+    initIndexedDB().then(() => {
+      populateFolderDropdown();
+      renderFilesList();
+      renderFolders();
+    });
   </script>
 </body>
 </html>
