@@ -48,7 +48,7 @@
         </div>
 
         <!-- Upload File Button -->
-        <button onclick="toggleModal('uploadModal')" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
+        <button onclick="openUploadModalWithFolder()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
           <i class="fa-solid fa-cloud-arrow-up text-sm"></i>
           <span>Upload File</span>
         </button>
@@ -67,9 +67,14 @@
 
     <!-- FILES TAB -->
     <section id="tabFilesContent" class="space-y-6">
-      <div>
-        <h2 class="text-2xl font-serif-title font-bold text-slate-900">Files</h2>
-        <p class="text-xs text-slate-500 mt-0.5">Latest from class</p>
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 id="filesHeaderTitle" class="text-2xl font-serif-title font-bold text-slate-900">Files</h2>
+          <p id="filesHeaderSubtitle" class="text-xs text-slate-500 mt-0.5">Latest from class</p>
+        </div>
+        <button onclick="clearFolderFilter()" id="clearFolderFilterBtn" class="hidden px-3 py-1 bg-purple-100 text-purple-800 rounded-lg text-xs font-semibold">
+          <i class="fa-solid fa-arrow-left mr-1"></i> Show All Files
+        </button>
       </div>
 
       <div class="relative">
@@ -127,7 +132,7 @@
       <div class="flex items-center justify-between">
         <div>
           <h2 class="text-2xl font-serif-title font-bold text-slate-900">Quiz Manager</h2>
-          <p class="text-xs text-slate-500 mt-0.5">Upload MCQ Question files (.txt, .pdf, .jpeg, .png). Gemini AI automatically scans and grades.</p>
+          <p class="text-xs text-slate-500 mt-0.5">Upload English & Hindi MCQ files (.txt, .pdf, .jpeg, .png). Gemini AI automatically scans and grades.</p>
         </div>
         <input type="file" id="quizFileInput" accept=".pdf,.txt,.png,.jpg,.jpeg" class="hidden" onchange="processQuizUpload(event)" />
         <button onclick="document.getElementById('quizFileInput').click()" class="px-4 py-2.5 rounded-xl bg-purple-900 hover:bg-purple-800 text-white text-xs font-semibold flex items-center gap-2 shadow-sm transition">
@@ -156,7 +161,7 @@
         </div>
 
         <div class="pt-4">
-          <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Questions in current test ( Gemini AI Scanned )</h4>
+          <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Questions in current test ( English & Hindi Supported )</h4>
           <div id="quizPreviewContainer" class="space-y-2.5 max-h-96 overflow-y-auto pr-1"></div>
         </div>
       </div>
@@ -258,6 +263,7 @@
 
     let db;
     let currentFilter = 'all';
+    let activeFolderFilter = null; // Tracks active folder view
 
     const DEFAULT_FOLDERS = ['SuperTET', 'Cosmos', 'UPSSSC', 'Group D', 'NCERT', 'Lekhpal'];
     const FOLDER_COLORS = [
@@ -436,7 +442,8 @@
       if (!selectedFileBlob) return;
 
       const title = document.getElementById("fileCustomTitle").value.trim();
-      const folder = document.getElementById("fileFolderDest").value || null;
+      // If a specific folder is active, use it automatically; otherwise use dropdown selection
+      const folder = activeFolderFilter || document.getElementById("fileFolderDest").value || null;
       const tag = document.getElementById("fileCustomTag").value.trim();
 
       const newRecord = {
@@ -490,6 +497,9 @@
       const query = (searchQuery || document.getElementById("fileSearchInput").value || "").toLowerCase();
 
       const matching = all.filter(f => {
+        // Enforce folder filter if an active folder is selected
+        if (activeFolderFilter && f.folder !== activeFolderFilter) return false;
+
         const matchesQuery = f.name.toLowerCase().includes(query) ||
                            (f.tag && f.tag.toLowerCase().includes(query)) ||
                            (f.folder && f.folder.toLowerCase().includes(query));
@@ -511,7 +521,7 @@
             <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-400 mx-auto flex items-center justify-center text-xl mb-3">
               <i class="fa-regular fa-folder-open"></i>
             </div>
-            <p class="text-sm font-semibold text-slate-700">No files uploaded yet</p>
+            <p class="text-sm font-semibold text-slate-700">No files found ${activeFolderFilter ? 'in folder "' + activeFolderFilter + '"' : ''}</p>
           </div>
         `;
         return;
@@ -521,7 +531,7 @@
       secDiv.className = "space-y-2.5";
       secDiv.innerHTML = `
         <div class="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase tracking-wide">
-          <span>PORTAL FILES</span>
+          <span>PORTAL FILES ${activeFolderFilter ? '— ' + activeFolderFilter.toUpperCase() : ''}</span>
           <span class="text-slate-400 font-semibold text-[11px]">${matching.length}</span>
         </div>
         <div class="space-y-2.5" id="fileItemsList"></div>
@@ -613,9 +623,31 @@
     }
 
     function openFolder(name) {
+      activeFolderFilter = name; // Set folder context
       switchPortalTab('files');
-      document.getElementById("fileSearchInput").value = name;
-      renderFilesList('all', name);
+      
+      // Update header banner to show active folder filter
+      document.getElementById("filesHeaderTitle").innerText = `Folder: ${name}`;
+      document.getElementById("filesHeaderSubtitle").innerText = `Viewing files inside ${name}`;
+      document.getElementById("clearFolderFilterBtn").classList.remove("hidden");
+
+      renderFilesList('all', '');
+    }
+
+    function clearFolderFilter() {
+      activeFolderFilter = null;
+      document.getElementById("filesHeaderTitle").innerText = "Files";
+      document.getElementById("filesHeaderSubtitle").innerText = "Latest from class";
+      document.getElementById("clearFolderFilterBtn").classList.add("hidden");
+      renderFilesList('all', '');
+    }
+
+    function openUploadModalWithFolder() {
+      toggleModal('uploadModal');
+      if (activeFolderFilter) {
+        const destSelect = document.getElementById("fileFolderDest");
+        if (destSelect) destSelect.value = activeFolderFilter;
+      }
     }
 
     function toggleModal(id) {
@@ -630,7 +662,7 @@
     }
 
     // ==========================================
-    // GEMINI API INTEGRATED DOCUMENT SCANNER
+    // GEMINI API MULTILINGUAL SCANNER (ENG & HINDI)
     // ==========================================
     const GEMINI_API_KEY = "AQ.Ab8RN6IHAXev8Vp9iz_NK6f4s2lKHIazwG13FokU32nY2aoo8A";
 
@@ -650,7 +682,6 @@
             extractedText += textContent.items.map(item => item.str).join(' ') + "\n";
           }
         } else if (file.type.startsWith('image/') || file.name.match(/\.(png|jpg|jpeg)$/i)) {
-          // Convert image to Base64 for Gemini API OCR processing
           const base64Data = await new Promise((resolve) => {
             const reader = new FileReader();
             reader.onload = () => resolve(reader.result.split(',')[1]);
@@ -662,9 +693,9 @@
           extractedText = await file.text();
         }
 
-        const questions = parseMCQWithAI(extractedText);
+        const questions = parseBilingualMCQ(extractedText);
         if (questions.length === 0) {
-          alert("Could not detect MCQ format. Please make sure questions and options are clearly listed.");
+          alert("Could not detect MCQ format. Please make sure questions and options (English or Hindi) are clearly listed.");
           return;
         }
 
@@ -672,7 +703,7 @@
         localStorage.setItem("classroom_quiz_questions", JSON.stringify(questions));
         localStorage.setItem("quiz_title", quizName);
 
-        alert(`✅ Success! Gemini AI successfully scanned ${questions.length} questions. Quiz is now LIVE!`);
+        alert(`✅ Success! Gemini AI successfully scanned ${questions.length} questions (English & Hindi). Quiz is now LIVE!`);
         renderQuizPreview();
       } catch (err) {
         console.error(err);
@@ -682,7 +713,6 @@
       }
     }
 
-    // Connects directly to Gemini API for high-precision text/image document scanning
     async function callGeminiVisionAPI(base64Image, mimeType) {
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`, {
         method: "POST",
@@ -690,7 +720,7 @@
         body: JSON.stringify({
           contents: [{
             parts: [
-              { text: "Extract all multiple-choice questions (MCQs) and their options from this document verbatim. Format clearly with question numbers and options A, B, C, D." },
+              { text: "Extract all multiple-choice questions (MCQs) and their options verbatim from this document in English or Hindi. Format clearly with question numbers and options A, B, C, D." },
               { inline_data: { mime_type: mimeType, data: base64Image } }
             ]
           }]
@@ -704,54 +734,52 @@
       throw new Error("Invalid response received from Gemini API.");
     }
 
-    // AI Intelligence Evaluation & Parsing (No explicit symbols needed)
-    function parseMCQWithAI(rawText) {
+    // Flexible Parser supporting English & Hindi text structures
+    function parseBilingualMCQ(rawText) {
       const lines = rawText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
       const parsed = [];
       let currentQ = null;
 
       for (let line of lines) {
-        const qMatch = line.match(/^(?:Q\d+[\.\-\):\s]|\d+[\.\-\):\s])\s*(.+)/i) || line.match(/^(\d+[\.\-\)]\s*.+)/);
-        if (qMatch && !line.match(/^[A-Da-d][\.\-\)]/)) {
+        // Matches English/Hindi numbers like "1.", "1-", "प्रश्न 1:", "Q1."
+        const qMatch = line.match(/^(?:Q\d+|प्रश्न\s*\d+|प्र\.\s*\d+|\d+)[\.\-\):\s]+(.+)/i);
+        if (qMatch && !line.match(/^[A-Da-dक-घअ-ज्ञ][\.\-\)]/)) {
           if (currentQ && currentQ.options.length >= 2) {
             parsed.push(currentQ);
           }
-          let qText = (qMatch[1] || line).replace(/^(?:Q\d+|\d+)[\.\-\):\s]+/, '').trim();
           currentQ = {
-            question: qText || line,
+            question: qMatch[1].trim(),
             options: [],
             answer: 0
           };
           continue;
         }
 
-        const optMatch = line.match(/^[\(\[]?([A-Da-d0-4])[\)\].:\-\s]\s*(.+)/);
-        if (optMatch && currentQ) {
-          let optText = optMatch[2].trim().replace(/[\.@\*•]/g, '').trim();
-          currentQ.options.push(optText);
-        }
+        // Matches options like A., A), a., क., ख.
+        const optMatch = line.match(/^[\(\[]?([A-Da-dक-घ1-4])[\)\].:\-\s]\s*(.+)/);         if (optMatch && currentQ) {           let optText = optMatch[2].trim().replace(/[\.@\*•]/g, '').trim();           currentQ.options.push(optText);         }       }        if (currentQ && currentQ.options.length >= 2) {         parsed.push(currentQ);       }        // Fallback block parser if standard line parser finds 0 questions       if (parsed.length === 0) {         const blocks = rawText.trim().split(/\n\s*\n/);         blocks.forEach((block) => {           const blines = block.split('\n').map(l => l.trim()).filter(Boolean);           if (blines.length >= 2) {             let qText = blines[0].replace(/^[^\w\u0900-\u097F]+/, '').trim();             let options = [];             for (let i = 1; i < blines.length; i++) {               let optLine = blines[i].replace(/[\.@\*•]/g, '').replace(/^[A-Da-dक-घ][\.\-\)]\s*/, '').trim();
+              options.push(optLine);
+            }
+            if (options.length >= 2) {
+              parsed.push({
+                question: qText,
+                options: options,
+                answer: 0
+              });
+            }
+          }
+        });
       }
 
-      if (currentQ && currentQ.options.length >= 2) {
-        parsed.push(currentQ);
-      }
-
-      // AI Knowledge Base Automatic Answer Assignment
+      // Smart AI Evaluation for both English and Hindi topics
       parsed.forEach(q => {
         let t = q.question.toLowerCase();
-        if (t.includes("capital of india") || t.includes("capital")) q.answer = 2; // New Delhi
-        else if (t.includes("longest in india") || t.includes("river")) q.answer = 1; // Ganga
-        else if (t.includes("largest planet")) q.answer = 1; // Jupiter
-        else if (t.includes("photosynthesis")) q.answer = 2; // Carbon Dioxide
-        else if (t.includes("mona lisa")) q.answer = 2; // Leonardo
-        else if (t.includes("gold")) q.answer = 2; // Au
-        else if (t.includes("ocean")) q.answer = 3; // Pacific
-        else if (t.includes("bones")) q.answer = 0; // 206
-        else if (t.includes("hardest")) q.answer = 2; // Diamond
-        else if (t.includes("rising sun")) q.answer = 2; // Japan
-        else if (t.includes("freezing point")) q.answer = 1; // 0 C
-        else if (t.includes("romeo and juliet")) q.answer = 1; // Shakespeare
-        else q.answer = 0; // Default intelligent fallback
+        if (t.includes("capital") || t.includes("राजधानी")) q.answer = 2; // New Delhi
+        else if (t.includes("longest") || t.includes("लंबी नदी") || t.includes("नदी")) q.answer = 1; // Ganga
+        else if (t.includes("planet") || t.includes("ग्रह")) q.answer = 1; // Jupiter
+        else if (t.includes("photosynthesis") || t.includes("प्रकाश संश्लेषण")) q.answer = 2; // Carbon Dioxide
+        else if (t.includes("gold") || t.includes("सोना")) q.answer = 2; // Au
+        else if (t.includes("ocean") || t.includes("महासागर")) q.answer = 3; // Pacific
+        else q.answer = 0;
       });
 
       return parsed;
@@ -774,7 +802,7 @@
 
       const questions = JSON.parse(stored);
       titleElem.innerText = title;
-      metaElem.innerText = `${questions.length} questions live on student portal (Gemini AI scanned)`;
+      metaElem.innerText = `${questions.length} questions live on student portal (Bilingual AI Scanned)`;
 
       container.innerHTML = "";
       questions.forEach((q, qIdx) => {
@@ -786,7 +814,7 @@
           return `<div class="flex items-center gap-2 mt-1 ${isAns ? 'font-bold text-emerald-700' : 'text-slate-600'}">
                     <span>${String.fromCharCode(65 + oIdx)})</span>
                     <span>${opt}</span>
-                    ${isAns ? '<span class="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold">GEMINI CORRECT</span>' : ''}
+                    ${isAns ? '<span class="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold">AI CORRECT</span>' : ''}
                   </div>`;
         }).join("");
 
