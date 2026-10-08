@@ -133,7 +133,7 @@
       <div class="flex items-center justify-between">
         <div>
           <h2 class="text-2xl font-serif-title font-bold text-slate-900">Quiz Manager</h2>
-          <p class="text-xs text-slate-500 mt-0.5">Upload English & Hindi MCQ files (.txt, .pdf, .jpeg, .png). Gemini AI automatically scans.</p>
+          <p class="text-xs text-slate-500 mt-0.5">Upload English & Hindi MCQ files (.txt, .pdf, .jpeg, .png). Gemini Flash-Lite automatically scans.</p>
         </div>
         <input type="file" id="quizFileInput" accept=".pdf,.txt,.png,.jpg,.jpeg" class="hidden" />
         <button id="triggerQuizUploadBtn" type="button" class="px-4 py-2.5 rounded-xl bg-purple-900 hover:bg-purple-800 text-white text-xs font-semibold flex items-center gap-2 shadow-sm transition">
@@ -360,7 +360,6 @@
       });
     }
 
-    // Secure Event Listeners on DOMContentLoaded
     document.addEventListener("DOMContentLoaded", () => {
       const bind = (id, event, fn) => {
         const el = document.getElementById(id);
@@ -801,7 +800,7 @@
     }
 
     // ==========================================
-    // GEMINI API MULTILINGUAL SCANNER (ENG & HINDI)
+    // GEMINI FLASH-LITE MULTILINGUAL SCANNER
     // ==========================================
     const GEMINI_API_KEY = "AQ.Ab8RN6IHAXev8Vp9iz_NK6f4s2lKHIazwG13FokU32nY2aoo8A";
 
@@ -818,7 +817,9 @@
           for (let i = 1; i <= pdf.numPages; i++) {
             const page = await pdf.getPage(i);
             const textContent = await page.getTextContent();
-            extractedText += textContent.items.map(item => item.str).join(' ') + "\n";
+            // Sort items by vertical position to maintain reading order across columns
+            const items = textContent.items.sort((a, b) => Math.abs(b.transform[5] - a.transform[5]) > 5 ? b.transform[5] - a.transform[5] : a.transform[4] - b.transform[4]);
+            extractedText += items.map(item => item.str).join(' ') + "\n";
           }
         } else if (file.type.startsWith('image/') || file.name.match(/\.(png|jpg|jpeg)$/i)) {
           const base64Data = await new Promise((resolve) => {
@@ -826,7 +827,7 @@
             reader.onload = () => resolve(reader.result.split(',')[1]);
             reader.readAsDataURL(file);
           });
-          extractedText = await callGeminiVisionAPI(base64Data, file.type);
+          extractedText = await callGeminiFlashLiteAPI(base64Data, file.type);
         } else {
           extractedText = await file.text();
         }
@@ -837,21 +838,30 @@
           return;
         }
 
-        const quizName = file.name.replace(/\.[^/.]+$/, "");
+        let allQuizzes = JSON.parse(localStorage.getItem("shoaib_all_quizzes") || "[]");
+        const quizName = `Quiz ${allQuizzes.length + 1} (${file.name})`;
+        
+        allQuizzes.push({
+          id: Date.now(),
+          name: quizName,
+          questions: questions
+        });
+
+        localStorage.setItem("shoaib_all_quizzes", JSON.stringify(allQuizzes));
         localStorage.setItem("classroom_quiz_questions", JSON.stringify(questions));
         localStorage.setItem("quiz_title", quizName);
 
-        alert(`✅ Success! Gemini AI successfully scanned ${questions.length} questions. Quiz is now LIVE!`);
+        alert(`✅ Success! Gemini Flash-Lite scanned ${questions.length} questions. Quiz is now LIVE on student portal!`);
         renderQuizPreview();
       } catch (err) {
         console.error(err);
-        alert("Gemini Scan Failed: " + err.message);
+        alert("Gemini Flash-Lite Scan Failed: " + err.message);
       } finally {
         event.target.value = "";
       }
     }
 
-    async function callGeminiVisionAPI(base64Image, mimeType) {
+    async function callGeminiFlashLiteAPI(base64Image, mimeType) {
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -869,7 +879,7 @@
       if (data.candidates && data.candidates[0].content.parts[0].text) {
         return data.candidates[0].content.parts[0].text;
       }
-      throw new Error("Invalid response received from Gemini API.");
+      throw new Error("Invalid response received from Gemini Flash-Lite API.");
     }
 
     function parseBilingualMCQ(rawText) {
@@ -891,13 +901,20 @@
           continue;
         }
 
-        const optMatch = line.match(/^[\(\[]?([A-Da-dक-घ1-4])[\)\].:\-\s]\s*(.+)/);         if (optMatch && currentQ) {           let optText = optMatch[2].trim().replace(/[\.@\*•]/g, '').trim();           currentQ.options.push(optText);         }       }        if (currentQ && currentQ.options.length >= 2) {         parsed.push(currentQ);       }        if (parsed.length === 0) {         const blocks = rawText.trim().split(/\n\s*\n/);         blocks.forEach((block) => {           const blines = block.split('\n').map(l => l.trim()).filter(Boolean);           if (blines.length >= 2) {             let qText = blines[0].replace(/^[^\w\u0900-\u097F]+/, '').trim();             let options = [];             for (let i = 1; i < blines.length; i++) {               let optLine = blines[i].replace(/[\.@\*•]/g, '').replace(/^[A-Da-dक-घ][\.\-\)]\s*/, '').trim();
-              options.push(optLine);
+        const optMatch = line.match(/^[\(\[]?([A-Da-dक-घ1-4])[\)\].:\-\s]\s*(.+)/);         if (optMatch && currentQ) {           let optText = optMatch[2].trim().replace(/[\.@\*•]/g, '').trim();           currentQ.options.push(optText);         }       }        if (currentQ && currentQ.options.length >= 2) {         parsed.push(currentQ);       }        // Universal fallback block tokenizer for complex PDFs       if (parsed.length === 0) {         const cleanedText = rawText.replace(/\b([A-Da-d])\b/g, '\n$1)');         const blocks = cleanedText.split(/(?=\b\d+[\.\-\)]|\bप्रश्न\s*\d+)/);
+        blocks.forEach((block) => {
+          const blines = block.split('\n').map(l => l.trim()).filter(Boolean);
+          if (blines.length >= 2) {
+            let qText = blines[0].replace(/^(?:Q\d+|\d+|प्रश्न\s*\d+)[\.\-\):\s]*/, '').trim();
+            let options = [];
+            for (let i = 1; i < blines.length; i++) {
+              let optLine = blines[i].replace(/[\.@\*•]/g, '').replace(/^[A-Da-dक-घ][\.\-\)]\s*/, '').trim();
+              if (optLine) options.push(optLine);
             }
             if (options.length >= 2) {
               parsed.push({
                 question: qText,
-                options: options,
+                options: options.slice(0, 4),
                 answer: 0
               });
             }
@@ -925,8 +942,16 @@
         const titleElem = document.getElementById("currentQuizTitle");
         const metaElem = document.getElementById("currentQuizMeta");
 
-        const stored = localStorage.getItem("classroom_quiz_questions");
+        let stored = localStorage.getItem("classroom_quiz_questions");
         const title = localStorage.getItem("quiz_title") || "Untitled Quiz";
+
+        if (!stored) {
+          const allQuizzes = JSON.parse(localStorage.getItem("shoaib_all_quizzes") || "[]");
+          if (allQuizzes.length > 0) {
+            stored = JSON.stringify(allQuizzes[allQuizzes.length - 1].questions);
+            localStorage.setItem("classroom_quiz_questions", stored);
+          }
+        }
 
         if (!stored) {
           if (titleElem) titleElem.innerText = "No active quiz uploaded";
@@ -937,7 +962,7 @@
 
         const questions = JSON.parse(stored);
         if (titleElem) titleElem.innerText = title;
-        if (metaElem) metaElem.innerText = `${questions.length} questions live on student portal (Bilingual AI Scanned)`;
+        if (metaElem) metaElem.innerText = `${questions.length} questions live on student portal (Gemini Flash-Lite Scanned)`;
 
         if (container) {
           container.innerHTML = "";
