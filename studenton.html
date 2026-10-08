@@ -5,6 +5,114 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Shoaib Akhter — Student Repository</title>
   <style>
+    /* Set the second image as the background wallpaper */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background: url('image_99ee14.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: #333;
+    }
+
+    .portal-container {
+      max-width: 800px;
+      margin: 50px auto;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+    }
+
+    .quiz-card {
+      background: #ffffff;
+      padding: 15px 20px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      border-left: 5px solid #3498db;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .quiz-info h3 {
+      margin: 0 0 5px 0;
+      color: #2c3e50;
+    }
+
+    .quiz-info p {
+      margin: 0;
+      font-size: 0.85rem;
+      color: #7f8c8d;
+    }
+
+    .btn-take-quiz {
+      background: #3498db;
+      color: white;
+      padding: 8px 16px;
+      text-decoration: none;
+      border-radius: 5px;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+
+    .btn-take-quiz:hover {
+      background: #2980b9;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="portal-container">
+    <h1>Available Quizzes</h1>
+    <div id="quiz-list-container">
+      <!-- Quizzes will be dynamically loaded here -->
+    </div>
+  </div>
+
+  <script>
+    // Load and automatically sort quizzes by upload date (newest first)
+    function loadStudentQuizzes() {
+      // Retrieve quizzes from localStorage (or your backend/API)
+      let quizzes = JSON.parse(localStorage.getItem('uploadedQuizzes')) || [];
+
+      // Sort descending: newest upload date/time on top
+      quizzes.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+      const container = document.getElementById('quiz-list-container');
+      container.innerHTML = '';
+
+      if (quizzes.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: #666;">No quizzes available at the moment.</p>';
+        return;
+      }
+
+      quizzes.forEach(quiz => {
+        const card = document.createElement('div');
+        card.className = 'quiz-card';
+        
+        // Format the date nicely
+        const uploadDate = new Date(quiz.createdAt).toLocaleString();
+
+        card.innerHTML = `
+          <div class="quiz-info">
+            <h3>${quiz.title}</h3>
+            <p>Uploaded on: ${uploadDate}</p>
+          </div>
+          <a href="quiz.html?id=${quiz.id}" class="btn-take-quiz">Start Quiz</a>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // Run on page load
+    window.onload = loadStudentQuizzes
     :root {
       --bg-main: #0a0314;
       --bg-sidebar: #0f0521;
