@@ -5,10 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz Portal — Shoaib Akhter</title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
         body { 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background: url('image_9a617e.jpg') no-repeat center center fixed; 
+            /* Bulletproof background: Dark moody gradient fallback + Wallpaper image */
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%), url('image_9a617e.jpg') no-repeat center center fixed; 
             background-size: cover; 
+            background-blend-mode: overlay;
             color: #1e293b; 
             margin: 0; 
             padding: 20px; 
@@ -21,15 +26,15 @@
             width: 100%; 
             max-width: 650px; 
             background: rgba(255, 255, 255, 0.95); 
-            backdrop-filter: blur(8px);
+            backdrop-filter: blur(10px);
             padding: 30px; 
             border-radius: 16px; 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2); 
-            border: 1px solid #e2e8f0; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4); 
+            border: 1px solid rgba(255, 255, 255, 0.2); 
         }
         h1 { text-align: center; color: #312e81; margin-bottom: 20px; font-size: 1.5rem; }
         .select-box { margin-bottom: 20px; }
-        select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-weight: 600; font-size: 0.95rem; background: #f8fafc; }
+        select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-weight: 600; font-size: 0.95rem; background: #f8fafc; cursor: pointer; }
         .question-card { display: none; background: #fbfbfc; border: 1px solid #e2e8f0; padding: 22px; border-radius: 12px; margin-bottom: 20px; }
         .question-card.active { display: block; }
         .question-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 15px; color: #0f172a; }
@@ -80,6 +85,9 @@
 
     function populateQuizSelector() {
         let quizzes = JSON.parse(localStorage.getItem("shoaib_all_quizzes") || "[]");
+        // Sort quizzes newest first
+        quizzes.sort((a, b) => new Date(b.id || 0) - new Date(a.id || 0));
+
         const dropdown = document.getElementById("quizDropdown");
         dropdown.innerHTML = '<option value="">-- Choose Uploaded Quiz --</option>';
 
