@@ -8,13 +8,12 @@
     :root {
       --bg-sidebar: rgba(18, 7, 38, 0.88);
       --card-bg: rgba(255, 255, 255, 0.65);
-      --card-hover: rgba(255, 255, 255, 0.88);
+      --card-hover: rgba(255, 255, 255, 0.9);
       --accent-purple: #7c3aed;
       --accent-gold: #f59e0b;
       --text-main: #1e1b2e;
       --text-muted: #64748b;
       --text-sub: #551a8b;
-      --border-subtle: rgba(255, 255, 255, 0.4);
     }
 
     * {
@@ -38,8 +37,8 @@
       width: 290px;
       min-width: 290px;
       background: var(--bg-sidebar);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       border-right: 1px solid rgba(255, 255, 255, 0.15);
       display: flex;
       flex-direction: column;
@@ -48,6 +47,7 @@
       position: sticky;
       top: 0;
       z-index: 10;
+      box-shadow: 10px 0 30px rgba(0, 0, 0, 0.3);
     }
 
     .brand-header {
@@ -67,7 +67,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 0 18px rgba(168, 85, 247, 0.35);
+      box-shadow: 0 0 18px rgba(168, 85, 247, 0.4);
     }
 
     .brand-logo-letter {
@@ -106,15 +106,15 @@
       border-radius: 18px;
       cursor: pointer;
       text-decoration: none;
-      transition: all 0.2s ease;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
       background: transparent;
       border: 1.5px solid transparent;
     }
 
     .nav-item.active {
-      background: rgba(124, 58, 237, 0.35);
+      background: rgba(124, 58, 237, 0.4);
       border-color: rgba(245, 158, 11, 0.8);
-      box-shadow: 0 0 20px rgba(245, 158, 11, 0.25);
+      box-shadow: 0 0 24px rgba(245, 158, 11, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.3);
     }
 
     .nav-item:not(.active):hover {
@@ -152,9 +152,7 @@
       line-height: 1.2;
     }
 
-    .nav-item.active .nav-sub {
-      color: #fde68a;
-    }
+    .nav-item.active .nav-sub { color: #fde68a; }
 
     .nav-sub {
       font-size: 0.76rem;
@@ -179,14 +177,16 @@
 
     .btn-signout:hover { opacity: 0.8; }
 
-    /* Translucent Glossy Main Content */
+    /* Ultra-Glossy Translucent Main Content */
     .main-wrapper {
       flex: 1;
       padding: 2.25rem 2.5rem;
       max-width: 1200px;
-      background: rgba(248, 250, 252, 0.82);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
+      background: radial-gradient(circle at 10% 10%, rgba(243, 232, 255, 0.6) 0%, transparent 40%),
+                  radial-gradient(circle at 90% 90%, rgba(233, 213, 255, 0.5) 0%, transparent 50%),
+                  rgba(248, 250, 252, 0.78);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       min-height: 100vh;
     }
 
@@ -200,15 +200,17 @@
     }
 
     .view-heading h2 {
-      font-size: 1.75rem;
+      font-size: 1.85rem;
       font-weight: 800;
       color: #0f172a;
+      letter-spacing: -0.02em;
     }
 
     .view-heading p {
       color: var(--text-muted);
       font-size: 0.88rem;
       margin-top: 0.3rem;
+      font-weight: 500;
     }
 
     .search-box {
@@ -219,58 +221,64 @@
 
     .search-box input {
       width: 100%;
-      background: rgba(255, 255, 255, 0.75);
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(10px);
       border: 1px solid rgba(255, 255, 255, 0.9);
-      border-radius: 14px;
-      padding: 0.75rem 1rem 0.75rem 2.5rem;
+      border-radius: 16px;
+      padding: 0.8rem 1rem 0.8rem 2.6rem;
       color: #0f172a;
       font-size: 0.9rem;
       outline: none;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-      transition: all 0.2s ease;
+      box-shadow: 0 4px 20px rgba(118, 92, 168, 0.05), inset 0 1px 2px rgba(255, 255, 255, 0.9);
+      transition: all 0.25s ease;
     }
 
     .search-box input:focus {
       border-color: #7c3aed;
-      background: #ffffff;
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 6px 24px rgba(124, 58, 237, 0.12), inset 0 1px 2px #ffffff;
     }
 
     .search-box svg {
       position: absolute;
-      left: 0.85rem;
+      left: 0.95rem;
       top: 50%;
       transform: translateY(-50%);
       width: 16px;
       height: 16px;
-      fill: var(--text-muted);
+      fill: #7c3aed;
+      opacity: 0.8;
     }
 
     .chips-bar {
       display: flex;
-      gap: 0.5rem;
+      gap: 0.6rem;
       overflow-x: auto;
       padding-bottom: 0.75rem;
       margin-bottom: 1.5rem;
     }
 
     .chip {
-      background: rgba(255, 255, 255, 0.7);
-      border: 1px solid rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.85);
       color: var(--text-muted);
-      padding: 0.45rem 1rem;
+      padding: 0.5rem 1.1rem;
       border-radius: 9999px;
-      font-size: 0.82rem;
-      font-weight: 600;
+      font-size: 0.84rem;
+      font-weight: 700;
       cursor: pointer;
       white-space: nowrap;
-      transition: all 0.2s ease;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+      transition: all 0.25s ease;
     }
 
     .chip.active, .chip:hover {
       background: linear-gradient(135deg, #7c3aed, #6d28d9);
       border-color: transparent;
       color: #ffffff;
-      box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+      box-shadow: 0 6px 18px rgba(124, 58, 237, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+      transform: translateY(-1px);
     }
 
     .file-grid {
@@ -280,24 +288,24 @@
     }
 
     .file-card {
-      background: var(--card-bg);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.8);
-      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      border-radius: 22px;
       padding: 1.25rem;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04), inset 0 1px 2px #ffffff;
-      transition: all 0.25s ease;
+      box-shadow: 0 8px 24px rgba(118, 92, 168, 0.06), inset 0 1px 2px rgba(255, 255, 255, 0.95);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .file-card:hover {
       transform: translateY(-3px);
-      background: var(--card-hover);
-      border-color: rgba(124, 58, 237, 0.4);
-      box-shadow: 0 10px 24px rgba(124, 58, 237, 0.1), inset 0 1px 2px #ffffff;
+      background: rgba(255, 255, 255, 0.88);
+      border-color: rgba(192, 132, 252, 0.6);
+      box-shadow: 0 14px 32px rgba(118, 92, 168, 0.12), inset 0 1px 2px #ffffff;
     }
 
     .file-top {
@@ -308,16 +316,17 @@
     }
 
     .file-badge-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      background: rgba(124, 58, 237, 0.12);
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      background: rgba(124, 58, 237, 0.1);
       border: 1px solid rgba(124, 58, 237, 0.25);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 1.2rem;
       flex-shrink: 0;
+      box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.8);
     }
 
     .file-info { overflow: hidden; }
@@ -335,8 +344,8 @@
       display: inline-block;
       font-size: 0.72rem;
       color: #6d28d9;
-      background: rgba(124, 58, 237, 0.12);
-      padding: 0.15rem 0.5rem;
+      background: rgba(124, 58, 237, 0.1);
+      padding: 0.15rem 0.55rem;
       border-radius: 6px;
       margin-top: 0.35rem;
       font-weight: 700;
@@ -355,9 +364,9 @@
     .btn-download {
       background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
       color: #ffffff;
-      border: none;
+      border: 1px solid rgba(216, 180, 254, 0.4);
       padding: 0.65rem;
-      border-radius: 12px;
+      border-radius: 14px;
       font-size: 0.85rem;
       font-weight: 700;
       cursor: pointer;
@@ -365,63 +374,65 @@
       align-items: center;
       justify-content: center;
       gap: 0.45rem;
-      box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
+      box-shadow: 0 4px 14px rgba(124, 58, 237, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.3);
       transition: all 0.2s ease;
     }
 
     .btn-download:hover {
-      box-shadow: 0 6px 16px rgba(124, 58, 237, 0.35);
+      box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35), inset 0 1px 2px rgba(255, 255, 255, 0.5);
       transform: translateY(-1px);
     }
 
     .folder-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
       gap: 1.25rem;
     }
 
     .folder-card {
-      background: var(--card-bg);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.8);
-      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      border-radius: 22px;
       padding: 1.25rem;
       cursor: pointer;
       display: flex;
       align-items: center;
       gap: 1rem;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04), inset 0 1px 2px #ffffff;
-      transition: all 0.2s ease;
+      box-shadow: 0 8px 24px rgba(118, 92, 168, 0.06), inset 0 1px 2px rgba(255, 255, 255, 0.95);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .folder-card:hover {
-      background: #ffffff;
-      border-color: #7c3aed;
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(124, 58, 237, 0.12);
+      background: rgba(255, 255, 255, 0.9);
+      border-color: rgba(192, 132, 252, 0.7);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(118, 92, 168, 0.12), inset 0 1px 2px #ffffff;
     }
 
-    .folder-icon { font-size: 2rem; }
+    .folder-icon { font-size: 2.1rem; }
 
     .folder-parent-crumb {
       font-size: 0.72rem;
       color: #7c3aed;
-      font-weight: 700;
+      font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.06em;
+      margin-bottom: 2px;
     }
 
     .folder-card-title {
-      font-size: 0.95rem;
-      font-weight: 700;
+      font-size: 0.98rem;
+      font-weight: 800;
       color: #0f172a;
     }
 
     .folder-card-count {
       font-size: 0.75rem;
       color: var(--text-muted);
-      margin-top: 2px;
+      margin-top: 3px;
+      font-weight: 600;
     }
 
     .empty-state {
@@ -429,6 +440,10 @@
       padding: 4rem 1.5rem;
       color: var(--text-muted);
       grid-column: 1 / -1;
+      background: rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(10px);
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.7);
     }
 
     .empty-state span {
@@ -548,7 +563,7 @@
   <script>
     let currentTab = 'files';
     let activeFilter = 'All';
-    let activeStudentFolderHierarchy = ''; // Tracks student folder drill down
+    let activeStudentFolderHierarchy = '';
     let dbInstance = null;
     let allFiles = [];
     let foldersList = [];
@@ -730,10 +745,9 @@
         bBar.classList.add('hidden');
       }
 
-      // Filter folders belonging to current drill-down level
       const currentLevelFolders = foldersList.filter(f => {
         if (!folderPath) {
-          return !f.includes(" / "); // Root folders only
+          return !f.includes(" / ");
         } else {
           if (f.startsWith(folderPath + " / ")) {
             const remainder = f.slice((folderPath + " / ").length);
