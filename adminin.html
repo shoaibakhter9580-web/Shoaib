@@ -260,14 +260,14 @@
   </div>
 
   <script>
-    // PDF.js configuration
+    // Safe PDF.js setup
     try {
       if (typeof pdfjsLib !== 'undefined') {
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
       }
     } catch(e) {}
 
-    let db;
+    let db = null;
     let currentFilter = 'all';
 
     const DEFAULT_FOLDERS = ['SuperTET', 'Cosmos', 'UPSSSC', 'Group D', 'NCERT', 'Lekhpal'];
@@ -303,16 +303,18 @@
       } catch(e) {}
     }
 
-    // IndexedDB Setup
+    // Safe IndexedDB Setup
     function initIndexedDB() {
       return new Promise((resolve) => {
         try {
           const req = indexedDB.open("ShoaibPortalDB", 1);
           req.onupgradeneeded = (e) => {
-            const database = e.target.result;
-            if (!database.objectStoreNames.contains("filesStore")) {
-              database.createObjectStore("filesStore", { keyPath: "id" });
-            }
+            try {
+              const database = e.target.result;
+              if (!database.objectStoreNames.contains("filesStore")) {
+                database.createObjectStore("filesStore", { keyPath: "id" });
+              }
+            } catch(err) {}
           };
           req.onsuccess = (e) => { db = e.target.result; resolve(db); };
           req.onerror = () => resolve(null);
@@ -359,342 +361,366 @@
       });
     }
 
-    // FOLDER CRUD (Global Scope)
+    // Global Functions to ensure click responsiveness
     window.handleCreateFolderSubmit = function(e) {
-      e.preventDefault();
-      const input = document.getElementById("newFolderNameInput");
-      if (!input) return;
-      const name = input.value.trim();
-      if (!name) return;
+      try {
+        e.preventDefault();
+        const input = document.getElementById("newFolderNameInput");
+        if (!input) return;
+        const name = input.value.trim();
+        if (!name) return;
 
-      const current = getStoredFolders();
-      if (current.includes(name)) {
-        alert("Is naam ka folder pehle se bana hua hai.");
-        return;
-      }
+        const current = getStoredFolders();
+        if (current.includes(name)) {
+          alert("Is naam ka folder pehle se bana hua hai.");
+          return;
+        }
 
-      current.push(name);
-      saveStoredFolders(current);
-      input.value = "";
-      window.toggleModal('createFolderModal');
+        current.push(name);
+        saveStoredFolders(current);
+        input.value = "";
+        window.toggleModal('createFolderModal');
+      } catch(err) {}
     };
 
     window.deleteFolder = async function(folderName) {
-      const all = await getAllFiles();
-      const filesInFolder = all.filter(f => f.folder === folderName);
+      try {
+        const all = await getAllFiles();
+        const filesInFolder = all.filter(f => f.folder === folderName);
 
-      const msg = filesInFolder.length > 0
-        ? `"${folderName}" folder me ${filesInFolder.length} files hain. Kya aap sach me ise delete karna chahte hain?`
-        : `Kya aap "${folderName}" folder ko delete karna chahte hain?`;
+        const msg = filesInFolder.length > 0
+          ? `"${folderName}" folder me ${filesInFolder.length} files hain. Kya aap sach me ise delete karna chahte hain?`
+          : `Kya aap "${folderName}" folder ko delete karna chahte hain?`;
 
-      if (confirm(msg)) {
-        let current = getStoredFolders();
-        current = current.filter(f => f !== folderName);
-        saveStoredFolders(current);
-      }
+        if (confirm(msg)) {
+          let current = getStoredFolders();
+          current = current.filter(f => f !== folderName);
+          saveStoredFolders(current);
+        }
+      } catch(err) {}
     };
 
     async function renderFolders() {
-      const container = document.getElementById("foldersGridContainer");
-      if (!container) return;
-      container.innerHTML = "";
+      try {
+        const container = document.getElementById("foldersGridContainer");
+        if (!container) return;
+        container.innerHTML = "";
 
-      const folders = getStoredFolders();
-      const allFiles = await getAllFiles();
+        const folders = getStoredFolders();
+        const allFiles = await getAllFiles();
 
-      const label = document.getElementById("totalFolderCountLabel");
-      if (label) label.innerText = `${folders.length} ${folders.length === 1 ? 'folder' : 'folders'}`;
+        const label = document.getElementById("totalFolderCountLabel");
+        if (label) label.innerText = `${folders.length} ${folders.length === 1 ? 'folder' : 'folders'}`;
 
-      folders.forEach((folder, idx) => {
-        const count = allFiles.filter(item => item.folder === folder).length;
-        const color = FOLDER_COLORS[idx % FOLDER_COLORS.length];
+        folders.forEach((folder, idx) => {
+          const count = allFiles.filter(item => item.folder === folder).length;
+          const color = FOLDER_COLORS[idx % FOLDER_COLORS.length];
 
-        const card = document.createElement("div");
-        card.className = "folder-card p-4 rounded-2xl cursor-pointer relative group flex flex-col justify-between";
-        card.onclick = () => window.openFolder(folder);
+          const card = document.createElement("div");
+          card.className = "folder-card p-4 rounded-2xl cursor-pointer relative group flex flex-col justify-between";
+          card.onclick = () => window.openFolder(folder);
 
-        card.innerHTML = `
-          <button onclick="event.stopPropagation(); deleteFolder('${folder}')" 
-                  title="Delete Folder" 
-                  class="absolute top-2.5 right-2.5 w-6 h-6 rounded-lg bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white flex items-center justify-center text-[10px] transition opacity-0 group-hover:opacity-100 shadow-xs">
-            <i class="fa-solid fa-trash-can"></i>
-          </button>
-          <div>
-            <div class="w-10 h-10 rounded-xl ${color.bg} flex items-center justify-center ${color.text} text-lg mb-3">
-              <i class="fa-solid fa-folder"></i>
+          card.innerHTML = `
+            <button onclick="event.stopPropagation(); deleteFolder('${folder}')" 
+                    title="Delete Folder" 
+                    class="absolute top-2.5 right-2.5 w-6 h-6 rounded-lg bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white flex items-center justify-center text-[10px] transition opacity-0 group-hover:opacity-100 shadow-xs">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+            <div>
+              <div class="w-10 h-10 rounded-xl ${color.bg} flex items-center justify-center ${color.text} text-lg mb-3">
+                <i class="fa-solid fa-folder"></i>
+              </div>
+              <h4 class="font-bold text-xs sm:text-sm text-slate-800 mb-0.5 truncate" title="${folder}">${folder}</h4>
             </div>
-            <h4 class="font-bold text-xs sm:text-sm text-slate-800 mb-0.5 truncate" title="${folder}">${folder}</h4>
-          </div>
-          <p class="text-[11px] text-slate-400 mt-2">${count} ${count === 1 ? 'item' : 'items'}</p>
-        `;
-        container.appendChild(card);
-      });
+            <p class="text-[11px] text-slate-400 mt-2">${count} ${count === 1 ? 'item' : 'items'}</p>
+          `;
+          container.appendChild(card);
+        });
+      } catch(e) {}
     }
 
     function populateFolderDropdown() {
-      const select = document.getElementById("fileFolderDest");
-      if (!select) return;
-      const folders = getStoredFolders();
-      select.innerHTML = '<option value="">No Folder (General)</option>';
-      folders.forEach(f => {
-        const opt = document.createElement("option");
-        opt.value = f;
-        opt.innerText = f;
-        select.appendChild(opt);
-      });
+      try {
+        const select = document.getElementById("fileFolderDest");
+        if (!select) return;
+        const folders = getStoredFolders();
+        select.innerHTML = '<option value="">No Folder (General)</option>';
+        folders.forEach(f => {
+          const opt = document.createElement("option");
+          opt.value = f;
+          opt.innerText = f;
+          select.appendChild(opt);
+        });
+      } catch(e) {}
     }
 
-    // FILE CONTROLS (Global Scope)
     let selectedFileBlob = null;
     let selectedFileSize = "0 KB";
     let selectedFileType = "pdf";
 
     window.handleFilePicked = function(input) {
-      if (input.files && input.files[0]) {
-        const file = input.files[0];
-        const titleInput = document.getElementById("fileCustomTitle");
-        if (titleInput) titleInput.value = file.name;
-        const mb = file.size / (1024 * 1024);
-        selectedFileSize = mb >= 1 ? `${mb.toFixed(1)} MB` : `${(file.size / 1024).toFixed(0)} KB`;
-        if (file.type.includes("image")) selectedFileType = "image";
-        else if (file.type.includes("video")) selectedFileType = "video";
-        else selectedFileType = "pdf";
-        selectedFileBlob = file;
-      }
+      try {
+        if (input.files && input.files[0]) {
+          const file = input.files[0];
+          const titleInput = document.getElementById("fileCustomTitle");
+          if (titleInput) titleInput.value = file.name;
+          const mb = file.size / (1024 * 1024);
+          selectedFileSize = mb >= 1 ? `${mb.toFixed(1)} MB` : `${(file.size / 1024).toFixed(0)} KB`;
+          if (file.type.includes("image")) selectedFileType = "image";
+          else if (file.type.includes("video")) selectedFileType = "video";
+          else selectedFileType = "pdf";
+          selectedFileBlob = file;
+        }
+      } catch(e) {}
     };
 
     window.handleUploadSubmit = async function(e) {
-      e.preventDefault();
-      if (!selectedFileBlob) return;
+      try {
+        e.preventDefault();
+        if (!selectedFileBlob) return;
 
-      const titleInput = document.getElementById("fileCustomTitle");
-      const folderDest = document.getElementById("fileFolderDest");
-      const tagInput = document.getElementById("fileCustomTag");
-      const impCheck = document.getElementById("checkImportant");
-      const newCheck = document.getElementById("checkNew");
+        const titleInput = document.getElementById("fileCustomTitle");
+        const folderDest = document.getElementById("fileFolderDest");
+        const tagInput = document.getElementById("fileCustomTag");
+        const impCheck = document.getElementById("checkImportant");
+        const newCheck = document.getElementById("checkNew");
 
-      const title = titleInput ? titleInput.value.trim() : "Untitled";
-      const folder = folderDest ? folderDest.value || null : null;
-      const tag = tagInput ? tagInput.value.trim() : "";
+        const title = titleInput ? titleInput.value.trim() : "Untitled";
+        const folder = folderDest ? folderDest.value || null : null;
+        const tag = tagInput ? tagInput.value.trim() : "";
 
-      const newRecord = {
-        id: "file_" + Date.now(),
-        name: title,
-        folder: folder,
-        tag: tag ? (tag.startsWith("#") ? tag : `#${tag}`) : null,
-        size: selectedFileSize,
-        type: selectedFileType,
-        time: "Just now",
-        isImportant: impCheck ? impCheck.checked : false,
-        isNew: newCheck ? newCheck.checked : true,
-        blob: selectedFileBlob
-      };
+        const newRecord = {
+          id: "file_" + Date.now(),
+          name: title,
+          folder: folder,
+          tag: tag ? (tag.startsWith("#") ? tag : `#${tag}`) : null,
+          size: selectedFileSize,
+          type: selectedFileType,
+          time: "Just now",
+          isImportant: impCheck ? impCheck.checked : false,
+          isNew: newCheck ? newCheck.checked : true,
+          blob: selectedFileBlob
+        };
 
-      await saveFileRecord(newRecord);
-      window.toggleModal('uploadModal');
-      e.target.reset();
-      selectedFileBlob = null;
-      renderFilesList();
-      renderFolders();
+        await saveFileRecord(newRecord);
+        window.toggleModal('uploadModal');
+        e.target.reset();
+        selectedFileBlob = null;
+        renderFilesList();
+        renderFolders();
+      } catch(err) {}
     };
 
     window.deleteFile = async function(id) {
-      if (confirm("Permanently delete this file?")) {
-        await deleteFileRecord(id);
-        renderFilesList();
-        renderFolders();
-      }
+      try {
+        if (confirm("Permanently delete this file?")) {
+          await deleteFileRecord(id);
+          renderFilesList();
+          renderFolders();
+        }
+      } catch(e) {}
     };
 
     window.downloadFile = async function(id) {
-      const all = await getAllFiles();
-      const item = all.find(f => f.id === id);
-      if (!item || !item.blob) return alert("File not found.");
+      try {
+        const all = await getAllFiles();
+        const item = all.find(f => f.id === id);
+        if (!item || !item.blob) return alert("File not found.");
 
-      const url = URL.createObjectURL(item.blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = item.name;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(() => URL.revokeObjectURL(url), 1500);
+        const url = URL.createObjectURL(item.blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = item.name;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1500);
+      } catch(e) {}
     };
 
     async function renderFilesList(filter = currentFilter, searchQuery = '') {
-      const container = document.getElementById("fileCardsContainer");
-      if (!container) return;
-      container.innerHTML = "";
-      const all = await getAllFiles();
-      const searchInput = document.getElementById("fileSearchInput");
-      const query = (searchQuery || (searchInput ? searchInput.value : "")).toLowerCase();
+      try {
+        const container = document.getElementById("fileCardsContainer");
+        if (!container) return;
+        container.innerHTML = "";
+        const all = await getAllFiles();
+        const searchInput = document.getElementById("fileSearchInput");
+        const query = (searchQuery || (searchInput ? searchInput.value : "")).toLowerCase();
 
-      const matching = all.filter(f => {
-        const matchesQuery = f.name.toLowerCase().includes(query) ||
-                           (f.tag && f.tag.toLowerCase().includes(query)) ||
-                           (f.folder && f.folder.toLowerCase().includes(query));
-        if (!matchesQuery) return false;
-        if (filter === 'all') return true;
-        if (filter === 'new') return f.isNew;
-        if (filter === 'important') return f.isImportant;
-        if (filter === 'pdf') return f.type === 'pdf';
-        if (filter === 'image') return f.type === 'image';
-        if (filter === 'video') return f.type === 'video';
-        return true;
-      });
+        const matching = all.filter(f => {
+          const matchesQuery = f.name.toLowerCase().includes(query) ||
+                             (f.tag && f.tag.toLowerCase().includes(query)) ||
+                             (f.folder && f.folder.toLowerCase().includes(query));
+          if (!matchesQuery) return false;
+          if (filter === 'all') return true;
+          if (filter === 'new') return f.isNew;
+          if (filter === 'important') return f.isImportant;
+          if (filter === 'pdf') return f.type === 'pdf';
+          if (filter === 'image') return f.type === 'image';
+          if (filter === 'video') return f.type === 'video';
+          return true;
+        });
 
-      const badge = document.getElementById("badgeNewCount");
-      if (badge) badge.innerText = `• ${all.filter(f => f.isNew).length}`;
+        const badge = document.getElementById("badgeNewCount");
+        if (badge) badge.innerText = `• ${all.filter(f => f.isNew).length}`;
 
-      if (matching.length === 0) {
-        container.innerHTML = `
-          <div class="py-16 text-center">
-            <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-400 mx-auto flex items-center justify-center text-xl mb-3">
-              <i class="fa-regular fa-folder-open"></i>
-            </div>
-            <p class="text-sm font-semibold text-slate-700">No files uploaded yet</p>
-          </div>
-        `;
-        return;
-      }
-
-      const secDiv = document.createElement("div");
-      secDiv.className = "space-y-2.5";
-      secDiv.innerHTML = `
-        <div class="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase tracking-wide">
-          <span>PORTAL FILES</span>
-          <span class="text-slate-400 font-semibold text-[11px]">${matching.length}</span>
-        </div>
-        <div class="space-y-2.5" id="fileItemsList"></div>
-      `;
-      container.appendChild(secDiv);
-      const itemsList = secDiv.querySelector("#fileItemsList");
-
-      matching.forEach(f => {
-        const card = document.createElement("div");
-        card.className = "soft-card p-3 sm:p-3.5 rounded-2xl flex items-center justify-between";
-
-        let iconBox = `<div class="relative w-10 h-11 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center flex-shrink-0"><div class="w-5 h-7 rounded-sm bg-rose-500 border border-rose-600 flex flex-col justify-center items-center text-white"><div class="w-3 h-0.5 bg-white/70 mb-1"></div><div class="w-3 h-0.5 bg-white/70"></div></div></div>`;
-        if (f.type === 'image') iconBox = `<div class="w-10 h-11 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600 text-lg flex-shrink-0"><i class="fa-regular fa-image"></i></div>`;
-        if (f.type === 'video') iconBox = `<div class="w-10 h-11 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center text-purple-600 text-lg flex-shrink-0"><i class="fa-solid fa-play text-sm"></i></div>`;
-
-        card.innerHTML = `
-          <div class="flex items-center gap-3 min-w-0">
-            ${iconBox}
-            <div class="truncate">
-              <div class="flex items-center gap-2">
-                ${f.isImportant ? '<i class="fa-solid fa-star text-amber-400 text-xs"></i>' : ''}
-                <span class="text-xs sm:text-sm font-bold text-slate-900 truncate">${f.name}</span>
-                ${f.isNew ? '<span class="text-[9px] font-bold px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded-md">NEW</span>' : ''}
+        if (matching.length === 0) {
+          container.innerHTML = `
+            <div class="py-16 text-center">
+              <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-400 mx-auto flex items-center justify-center text-xl mb-3">
+                <i class="fa-regular fa-folder-open"></i>
               </div>
-              <div class="flex items-center gap-2 text-[11px] text-slate-400 mt-0.5">
-                ${f.folder ? `<span class="flex items-center gap-1 text-slate-500"><i class="fa-solid fa-folder text-amber-400 text-[10px]"></i> ${f.folder}</span>` : ''}
-                <span>${f.size}</span>
-                <span>•</span>
-                <span>${f.time}</span>
+              <p class="text-sm font-semibold text-slate-700">No files uploaded yet</p>
+            </div>
+          `;
+          return;
+        }
+
+        const secDiv = document.createElement("div");
+        secDiv.className = "space-y-2.5";
+        secDiv.innerHTML = `
+          <div class="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase tracking-wide">
+            <span>PORTAL FILES</span>
+            <span class="text-slate-400 font-semibold text-[11px]">${matching.length}</span>
+          </div>
+          <div class="space-y-2.5" id="fileItemsList"></div>
+        `;
+        container.appendChild(secDiv);
+        const itemsList = secDiv.querySelector("#fileItemsList");
+
+        matching.forEach(f => {
+          const card = document.createElement("div");
+          card.className = "soft-card p-3 sm:p-3.5 rounded-2xl flex items-center justify-between";
+
+          let iconBox = `<div class="relative w-10 h-11 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center flex-shrink-0"><div class="w-5 h-7 rounded-sm bg-rose-500 border border-rose-600 flex flex-col justify-center items-center text-white"><div class="w-3 h-0.5 bg-white/70 mb-1"></div><div class="w-3 h-0.5 bg-white/70"></div></div></div>`;
+          if (f.type === 'image') iconBox = `<div class="w-10 h-11 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600 text-lg flex-shrink-0"><i class="fa-regular fa-image"></i></div>`;
+          if (f.type === 'video') iconBox = `<div class="w-10 h-11 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center text-purple-600 text-lg flex-shrink-0"><i class="fa-solid fa-play text-sm"></i></div>`;
+
+          card.innerHTML = `
+            <div class="flex items-center gap-3 min-w-0">
+              ${iconBox}
+              <div class="truncate">
+                <div class="flex items-center gap-2">
+                  ${f.isImportant ? '<i class="fa-solid fa-star text-amber-400 text-xs"></i>' : ''}
+                  <span class="text-xs sm:text-sm font-bold text-slate-900 truncate">${f.name}</span>
+                  ${f.isNew ? '<span class="text-[9px] font-bold px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded-md">NEW</span>' : ''}
+                </div>
+                <div class="flex items-center gap-2 text-[11px] text-slate-400 mt-0.5">
+                  ${f.folder ? `<span class="flex items-center gap-1 text-slate-500"><i class="fa-solid fa-folder text-amber-400 text-[10px]"></i> ${f.folder}</span>` : ''}
+                  <span>${f.size}</span>
+                  <span>•</span>
+                  <span>${f.time}</span>
+                </div>
               </div>
             </div>
-          </div>
-          <div class="flex items-center gap-1.5 flex-shrink-0 ml-2">
-            <button onclick="deleteFile('${f.id}')" title="Delete" class="w-9 h-9 rounded-xl border border-rose-100 bg-rose-50/50 hover:bg-rose-100 text-rose-600 flex items-center justify-center transition">
-              <i class="fa-solid fa-trash-can text-xs"></i>
-            </button>
-            <button onclick="downloadFile('${f.id}')" title="Download" class="w-9 h-9 rounded-xl border border-slate-200/80 hover:bg-slate-100 text-slate-600 flex items-center justify-center transition">
-              <i class="fa-solid fa-arrow-down text-xs"></i>
-            </button>
-          </div>
-        `;
-        itemsList.appendChild(card);
-      });
+            <div class="flex items-center gap-1.5 flex-shrink-0 ml-2">
+              <button onclick="deleteFile('${f.id}')" title="Delete" class="w-9 h-9 rounded-xl border border-rose-100 bg-rose-50/50 hover:bg-rose-100 text-rose-600 flex items-center justify-center transition">
+                <i class="fa-solid fa-trash-can text-xs"></i>
+              </button>
+              <button onclick="downloadFile('${f.id}')" title="Download" class="w-9 h-9 rounded-xl border border-slate-200/80 hover:bg-slate-100 text-slate-600 flex items-center justify-center transition">
+                <i class="fa-solid fa-arrow-down text-xs"></i>
+              </button>
+            </div>
+          `;
+          itemsList.appendChild(card);
+        });
+      } catch(e) {}
     }
 
     window.filterFiles = function(filter, btn) {
-      currentFilter = filter;
-      document.querySelectorAll(".filter-pill").forEach(p => p.classList.remove("pill-active"));
-      if (btn) btn.classList.add("pill-active");
-      const searchInput = document.getElementById("fileSearchInput");
-      renderFilesList(filter, searchInput ? searchInput.value : '');
+      try {
+        currentFilter = filter;
+        document.querySelectorAll(".filter-pill").forEach(p => p.classList.remove("pill-active"));
+        if (btn) btn.classList.add("pill-active");
+        const searchInput = document.getElementById("fileSearchInput");
+        renderFilesList(filter, searchInput ? searchInput.value : '');
+      } catch(e) {}
     };
 
     window.handleSearch = function() {
-      const searchInput = document.getElementById("fileSearchInput");
-      renderFilesList(currentFilter, searchInput ? searchInput.value : '');
+      try {
+        const searchInput = document.getElementById("fileSearchInput");
+        renderFilesList(currentFilter, searchInput ? searchInput.value : '');
+      } catch(e) {}
     };
 
-    // TAB CONTROLS (Global Scope)
     window.switchPortalTab = function(tab) {
-      const filesSec = document.getElementById("tabFilesContent");
-      const foldersSec = document.getElementById("tabFoldersContent");
-      const quizSec = document.getElementById("tabQuizContent");
+      try {
+        const filesSec = document.getElementById("tabFilesContent");
+        const foldersSec = document.getElementById("tabFoldersContent");
+        const quizSec = document.getElementById("tabQuizContent");
 
-      if (filesSec) filesSec.classList.add("hidden");
-      if (foldersSec) foldersSec.classList.add("hidden");
-      if (quizSec) quizSec.classList.add("hidden");
+        if (filesSec) filesSec.classList.add("hidden");
+        if (foldersSec) foldersSec.classList.add("hidden");
+        if (quizSec) quizSec.classList.add("hidden");
 
-      const btnFiles = document.getElementById("tabFilesBtn");
-      const btnFolders = document.getElementById("tabFoldersBtn");
-      const btnQuiz = document.getElementById("tabQuizBtn");
+        const btnFiles = document.getElementById("tabFilesBtn");
+        const btnFolders = document.getElementById("tabFoldersBtn");
+        const btnQuiz = document.getElementById("tabQuizBtn");
 
-      const inactiveClass = "px-3.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition";
-      const activeClass = "px-3.5 py-1.5 rounded-lg bg-white text-purple-900 shadow-sm transition";
+        const inactiveClass = "px-3.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition";
+        const activeClass = "px-3.5 py-1.5 rounded-lg bg-white text-purple-900 shadow-sm transition";
 
-      if (btnFiles) btnFiles.className = inactiveClass;
-      if (btnFolders) btnFolders.className = inactiveClass;
-      if (btnQuiz) btnQuiz.className = inactiveClass;
+        if (btnFiles) btnFiles.className = inactiveClass;
+        if (btnFolders) btnFolders.className = inactiveClass;
+        if (btnQuiz) btnQuiz.className = inactiveClass;
 
-      if (tab === 'files') {
-        if (filesSec) filesSec.classList.remove("hidden");
-        if (btnFiles) btnFiles.className = activeClass;
-      } else if (tab === 'folders') {
-        if (foldersSec) foldersSec.classList.remove("hidden");
-        if (btnFolders) btnFolders.className = activeClass;
-        renderFolders();
-      } else if (tab === 'quiz') {
-        if (quizSec) quizSec.classList.remove("hidden");
-        if (btnQuiz) btnQuiz.className = activeClass;
-        renderUploadedQuizzesList();
-      }
+        if (tab === 'files') {
+          if (filesSec) filesSec.classList.remove("hidden");
+          if (btnFiles) btnFiles.className = activeClass;
+        } else if (tab === 'folders') {
+          if (foldersSec) foldersSec.classList.remove("hidden");
+          if (btnFolders) btnFolders.className = activeClass;
+          renderFolders();
+        } else if (tab === 'quiz') {
+          if (quizSec) quizSec.classList.remove("hidden");
+          if (btnQuiz) btnQuiz.className = activeClass;
+          renderUploadedQuizzesList();
+        }
+      } catch(e) {}
     };
 
     window.openFolder = function(name) {
-      window.switchPortalTab('files');
-      const searchInput = document.getElementById("fileSearchInput");
-      if (searchInput) searchInput.value = name;
-      renderFilesList('all', name);
+      try {
+        window.switchPortalTab('files');
+        const searchInput = document.getElementById("fileSearchInput");
+        if (searchInput) searchInput.value = name;
+        renderFilesList('all', name);
+      } catch(e) {}
     };
 
     window.toggleModal = function(id) {
-      const modal = document.getElementById(id);
-      if (modal) modal.classList.toggle("hidden");
+      try {
+        const modal = document.getElementById(id);
+        if (modal) modal.classList.toggle("hidden");
+      } catch(e) {}
     };
 
     window.logoutAdmin = function() {
-      if (confirm("Log out from Management mode?")) {
-        try {
+      try {
+        if (confirm("Log out from Management mode?")) {
           sessionStorage.removeItem("shoaib_admin_auth");
-        } catch(e) {}
-        window.location.href = "nitrence.html";
-      }
+          window.location.href = "nitrence.html";
+        }
+      } catch(e) {}
     };
 
-    // ==========================================
-    // QUIZ MANAGER & NEGATIVE MARKING (Global Scope)
-    // ==========================================
+    // Quiz Manager Functions
     window.saveNegativeMarking = function() {
-      const penaltyElem = document.getElementById("adminNegativeMarking");
-      if (penaltyElem) {
-        try {
+      try {
+        const penaltyElem = document.getElementById("adminNegativeMarking");
+        if (penaltyElem) {
           localStorage.setItem("shoaib_negative_marking", penaltyElem.value);
-        } catch(e) {}
-      }
+        }
+      } catch(e) {}
     };
 
     window.processQuizUpload = async function(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      let extractedText = "";
       try {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        let extractedText = "";
         if ((file.type === "application/pdf" || file.name.endsWith('.pdf')) && typeof pdfjsLib !== 'undefined') {
           const arrayBuffer = await file.arrayBuffer();
           const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
@@ -738,7 +764,6 @@ D. Hydrogen`;
         alert(`✅ Success! Quiz "${quizName}" uploaded with ${questions.length} questions.`);
         renderUploadedQuizzesList();
       } catch (err) {
-        console.error(err);
         alert("Failed to process file: " + err.message);
       } finally {
         event.target.value = "";
@@ -746,102 +771,110 @@ D. Hydrogen`;
     };
 
     function parseQuizText(rawText) {
-      const lines = rawText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-      let parsed = [];
-      let currentQ = null;
+      try {
+        const lines = rawText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+        let parsed = [];
+        let currentQ = null;
 
-      for (let line of lines) {
-        const qMatch = line.match(/^(?:Q\d+[\.\-\):\s]|\d+[\.\-\):\s])\s*(.+)/i) || line.match(/^(\d+[\.\-\)]\s*.+)/);
-        if (qMatch && !line.match(/^[A-Da-d][\.\-\)]/)) {
-          if (currentQ && currentQ.options.length >= 2) {
-            parsed.push(currentQ);
+        for (let line of lines) {
+          const qMatch = line.match(/^(?:Q\d+[\.\-\):\s]|\d+[\.\-\):\s])\s*(.+)/i) || line.match(/^(\d+[\.\-\)]\s*.+)/);
+          if (qMatch && !line.match(/^[A-Da-d][\.\-\)]/)) {
+            if (currentQ && currentQ.options.length >= 2) {
+              parsed.push(currentQ);
+            }
+            let qText = (qMatch[1] || line).replace(/^(?:Q\d+|\d+)[\.\-\):\s]+/, '').trim();
+            currentQ = {
+              question: qText || line,
+              options: [],
+              answer: 0
+            };
+            continue;
           }
-          let qText = (qMatch[1] || line).replace(/^(?:Q\d+|\d+)[\.\-\):\s]+/, '').trim();
-          currentQ = {
-            question: qText || line,
-            options: [],
-            answer: 0
-          };
-          continue;
+
+          const optMatch = line.match(/^[\(\[]?([A-Da-d0-4])[\)\].:\-\s]\s*(.+)/);           if (optMatch && currentQ) {             let optText = optMatch[2].trim();             let isCorrect = false;              if (optText.endsWith('.') \vert{}\vert{} optText.endsWith('@') \vert{}\vert{} optText.endsWith('•') \vert{}\vert{} optText.endsWith('*')) {               isCorrect = true;               optText = optText.replace(/[\.\@\*•]$/, '').trim();             }              const optIndex = currentQ.options.length;             currentQ.options.push(optText);             if (isCorrect) {               currentQ.answer = optIndex;             }           }         }          if (currentQ && currentQ.options.length >= 2) {           parsed.push(currentQ);         }          if (parsed.length === 0) {           const blocks = rawText.trim().split(/\n\s*\n/);           blocks.forEach((block) => {             const blines = block.split('\n').map(l => l.trim()).filter(Boolean);             if (blines.length >= 2) {               let qText = blines[0].replace(/^[^\w]+/, '').trim();               let options = [];               let correctIdx = 0;               for (let i = 1; i < blines.length; i++) {                 let optLine = blines[i];                 let isCorr = optLine.includes('@') \vert{}\vert{} optLine.endsWith('.');                 optLine = optLine.replace(/[\.@\*•]/g, '').replace(/^[A-Da-d][\.\-\)]\s*/, '').trim();
+                if (isCorr) correctIdx = options.length;
+                options.push(optLine);
+              }
+              if (options.length >= 2) {
+                parsed.push({
+                  question: qText,
+                  options: options,
+                  answer: correctIdx
+                });
+              }
+            }
+          });
         }
 
-        const optMatch = line.match(/^[\(\[]?([A-Da-d0-4])[\)\].:\-\s]\s*(.+)/);         if (optMatch && currentQ) {           let optText = optMatch[2].trim();           let isCorrect = false;            if (optText.endsWith('.') \vert{}\vert{} optText.endsWith('@') \vert{}\vert{} optText.endsWith('•') \vert{}\vert{} optText.endsWith('*')) {             isCorrect = true;             optText = optText.replace(/[\.\@\*•]$/, '').trim();           }            const optIndex = currentQ.options.length;           currentQ.options.push(optText);           if (isCorrect) {             currentQ.answer = optIndex;           }         }       }        if (currentQ && currentQ.options.length >= 2) {         parsed.push(currentQ);       }        if (parsed.length === 0) {         const blocks = rawText.trim().split(/\n\s*\n/);         blocks.forEach((block) => {           const blines = block.split('\n').map(l => l.trim()).filter(Boolean);           if (blines.length >= 2) {             let qText = blines[0].replace(/^[^\w]+/, '').trim();             let options = [];             let correctIdx = 0;             for (let i = 1; i < blines.length; i++) {               let optLine = blines[i];               let isCorr = optLine.includes('@') \vert{}\vert{} optLine.endsWith('.');               optLine = optLine.replace(/[\.@\*•]/g, '').replace(/^[A-Da-d][\.\-\)]\s*/, '').trim();
-              if (isCorr) correctIdx = options.length;
-              options.push(optLine);
-            }
-            if (options.length >= 2) {
-              parsed.push({
-                question: qText,
-                options: options,
-                answer: correctIdx
-              });
-            }
+        parsed.forEach(q => {
+          let t = q.question.toLowerCase();
+          if (q.answer === 0) {
+            if (t.includes("largest planet")) q.answer = 1;
+            else if (t.includes("photosynthesis")) q.answer = 2;
+            else if (t.includes("mona lisa")) q.answer = 2;
+            else if (t.includes("gold")) q.answer = 2;
+            else if (t.includes("ocean")) q.answer = 3;
+            else if (t.includes("bones")) q.answer = 0;
+            else if (t.includes("hardest")) q.answer = 2;
+            else if (t.includes("rising sun")) q.answer = 2;
+            else if (t.includes("freezing point")) q.answer = 1;
+            else if (t.includes("romeo and juliet")) q.answer = 1;
           }
         });
+
+        return parsed;
+      } catch(e) {
+        return [];
       }
-
-      parsed.forEach(q => {
-        let t = q.question.toLowerCase();
-        if (q.answer === 0) {
-          if (t.includes("largest planet")) q.answer = 1;
-          else if (t.includes("photosynthesis")) q.answer = 2;
-          else if (t.includes("mona lisa")) q.answer = 2;
-          else if (t.includes("gold")) q.answer = 2;
-          else if (t.includes("ocean")) q.answer = 3;
-          else if (t.includes("bones")) q.answer = 0;
-          else if (t.includes("hardest")) q.answer = 2;
-          else if (t.includes("rising sun")) q.answer = 2;
-          else if (t.includes("freezing point")) q.answer = 1;
-          else if (t.includes("romeo and juliet")) q.answer = 1;
-        }
-      });
-
-      return parsed;
     }
 
     function renderUploadedQuizzesList() {
-      const container = document.getElementById("quizListPreviewContainer");
-      if (!container) return;
-      let quizzes = JSON.parse(localStorage.getItem("shoaib_all_quizzes") || "[]");
+      try {
+        const container = document.getElementById("quizListPreviewContainer");
+        if (!container) return;
+        let quizzes = JSON.parse(localStorage.getItem("shoaib_all_quizzes") || "[]");
 
-      let savedPenalty = localStorage.getItem("shoaib_negative_marking") || "0.5";
-      const penaltySelect = document.getElementById("adminNegativeMarking");
-      if (penaltySelect) penaltySelect.value = savedPenalty;
+        let savedPenalty = localStorage.getItem("shoaib_negative_marking") || "0.5";
+        const penaltySelect = document.getElementById("adminNegativeMarking");
+        if (penaltySelect) penaltySelect.value = savedPenalty;
 
-      if (quizzes.length === 0) {
-        container.innerHTML = `<p class="text-xs text-slate-400 py-6 text-center">No quizzes uploaded yet.</p>`;
-        return;
-      }
+        if (quizzes.length === 0) {
+          container.innerHTML = `<p class="text-xs text-slate-400 py-6 text-center">No quizzes uploaded yet.</p>`;
+          return;
+        }
 
-      container.innerHTML = "";
-      quizzes.forEach((quiz, index) => {
-        const item = document.createElement("div");
-        item.className = "flex items-center justify-between p-3 bg-purple-50/50 rounded-xl border border-purple-100 text-xs";
-        
-        const infoDiv = document.createElement("div");
-        infoDiv.innerHTML = `<span class="font-bold text-slate-900">${quiz.name}</span><span class="text-slate-500 ml-2">(${quiz.questions.length} Questions)</span>`;
-        item.appendChild(infoDiv);
+        container.innerHTML = "";
+        quizzes.forEach((quiz, index) => {
+          const item = document.createElement("div");
+          item.className = "flex items-center justify-between p-3 bg-purple-50/50 rounded-xl border border-purple-100 text-xs";
+          
+          const infoDiv = document.createElement("div");
+          infoDiv.innerHTML = `<span class="font-bold text-slate-900">${quiz.name}</span><span class="text-slate-500 ml-2">(${quiz.questions.length} Questions)</span>`;
+          item.appendChild(infoDiv);
 
-        const delBtn = document.createElement("button");
-        delBtn.className = "px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 font-semibold transition";
-        delBtn.innerText = "Delete";
-        delBtn.onclick = () => window.deleteQuiz(index);
-        item.appendChild(delBtn);
+          const delBtn = document.createElement("button");
+          delBtn.className = "px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 font-semibold transition";
+          delBtn.innerText = "Delete";
+          delBtn.onclick = () => window.deleteQuiz(index);
+          item.appendChild(delBtn);
 
-        container.appendChild(item);
-      });
+          container.appendChild(item);
+        });
+      } catch(e) {}
     }
 
     window.deleteQuiz = function(index) {
-      if (confirm("Delete this quiz?")) {
-        let quizzes = JSON.parse(localStorage.getItem("shoaib_all_quizzes") || "[]");
-        quizzes.splice(index, 1);
-        localStorage.setItem("shoaib_all_quizzes", JSON.stringify(quizzes));
-        renderUploadedQuizzesList();
-      }
+      try {
+        if (confirm("Delete this quiz?")) {
+          let quizzes = JSON.parse(localStorage.getItem("shoaib_all_quizzes") || "[]");
+          quizzes.splice(index, 1);
+          localStorage.setItem("shoaib_all_quizzes", JSON.stringify(quizzes));
+          renderUploadedQuizzesList();
+        }
+      } catch(e) {}
     };
 
-    // App Initialization on Load
+    // Initialization on load
     window.onload = function() {
       initIndexedDB().then(() => {
         try {
