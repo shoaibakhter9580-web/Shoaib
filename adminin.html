@@ -187,12 +187,12 @@
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 class="text-2xl font-serif-title font-bold text-slate-900">Quiz Manager</h2>
-          <p class="text-xs text-slate-600 mt-0.5">Upload English & Hindi MCQ files (.pdf, .txt, .jpeg, .png). Clean Smart Quiz Scan.</p>
+          <p class="text-xs text-slate-600 mt-0.5">Upload English & Hindi MCQ files (.pdf, .txt, .jpeg, .png). Flawless Smart Quiz Scan.</p>
         </div>
         <input type="file" id="quizFileInput" accept=".pdf,.txt,.png,.jpg,.jpeg" class="hidden" onchange="processQuizUpload(event)" />
         <button onclick="document.getElementById('quizFileInput').click()" class="px-4 py-2.5 rounded-xl liquid-button text-white text-xs font-semibold flex items-center gap-2 transition shadow-md">
           <i class="fa-solid fa-file-circle-plus text-sm"></i>
-          <span>Upload Quiz (Clean Smart Scan)</span>
+          <span>Upload Quiz (Flawless Smart Scan)</span>
         </button>
       </div>
 
@@ -920,7 +920,24 @@
             let sortedYs = Object.keys(linesMap).sort((a, b) => b - a);
             let pageLines = sortedYs.map(y => {
               let lineItems = linesMap[y].sort((a, b) => a.x - b.x);
-              return lineItems.map(i => i.str).join(' ');
+              // Join items without arbitrary spaces if they are part of Devanagari words/matras
+              let lineStr = "";
+              for (let k = 0; k < lineItems.length; k++) {
+                let curr = lineItems[k].str;
+                if (k === 0) {
+                  lineStr += curr;
+                } else {
+                  let prev = lineItems[k - 1].str;
+                  let dist = lineItems[k].x - (lineItems[k - 1].x + prev.length * 5);
+                  // If distance is very small or it's a matra/half-character, join directly without space
+                  if (dist < 4 || /[\u0900-\u097F]/.test(curr) && /[\u0900-\u097F]/.test(prev) && dist < 12) {
+                    lineStr += curr;
+                  } else {
+                    lineStr += " " + curr;
+                  }
+                }
+              }
+              return lineStr;
             });
 
             extractedText += pageLines.join('\n') + "\n";
@@ -967,7 +984,6 @@
       const cleanText = rawText
         .replace(/[\u200B-\u200D\uFEFF]/g, '')
         .replace(/[•★▪▫]/g, ' ')
-        .replace(/\s{2,}/g, ' ')
         .replace(/\r\n/g, '\n');
 
       const lines = cleanText.split('\n').map(l => l.trim()).filter(Boolean);
@@ -977,7 +993,7 @@
       for (let line of lines) {
         if (/^(?:RRB|पेज|Page|भाग\s*\d+|सामान्य\s*अध्ययन)/i.test(line)) continue;
 
-        // Match question numbers e.g. "1.", "1 -", "Q1." and clean spaced-out text artifacting
+        // Match question numbers e.g. "1.", "1 -", "Q1."
         const qMatch = line.match(/^(?:Q\.?|Q\d+|प्रश्न\s*\d+|प्र\s*\d+|\d+)[\.\-\):\s]+(.+)/i);
         if (qMatch && !/^[A-Da-dक-घ1-4][\.\-\)]/.test(line)) {
           if (currentQ && currentQ.options.length >= 2) {
@@ -991,8 +1007,8 @@
           continue;
         }
 
-        // Match options e.g. "A)", "A.", "A-", and remove duplicate closing parenthesis artifacts like "A))"
-        const optMatch = line.match(/^[\(\[]?([A-Da-dक-घ1-4])[\)\].:\-\s]+\s*(.+)/);         if (optMatch && currentQ) {           let optText = optMatch[2]             .replace(/^[\)\].:\-\s]+/, '') // remove leading trailing punctuation artifacts
+        // Match options e.g. "A)", "A.", "A-"
+        const optMatch = line.match(/^[\(\[]?([A-Da-dक-घ1-4])[\)\].:\-\s]+\s*(.+)/);         if (optMatch && currentQ) {           let optText = optMatch[2]             .replace(/^[\)\].:\-\s]+/, '')
             .replace(/\s{2,}/g, ' ')
             .replace(/[\.@\*•]/g, '')
             .trim();
