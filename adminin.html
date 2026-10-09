@@ -187,12 +187,12 @@
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 class="text-2xl font-serif-title font-bold text-slate-900">Quiz Manager</h2>
-          <p class="text-xs text-slate-600 mt-0.5">Upload English & Hindi MCQ files (.txt, .pdf, .jpeg, .png). Gemini Flash-Lite scans automatically.</p>
+          <p class="text-xs text-slate-600 mt-0.5">Upload English & Hindi MCQ files (.pdf, .txt, .jpeg, .png). Gemini Vision AI scans automatically.</p>
         </div>
         <input type="file" id="quizFileInput" accept=".pdf,.txt,.png,.jpg,.jpeg" class="hidden" onchange="processQuizUpload(event)" />
         <button onclick="document.getElementById('quizFileInput').click()" class="px-4 py-2.5 rounded-xl glossy-button text-white text-xs font-semibold flex items-center gap-2 transition shadow-md">
           <i class="fa-solid fa-file-circle-plus text-sm"></i>
-          <span>Upload Quiz (Gemini AI Scan)</span>
+          <span>Upload Quiz (Gemini Vision AI Scan)</span>
         </button>
       </div>
 
@@ -903,14 +903,24 @@
       const negativeMarkingVal = negMarkingSelect ? parseFloat(negMarkingSelect.value) : 0.5;
 
       try {
+        // If PDF, render pages to images and process via Gemini Vision API
         if ((file.type === "application/pdf" || file.name.endsWith('.pdf')) && typeof pdfjsLib !== 'undefined') {
           const arrayBuffer = await file.arrayBuffer();
           const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+          
           for (let i = 1; i <= pdf.numPages; i++) {
             const page = await pdf.getPage(i);
-            const textContent = await page.getTextContent();
-            const items = textContent.items.sort((a, b) => Math.abs(b.transform[5] - a.transform[5]) > 5 ? b.transform[5] - a.transform[5] : a.transform[4] - b.transform[4]);
-            extractedText += items.map(item => item.str).join(' ') + "\n";
+            const viewport = page.getViewport({ scale: 1.5 });
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+
+            await page.render({ canvasContext: context, viewport: viewport }).promise;
+            const base64Data = canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
+            
+            const pageText = await callGeminiFlashLiteAPI(base64Data, 'image/jpeg');
+            extractedText += pageText + "\n";
           }
         } else if (file.type.startsWith('image/') || file.name.match(/\.(png|jpg|jpeg)$/i)) {
           const base64Data = await new Promise((resolve) => {
@@ -962,7 +972,7 @@
         body: JSON.stringify({
           contents: [{
             parts: [
-              { text: "Extract all multiple-choice questions (MCQs) and their options verbatim from this document in English or Hindi. Format clearly with question numbers and options A, B, C, D." },
+              { text: "Extract all multiple-choice questions (MCQs) and their options (A, B, C, D) verbatim from this document page in English or Hindi. Format each question clearly starting with 'Q.' followed by the question, and each option starting with '(A)', '(B)', '(C)', '(D)'." },
               { inline_data: { mime_type: mimeType, data: base64Image } }
             ]
           }]
@@ -970,14 +980,13 @@
       });
 
       const data = await response.json();
-      if (data.candidates && data.candidates[0].content.parts[0].text) {
+      if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts[0].text) {
         return data.candidates[0].content.parts[0].text;
       }
       throw new Error("Invalid response received from Gemini API.");
     }
 
     function parseBilingualMCQ(rawText) {
-      // Clean random symbols, zero-width characters, and excessive whitespace
       const cleanText = rawText
         .replace(/[\u200B-\u200D\uFEFF]/g, '')
         .replace(/[•★▪▫]/g, ' ')
@@ -988,11 +997,9 @@
       let currentQ = null;
 
       for (let line of lines) {
-        // Skip header/footer artifacts
         if (/^(?:RRB|पेज|Page|भाग\s*\d+)/i.test(line)) continue;
 
-        // Match question lines (e.g. "1.", "Q1.", "प्रश्न 1", etc.)
-        const qMatch = line.match(/^(?:Q\d+|प्रश्न\s*\d+|प्र\s*\d+|\d+)[\.\-\):\s]+(.+)/i);
+        const qMatch = line.match(/^(?:Q\.?|Q\d+|प्रश्न\s*\d+|प्र\s*\d+|\d+)[\.\-\):\s]+(.+)/i);
         if (qMatch && !/^[A-Da-dक-घ1-4][\.\-\)]/.test(line)) {
           if (currentQ && currentQ.options.length >= 2) {
             parsed.push(currentQ);
@@ -1005,11 +1012,10 @@
           continue;
         }
 
-        // Match multiple options on the same line or single option per line
         const optMatches = [...line.matchAll(/(?:^|\s+)[\(\[]?([A-Da-dक-घ1-4])[\)\].:\-\s]\s*([^\(\[\)]+?)(?=\s+[\([]?[A-Da-dक-घ1-4][\)].:\-\s]|$)/g)];
         if (optMatches.length > 0 && currentQ) {
           for (let m of optMatches) {
-            const optText = m[2].trim().replace(/[\.@\*•]/g, '').trim();
+            let optText = m[2].trim().replace(/[\.@\*•]/g, '').trim();
             if (optText && !currentQ.options.includes(optText)) {
               currentQ.options.push(optText);
             }
@@ -1021,14 +1027,13 @@
             }
           }
         } else {
-          const singleOptMatch = line.match(/^[\(\[]?([A-Da-dक-घ1-4])[\)\].:\-\s]\s*(.+)/);
+          const singleOptMatch = line.match(/^[\(\[]?([A-Da-dक-घ1-4])[\)\].:\-\s]\s*(.+)/i);
           if (singleOptMatch && currentQ) {
             let optText = singleOptMatch[2].trim().replace(/[\.@\*•]/g, '').trim();
             if (optText && !currentQ.options.includes(optText)) {
               currentQ.options.push(optText);
             }
           } else if (currentQ && currentQ.options.length === 0) {
-            // Append continuation text to question if no options started yet
             currentQ.question += " " + line;
           }
         }
@@ -1038,7 +1043,6 @@
         parsed.push(currentQ);
       }
 
-      // Assign answers safely
       parsed.forEach(q => {
         let t = q.question.toLowerCase();
         if (t.includes("capital") || t.includes("राजधानी")) q.answer = 2;
