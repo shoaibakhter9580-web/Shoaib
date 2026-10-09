@@ -911,33 +911,35 @@
             
             let linesMap = {};
             textContent.items.forEach(item => {
-              if (!item.str || !item.str.trim()) return;
+              if (!item.str || (!item.str.trim() && item.str !== ' ')) return;
               let y = Math.round(item.transform[5] / 6) * 6;
               if (!linesMap[y]) linesMap[y] = [];
-              linesMap[y].push({ x: item.transform[4], str: item.str });
+              // Accurately capture PDF width for gap calculations
+              linesMap[y].push({ x: item.transform[4], str: item.str, width: item.width || 0 });
             });
 
             let sortedYs = Object.keys(linesMap).sort((a, b) => b - a);
             let pageLines = sortedYs.map(y => {
               let lineItems = linesMap[y].sort((a, b) => a.x - b.x);
-              // Join items without arbitrary spaces if they are part of Devanagari words/matras
               let lineStr = "";
               for (let k = 0; k < lineItems.length; k++) {
-                let curr = lineItems[k].str;
+                let curr = lineItems[k];
                 if (k === 0) {
-                  lineStr += curr;
+                  lineStr += curr.str;
                 } else {
-                  let prev = lineItems[k - 1].str;
-                  let dist = lineItems[k].x - (lineItems[k - 1].x + prev.length * 5);
-                  // If distance is very small or it's a matra/half-character, join directly without space
-                  if (dist < 4 || /[\u0900-\u097F]/.test(curr) && /[\u0900-\u097F]/.test(prev) && dist < 12) {
-                    lineStr += curr;
+                  let prev = lineItems[k - 1];
+                  let prevEndX = prev.x + prev.width;
+                  let dist = curr.x - prevEndX;
+                  
+                  // Use commonsense accurate distance calculation using the specific PDF item width
+                  if (dist > 4 || prev.str.endsWith(' ') || curr.str.startsWith(' ')) {
+                    lineStr += " " + curr.str.trim();
                   } else {
-                    lineStr += " " + curr;
+                    lineStr += curr.str;
                   }
                 }
               }
-              return lineStr;
+              return lineStr.replace(/\s+/g, ' ').trim();
             });
 
             extractedText += pageLines.join('\n') + "\n";
@@ -1007,7 +1009,7 @@
           continue;
         }
 
-        // Match options e.g. "A)", "A.", "A-"
+        // Properly formatted without layout breaks
         const optMatch = line.match(/^[\(\[]?([A-Da-dक-घ1-4])[\)\].:\-\s]+\s*(.+)/);         if (optMatch && currentQ) {           let optText = optMatch[2]             .replace(/^[\)\].:\-\s]+/, '')
             .replace(/\s{2,}/g, ' ')
             .replace(/[\.@\*•]/g, '')
