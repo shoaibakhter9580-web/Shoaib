@@ -977,15 +977,23 @@
     }
 
     function parseBilingualMCQ(rawText) {
-      const lines = rawText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      // Clean random symbols, zero-width characters, and excessive whitespace
+      const cleanText = rawText
+        .replace(/[\u200B-\u200D\uFEFF]/g, '')
+        .replace(/[•★▪▫]/g, ' ')
+        .replace(/\r\n/g, '\n');
+
+      const lines = cleanText.split('\n').map(l => l.trim()).filter(Boolean);
       const parsed = [];
       let currentQ = null;
 
       for (let line of lines) {
-        if (line.match(/^(?:RRB|पेज|Page|भाग \d)/i)) continue;
+        // Skip header/footer artifacts
+        if (/^(?:RRB|पेज|Page|भाग\s*\d+)/i.test(line)) continue;
 
+        // Match question lines (e.g. "1.", "Q1.", "प्रश्न 1", etc.)
         const qMatch = line.match(/^(?:Q\d+|प्रश्न\s*\d+|प्र\s*\d+|\d+)[\.\-\):\s]+(.+)/i);
-        if (qMatch && !line.match(/^[A-Da-dक-घ1-4][\.\-\)]/)) {
+        if (qMatch && !/^[A-Da-dक-घ1-4][\.\-\)]/.test(line)) {
           if (currentQ && currentQ.options.length >= 2) {
             parsed.push(currentQ);
           }
@@ -994,9 +1002,11 @@
             options: [],
             answer: 0
           };
+          continue;
         }
 
-        const optMatches = [...line.matchAll(/(?:^|\s+)[\(\[]?([A-Da-dक-घ1-4])[\)\].:\-\s]\s*([^()]+?)(?=\s+[\([]?[A-Da-dक-घ1-4][\)].:\-\s]|$)/g)];
+        // Match multiple options on the same line or single option per line
+        const optMatches = [...line.matchAll(/(?:^|\s+)[\(\[]?([A-Da-dक-घ1-4])[\)\].:\-\s]\s*([^\(\[\)]+?)(?=\s+[\([]?[A-Da-dक-घ1-4][\)].:\-\s]|$)/g)];
         if (optMatches.length > 0 && currentQ) {
           for (let m of optMatches) {
             const optText = m[2].trim().replace(/[\.@\*•]/g, '').trim();
@@ -1017,6 +1027,9 @@
             if (optText && !currentQ.options.includes(optText)) {
               currentQ.options.push(optText);
             }
+          } else if (currentQ && currentQ.options.length === 0) {
+            // Append continuation text to question if no options started yet
+            currentQ.question += " " + line;
           }
         }
       }
@@ -1025,6 +1038,7 @@
         parsed.push(currentQ);
       }
 
+      // Assign answers safely
       parsed.forEach(q => {
         let t = q.question.toLowerCase();
         if (t.includes("capital") || t.includes("राजधानी")) q.answer = 2;
