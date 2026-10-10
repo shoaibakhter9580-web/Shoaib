@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Shoaib Akhter — Student Repository</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&display=swap');
+    
     :root {
       --bg-sidebar: rgba(18, 7, 38, 0.88);
       --card-bg: rgba(255, 255, 255, 0.65);
@@ -177,16 +179,16 @@
 
     .btn-signout:hover { opacity: 0.8; }
 
-    /* Ultra-Glossy Translucent Main Content */
+    /* Ultra-Glossy Translucent Main Content - Ocean Effect applied */
     .main-wrapper {
       flex: 1;
       padding: 2.25rem 2.5rem;
       max-width: 1200px;
-      background: radial-gradient(circle at 10% 10%, rgba(243, 232, 255, 0.6) 0%, transparent 40%),
-                  radial-gradient(circle at 90% 90%, rgba(233, 213, 255, 0.5) 0%, transparent 50%),
-                  rgba(248, 250, 252, 0.78);
+      /* Deep ocean translucent background */
+      background: rgba(4, 15, 33, 0.65);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
+      border-left: 1px solid rgba(255, 255, 255, 0.1);
       min-height: 100vh;
     }
 
@@ -202,12 +204,12 @@
     .view-heading h2 {
       font-size: 1.85rem;
       font-weight: 800;
-      color: #0f172a;
+      color: #ffffff;
       letter-spacing: -0.02em;
     }
 
     .view-heading p {
-      color: var(--text-muted);
+      color: #cbd5e1;
       font-size: 0.88rem;
       margin-top: 0.3rem;
       font-weight: 500;
@@ -262,7 +264,7 @@
       background: rgba(255, 255, 255, 0.65);
       backdrop-filter: blur(10px);
       border: 1px solid rgba(255, 255, 255, 0.85);
-      color: var(--text-muted);
+      color: #334155;
       padding: 0.5rem 1.1rem;
       border-radius: 9999px;
       font-size: 0.84rem;
@@ -353,7 +355,7 @@
 
     .file-meta {
       font-size: 0.76rem;
-      color: var(--text-muted);
+      color: #475569;
       display: flex;
       justify-content: space-between;
       padding-top: 0.85rem;
@@ -430,7 +432,7 @@
 
     .folder-card-count {
       font-size: 0.75rem;
-      color: var(--text-muted);
+      color: #475569;
       margin-top: 3px;
       font-weight: 600;
     }
@@ -438,12 +440,12 @@
     .empty-state {
       text-align: center;
       padding: 4rem 1.5rem;
-      color: var(--text-muted);
+      color: #cbd5e1;
       grid-column: 1 / -1;
-      background: rgba(255, 255, 255, 0.5);
+      background: rgba(15, 23, 42, 0.45);
       backdrop-filter: blur(10px);
       border-radius: 24px;
-      border: 1px solid rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.15);
     }
 
     .empty-state span {
@@ -466,6 +468,8 @@
       .main-wrapper { padding: 1.5rem; }
     }
   </style>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
@@ -547,13 +551,13 @@
 
     <div id="chipsContainer" class="chips-bar"></div>
     
-    <!-- Hierarchical Breadcrumb for Student Folders -->
-    <div id="studentFolderBreadcrumbBar" class="hidden bg-white/70 backdrop-blur-md px-4 py-2.5 rounded-2xl mb-4 border border-white/80 flex items-center gap-2 text-xs shadow-sm">
-      <button onclick="renderStudentFoldersHierarchy('')" class="text-purple-800 font-bold hover:underline flex items-center gap-1">
-        <i class="fa-solid fa-house text-[10px]"></i> Root Folders
+    <!-- Hierarchical Breadcrumb for Student Folders (Handwritten & Box-less) -->
+    <div id="studentFolderBreadcrumbBar" class="hidden mb-6 flex items-center gap-2 shadow-none" style="font-family: 'Dancing Script', cursive; font-size: 1.6rem; letter-spacing: 1px;">
+      <button onclick="renderStudentFoldersHierarchy('')" class="text-sky-300 font-bold hover:text-sky-100 transition flex items-center gap-2 drop-shadow-md">
+        <i class="fa-solid fa-house text-lg"></i> Root Folders
       </button>
-      <span class="text-slate-400">/</span>
-      <span id="studentCurrentBreadcrumbText" class="font-bold text-slate-800"></span>
+      <span class="text-slate-400 mx-1">/</span>
+      <span id="studentCurrentBreadcrumbText" class="font-bold text-white drop-shadow-md"></span>
     </div>
 
     <div id="filesContainer" class="file-grid"></div>
@@ -762,7 +766,7 @@
           <div class="empty-state">
             <span>&#128193;</span>
             <h3>No subfolders here</h3>
-            <p>Click <button onclick="renderStudentFoldersHierarchy('')" class="text-purple-700 font-bold underline">Root Folders</button> to go back.</p>
+            <p>Click <button onclick="renderStudentFoldersHierarchy('')" class="text-sky-300 font-bold hover:underline">Root Folders</button> to go back.</p>
           </div>
         `;
         return;
