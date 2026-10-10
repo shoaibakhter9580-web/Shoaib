@@ -8,35 +8,35 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
-    body { font-family: 'Plus Jakarta Sans', sans-serif; background: #020617; color: #e5e7eb; min-height: 100vh; overflow-x: hidden; margin: 0; }
+    
+    body { 
+      font-family: 'Plus Jakarta Sans', sans-serif; 
+      background: #020617; 
+      color: #e5e7eb; 
+      min-height: 100vh; 
+      overflow-x: hidden; 
+      margin: 0; 
+    }
     .font-serif-title { font-family: 'Playfair Display', serif; }
     .font-cinzel { font-family: 'Cinzel', serif; }
     
     .glass-card { 
-      background: rgba(15, 23, 42, 0.65); 
-      backdrop-filter: blur(16px); 
-      -webkit-backdrop-filter: blur(16px); 
+      background: rgba(15, 23, 42, 0.45); 
+      backdrop-filter: blur(24px); 
+      -webkit-backdrop-filter: blur(24px); 
       border: 1px solid rgba(255, 255, 255, 0.1); 
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4); 
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); 
     }
 
-    .hero-glass {
-      background: rgba(10, 15, 30, 0.55);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.1);
-    }
-
-    /* Roman Wall Clock Styling - Medium Sized */
+    /* Roman Wall Clock Styling - Perfectly Sized */
     .roman-clock {
       position: relative;
-      width: 80px;
-      height: 80px;
+      width: 52px;
+      height: 52px;
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.6), 0 4px 15px rgba(0,0,0,0.4);
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.5), 0 4px 12px rgba(0,0,0,0.3);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -44,16 +44,16 @@
     .roman-numeral {
       position: absolute;
       font-family: 'Cinzel', serif;
-      font-size: 11px;
+      font-size: 8px;
       font-weight: 700;
       color: #f1f5f9;
       line-height: 1;
       text-shadow: 0 1px 2px rgba(0,0,0,0.8);
     }
-    .roman-numeral.num-12 { top: 4px; }
-    .roman-numeral.num-3  { right: 5px; }
-    .roman-numeral.num-6  { bottom: 4px; }
-    .roman-numeral.num-9  { left: 5px; }
+    .roman-numeral.num-12 { top: 3px; }
+    .roman-numeral.num-3  { right: 4px; }
+    .roman-numeral.num-6  { bottom: 3px; }
+    .roman-numeral.num-9  { left: 4px; }
 
     .clock-hand {
       position: absolute;
@@ -64,29 +64,29 @@
       box-shadow: 0 1px 3px rgba(0,0,0,0.5);
     }
     .clock-hand.hour {
-      width: 2.5px;
-      height: 20px;
-      background: #e2e8f0;
-      margin-left: -1.25px;
-    }
-    .clock-hand.minute {
       width: 2px;
-      height: 28px;
-      background: #cbd5e1;
+      height: 14px;
+      background: #e2e8f0;
       margin-left: -1px;
     }
-    .clock-hand.second {
+    .clock-hand.minute {
       width: 1.5px;
-      height: 33px;
-      background: #ef4444;
+      height: 19px;
+      background: #cbd5e1;
       margin-left: -0.75px;
+    }
+    .clock-hand.second {
+      width: 1px;
+      height: 22px;
+      background: #ef4444;
+      margin-left: -0.5px;
     }
     .clock-center-pin {
       position: absolute;
-      width: 6px;
-      height: 6px;
+      width: 4px;
+      height: 4px;
       background: #0f172a;
-      border: 1.5px solid #ef4444;
+      border: 1px solid #ef4444;
       border-radius: 50%;
       z-index: 10;
     }
@@ -97,21 +97,35 @@
   <!-- Live Time-of-Day Simulator Wallpaper Canvas -->
   <canvas id="oceanCanvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
 
-  <!-- Minimal Header (Only Notification Bell remains at the top) -->
-  <header class="absolute top-0 right-0 w-full z-30 px-6 pt-6 flex justify-end">
-    <button onclick="alert('Shoaib Akhter Portal: All systems operational.')" class="w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200 border border-white/10 flex items-center justify-center transition backdrop-blur-md shadow-lg">
-      <i class="fa-regular fa-bell text-sm"></i>
-    </button>
-  </header>
-
-  <main class="relative z-10 w-full max-w-5xl mx-auto px-4 flex flex-col items-center justify-center flex-grow py-16 text-center">
-    
-    <!-- Centered Logo & Clock Container -->
-    <div class="hero-glass rounded-3xl p-5 md:px-8 md:py-6 flex flex-col md:flex-row items-center justify-center gap-6 md:gap-10 mb-10 transition-transform hover:scale-[1.02] duration-300">
+  <!-- Top Header Bar with Corners Layout -->
+  <header class="relative z-30 w-full px-4 sm:px-8 pt-6">
+    <div class="glass-card rounded-3xl px-6 py-4 flex flex-wrap items-center justify-between gap-4">
       
-      <!-- Logo Section -->
+      <!-- TOP LEFT: Clock & Date -->
       <div class="flex items-center gap-4">
-        <div id="logoContainer" onclick="cycleLogoBg()" title="Click to cycle logo background" class="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center p-2 cursor-pointer shadow-lg transition-all duration-300 hover:scale-105 border border-white/20">
+        <div class="roman-clock" title="Current Time">
+          <span class="roman-numeral num-12">XII</span>
+          <span class="roman-numeral num-3">III</span>
+          <span class="roman-numeral num-6">VI</span>
+          <span class="roman-numeral num-9">IX</span>
+          <div id="hourHand" class="clock-hand hour"></div>
+          <div id="minuteHand" class="clock-hand minute"></div>
+          <div id="secondHand" class="clock-hand second"></div>
+          <div class="clock-center-pin"></div>
+        </div>
+        <div class="flex flex-col text-left">
+          <span id="liveDate" class="text-sm sm:text-base text-slate-100 font-cinzel tracking-wider font-bold drop-shadow-md">Loading date...</span>
+          <span class="text-[10px] text-amber-300/90 font-bold tracking-[0.15em] uppercase mt-0.5">Local Time</span>
+        </div>
+      </div>
+
+      <!-- TOP RIGHT: Logo, Name & Location -->
+      <div class="flex items-center gap-4">
+        <div class="text-right hidden sm:block">
+          <h1 class="text-lg sm:text-xl font-bold text-white tracking-widest uppercase drop-shadow-md">Shoaib Akhter</h1>
+          <p class="text-[10px] text-amber-300 font-cinzel tracking-[0.2em] font-bold mt-0.5">GHAZIPUR</p>
+        </div>
+        <div id="logoContainer" onclick="cycleLogoBg()" title="Click to cycle logo background" class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center p-1.5 cursor-pointer shadow-lg transition-all duration-300 hover:scale-105 border border-white/20">
           <svg viewBox="0 0 100 120" class="w-full h-full drop-shadow-md">
             <path d="M 44,14 C 54,12 68,14 74,25 C 66,28 54,32 48,27 C 45,24 43,18 44,14 Z" fill="#b9ab94" />
             <path d="M 39,20 C 42,28 36,37 26,38 C 22,31 28,21 39,20 Z" fill="#d1c7b7" />
@@ -119,39 +133,15 @@
             <path d="M 28,42 C 40,40 50,47 52,57 C 41,56 31,52 28,42 Z" fill="#a39385" />
           </svg>
         </div>
-        <div class="text-left">
-          <h1 class="text-xl sm:text-2xl font-bold text-white tracking-widest uppercase drop-shadow-md">Shoaib Akhter</h1>
-          <p class="text-[11px] text-amber-300 font-cinzel tracking-[0.2em] font-bold mt-0.5">GHAZIPUR</p>
-        </div>
-      </div>
-
-      <!-- Divider -->
-      <div class="hidden md:block w-px h-16 bg-gradient-to-b from-transparent via-white/30 to-transparent"></div>
-      <div class="block md:hidden h-px w-32 bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
-
-      <!-- Clock Section -->
-      <div class="flex items-center gap-4">
-        <div class="roman-clock" title="Current Time">
-          <span class="roman-numeral num-12">XII</span>
-          <span class="roman-numeral num-3">III</span>
-          <span class="roman-numeral num-6">VI</span>
-          <span class="roman-numeral num-9">IX</span>
-
-          <div id="hourHand" class="clock-hand hour"></div>
-          <div id="minuteHand" class="clock-hand minute"></div>
-          <div id="secondHand" class="clock-hand second"></div>
-          <div class="clock-center-pin"></div>
-        </div>
-        <div class="flex flex-col text-left">
-          <span id="liveDate" class="text-xs sm:text-sm text-slate-200 font-cinzel tracking-wider font-semibold drop-shadow-md">Loading date...</span>
-          <span class="text-[10px] text-amber-300/90 font-bold tracking-[0.15em] uppercase mt-0.5">Local Time</span>
-        </div>
       </div>
 
     </div>
+  </header>
 
+  <main class="relative z-10 w-full max-w-5xl mx-auto px-4 flex flex-col items-center justify-center flex-grow py-12 text-center">
+    
     <!-- Portal Typography -->
-    <div class="inline-flex items-center gap-2 px-5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs uppercase tracking-widest font-cinzel mb-4 shadow-lg backdrop-blur-sm">
+    <div class="inline-flex items-center gap-2 px-5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs uppercase tracking-widest font-cinzel mb-4 shadow-lg backdrop-blur-sm mt-8">
       <span>✦</span> Student Management Portal <span>✦</span>
     </div>
 
@@ -208,15 +198,53 @@
 
       const dateEl = document.getElementById("liveDate");
       if (dateEl) {
-        dateEl.innerText = now.toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+        dateEl.innerText = now.toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase();
       }
     }
     setInterval(updateClock, 1000);
     updateClock();
 
-    // ---- ADVANCED REAL-WORLD TIME & MOON PHASE CANVAS ENGINE ----
+    // ---- ADVANCED REAL-WORLD TIME & TEXTURED MOON ENGINE ----
     const canvas = document.getElementById('oceanCanvas');
     const ctx = canvas.getContext('2d');
+
+    // Pre-render a highly realistic textured moon off-screen
+    const moonCanvas = document.createElement('canvas');
+    const mCtx = moonCanvas.getContext('2d');
+    const mSize = 300;
+    moonCanvas.width = mSize;
+    moonCanvas.height = mSize;
+    
+    function generateMoonTexture() {
+      // 1. Base lunar silver/grey
+      mCtx.fillStyle = '#cbd5e1';
+      mCtx.beginPath();
+      mCtx.arc(mSize/2, mSize/2, mSize/2, 0, Math.PI*2);
+      mCtx.fill();
+
+      // 2. Draw Lunar Maria (Dark spots / Craters)
+      mCtx.globalCompositeOperation = 'source-atop';
+      mCtx.filter = 'blur(6px)';
+      mCtx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+      mCtx.beginPath(); mCtx.arc(mSize*0.3, mSize*0.4, mSize*0.2, 0, Math.PI*2); mCtx.fill();
+      mCtx.beginPath(); mCtx.arc(mSize*0.7, mSize*0.3, mSize*0.25, 0, Math.PI*2); mCtx.fill();
+      mCtx.beginPath(); mCtx.arc(mSize*0.4, mSize*0.7, mSize*0.22, 0, Math.PI*2); mCtx.fill();
+      mCtx.beginPath(); mCtx.arc(mSize*0.6, mSize*0.8, mSize*0.15, 0, Math.PI*2); mCtx.fill();
+      mCtx.filter = 'none';
+
+      // 3. Add textured micro-craters
+      for(let i=0; i<400; i++) {
+          let cx = Math.random() * mSize;
+          let cy = Math.random() * mSize;
+          let cr = Math.random() * 2.5 + 0.5;
+          mCtx.fillStyle = 'rgba(255,255,255,0.15)';
+          mCtx.beginPath(); mCtx.arc(cx, cy, cr, 0, Math.PI*2); mCtx.fill();
+          mCtx.fillStyle = 'rgba(0,0,0,0.1)';
+          mCtx.beginPath(); mCtx.arc(cx-1, cy-1, cr, 0, Math.PI*2); mCtx.fill();
+      }
+      mCtx.globalCompositeOperation = 'source-over';
+    }
+    generateMoonTexture();
 
     function resizeCanvas() {
       canvas.width = window.innerWidth;
@@ -225,8 +253,7 @@
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
 
-    // Generate Background Stars (Only shown at night/evening)
-    const stars = Array.from({ length: 120 }, () => ({
+    const stars = Array.from({ length: 150 }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * (canvas.height * 0.6),
       radius: Math.random() * 1.5 + 0.3,
@@ -241,29 +268,31 @@
       
       const now = new Date();
       const currentHour = now.getHours();
+      const currentMinute = now.getMinutes();
+      const timeFloat = currentHour + (currentMinute / 60);
 
-      // Time-of-Day Configurations
       let skyTop, skyMid, skyBot;
       let isNight = false, isEvening = false, isDay = false;
       let starOpacityMult = 0;
-      let celestialY = canvas.height * 0.22;
+      let celestialY = canvas.height * 0.25;
 
-      if (currentHour >= 19 || currentHour <= 5) {
-        // Night Time (7 PM to 5 AM)
-        isNight = true;
-        skyTop = '#020617'; skyMid = '#090d1f'; skyBot = '#111827';
-        starOpacityMult = 1;
-      } else if (currentHour >= 17 && currentHour < 19) {
-        // Evening / Sunset (5 PM to 6:59 PM)
-        isEvening = true;
-        skyTop = '#4c1d95'; skyMid = '#be123c'; skyBot = '#f59e0b';
-        starOpacityMult = (currentHour === 18) ? 0.6 : 0.1;
-        celestialY = canvas.height * 0.45; // Sun lowering
-      } else {
-        // Day Time (6 AM to 4:59 PM)
+      // Real World Time Logic (India Guidelines)
+      if (timeFloat >= 6.0 && timeFloat < 17.5) {
+        // Daylight (6:00 AM - 5:30 PM) -> Invisible Stars
         isDay = true;
         skyTop = '#0284c7'; skyMid = '#38bdf8'; skyBot = '#bae6fd';
-        starOpacityMult = 0; // Stars invisible during day
+        starOpacityMult = 0; 
+      } else if (timeFloat >= 17.5 && timeFloat < 19.0) {
+        // Evening / Sunset (5:30 PM - 7:00 PM)
+        isEvening = true;
+        skyTop = '#4c1d95'; skyMid = '#be123c'; skyBot = '#f59e0b';
+        starOpacityMult = (timeFloat > 18.25) ? 0.6 : 0.1;
+        celestialY = canvas.height * 0.45; // Sun lowering
+      } else {
+        // Night Time (7:00 PM - 5:59 AM)
+        isNight = true;
+        skyTop = '#020617'; skyMid = '#090d1f'; skyBot = '#111827';
+        starOpacityMult = 1; // Full Stars
       }
 
       // 1. Draw Sky Gradient
@@ -274,7 +303,7 @@
       ctx.fillStyle = skyGrad;
       ctx.fillRect(0, 0, canvas.width, canvas.height * 0.6);
 
-      // 2. Draw Stars (If visible)
+      // 2. Draw Stars (Strictly dependent on time)
       if (starOpacityMult > 0) {
         stars.forEach(star => {
           star.alpha += star.twinkleSpeed;
@@ -286,9 +315,9 @@
         });
       }
 
-      // 3. Draw Celestial Body (Sun or Moon)
+      // 3. Draw Celestial Body (Sun or Textured Moon)
       const cX = canvas.width * 0.5;
-      const cRadius = Math.min(canvas.width, canvas.height) * 0.07;
+      const cRadius = Math.min(canvas.width, canvas.height) * 0.08;
       const horizonY = canvas.height * 0.55;
 
       ctx.save();
@@ -302,7 +331,7 @@
           sunGlow.addColorStop(1, 'rgba(245, 158, 11, 0)');
           ctx.fillStyle = '#f97316'; // Orange sunset sun
         } else {
-          sunGlow.addColorStop(0, 'rgba(255, 255, 220, 0.6)');
+          sunGlow.addColorStop(0, 'rgba(255, 255, 220, 0.7)');
           sunGlow.addColorStop(1, 'rgba(255, 255, 100, 0)');
           ctx.fillStyle = '#fef08a'; // Bright yellow day sun
         }
@@ -313,69 +342,48 @@
 
         ctx.beginPath();
         ctx.arc(0, 0, cRadius, 0, Math.PI * 2);
-        ctx.fillStyle = isEvening ? '#f97316' : '#fef08a';
-        ctx.shadowBlur = 20;
+        ctx.fillStyle = isEvening ? '#ea580c' : '#fef08a';
+        ctx.shadowBlur = 25;
         ctx.shadowColor = ctx.fillStyle;
         ctx.fill();
 
       } else {
-        // --- DRAW AUTOMATIC REAL-WORLD MOON PHASE ---
-        // 29.53058 days per lunar cycle. Ref New Moon: Jan 11, 2024, 11:57 UTC
-        const knownNewMoon = 1704974220000;
+        // --- DRAW REALISTIC TEXTURED MOON ---
         const cycleDays = 29.53058770576;
+        const knownNewMoon = 1704974220000; // Jan 11, 2024
         const daysSince = (now.getTime() - knownNewMoon) / (1000 * 60 * 60 * 24);
-        const phase = (daysSince % cycleDays) / cycleDays; // Float from 0.0 to 1.0
+        const phase = (daysSince % cycleDays) / cycleDays; 
 
         // Moon Outer Glow
         const moonGlow = ctx.createRadialGradient(0, 0, cRadius * 0.5, 0, 0, cRadius * 3.5);
-        moonGlow.addColorStop(0, 'rgba(220, 235, 255, 0.25)');
+        moonGlow.addColorStop(0, 'rgba(220, 235, 255, 0.15)');
         moonGlow.addColorStop(1, 'rgba(100, 150, 255, 0)');
         ctx.fillStyle = moonGlow;
-        ctx.beginPath();
-        ctx.arc(0, 0, cRadius * 3.5, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.beginPath(); ctx.arc(0, 0, cRadius * 3.5, 0, Math.PI * 2); ctx.fill();
 
-        // Base Fully Lit Moon
+        // Draw the highly textured moon image
         ctx.beginPath();
         ctx.arc(0, 0, cRadius, 0, Math.PI * 2);
-        ctx.clip(); // Restrict shadows to the moon circle
+        ctx.clip(); 
+        ctx.drawImage(moonCanvas, -cRadius, -cRadius, cRadius * 2, cRadius * 2);
 
-        ctx.fillStyle = '#e2e8f0'; // Bright moon color
-        ctx.fillRect(-cRadius, -cRadius, cRadius * 2, cRadius * 2);
-
-        // Draw Moon Shadow (The Terminator Line)
-        ctx.fillStyle = 'rgba(11, 17, 32, 0.9)'; // Dark sky color to simulate shadow
-
+        // Apply realistic shadow for the phase (Terminator line)
+        ctx.fillStyle = 'rgba(5, 8, 15, 0.88)'; // Deep shadow color hiding the texture
+        
         if (phase < 0.5) {
-          // Waxing: Right side is lit, shadow covers the left.
-          ctx.beginPath();
-          ctx.arc(0, 0, cRadius, Math.PI/2, Math.PI*1.5, false); // Left hemisphere shadow
-          ctx.fill();
-
+          ctx.beginPath(); ctx.arc(0, 0, cRadius, Math.PI/2, Math.PI*1.5, false); ctx.fill();
           const shadowWidth = cRadius - (phase * 2 * cRadius);
-          ctx.beginPath();
-          ctx.ellipse(0, 0, Math.abs(shadowWidth), cRadius, 0, 0, Math.PI * 2);
-          if (phase < 0.25) {
-            ctx.fill(); // Fill ellipse with shadow (crescent phase)
-          } else {
-            ctx.fillStyle = '#e2e8f0'; // Fill ellipse with light (gibbous phase)
-            ctx.fill();
+          ctx.beginPath(); ctx.ellipse(0, 0, Math.abs(shadowWidth), cRadius, 0, 0, Math.PI * 2);
+          if (phase < 0.25) { ctx.fill(); } else {
+            ctx.globalCompositeOperation = 'destination-out'; ctx.fill(); ctx.globalCompositeOperation = 'source-over';
           }
         } else {
-          // Waning: Left side is lit, shadow covers the right.
-          ctx.beginPath();
-          ctx.arc(0, 0, cRadius, Math.PI*1.5, Math.PI/2, false); // Right hemisphere shadow
-          ctx.fill();
-
+          ctx.beginPath(); ctx.arc(0, 0, cRadius, Math.PI*1.5, Math.PI/2, false); ctx.fill();
           const phase2 = phase - 0.5;
           const shadowWidth = cRadius - (phase2 * 2 * cRadius);
-          ctx.beginPath();
-          ctx.ellipse(0, 0, Math.abs(shadowWidth), cRadius, 0, 0, Math.PI * 2);
-          if (phase2 < 0.25) {
-            ctx.fill(); // Fill ellipse with shadow
-          } else {
-            ctx.fillStyle = '#e2e8f0'; // Fill ellipse with light
-            ctx.fill();
+          ctx.beginPath(); ctx.ellipse(0, 0, Math.abs(shadowWidth), cRadius, 0, 0, Math.PI * 2);
+          if (phase2 < 0.25) { ctx.fill(); } else {
+            ctx.globalCompositeOperation = 'destination-out'; ctx.fill(); ctx.globalCompositeOperation = 'source-over';
           }
         }
       }
@@ -384,10 +392,10 @@
       // 4. Draw Reflection on Water
       const reflGrad = ctx.createLinearGradient(cX, horizonY, cX, canvas.height);
       if (isDay) {
-        reflGrad.addColorStop(0, 'rgba(255, 255, 255, 0.6)');
+        reflGrad.addColorStop(0, 'rgba(255, 255, 255, 0.5)');
         reflGrad.addColorStop(1, 'rgba(255, 255, 200, 0)');
       } else if (isEvening) {
-        reflGrad.addColorStop(0, 'rgba(255, 200, 100, 0.5)');
+        reflGrad.addColorStop(0, 'rgba(255, 200, 100, 0.4)');
         reflGrad.addColorStop(1, 'rgba(245, 158, 11, 0)');
       } else {
         reflGrad.addColorStop(0, 'rgba(220, 235, 255, 0.35)');
@@ -402,7 +410,7 @@
       ctx.closePath();
       ctx.fill();
 
-      // 5. Rolling Ocean Waves (Adapts color to time)
+      // 5. Rolling Ocean Waves (Adapts strictly to time)
       waveOffset += 0.03;
       const numWaves = 4;
       for (let i = 0; i < numWaves; i++) {
@@ -414,7 +422,6 @@
           let y = currentY + Math.sin(x * 0.01 + waveOffset + i) * 8 + Math.cos(x * 0.005 - waveOffset * 0.5) * 6;
           ctx.lineTo(x, y);
         }
-
         ctx.lineTo(canvas.width, canvas.height);
         ctx.lineTo(0, canvas.height);
         ctx.closePath();
