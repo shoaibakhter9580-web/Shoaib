@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shoaib Akhter — Student Management Portal</title>
+  <title>Shoaib Akhter — Management Portal</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -33,69 +33,6 @@
       align-items: center;
       gap: 1rem;
     }
-
-    /* Roman Wall Clock Styling - Perfectly Sized */
-    .roman-clock {
-      position: relative;
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.5), 0 4px 12px rgba(0,0,0,0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .roman-numeral {
-      position: absolute;
-      font-family: 'Cinzel', serif;
-      font-size: 8px;
-      font-weight: 700;
-      color: #f1f5f9;
-      line-height: 1;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.8);
-    }
-    .roman-numeral.num-12 { top: 3px; }
-    .roman-numeral.num-3  { right: 4px; }
-    .roman-numeral.num-6  { bottom: 3px; }
-    .roman-numeral.num-9  { left: 4px; }
-
-    .clock-hand {
-      position: absolute;
-      bottom: 50%;
-      left: 50%;
-      transform-origin: bottom center;
-      border-radius: 4px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.5);
-    }
-    .clock-hand.hour {
-      width: 2px;
-      height: 14px;
-      background: #e2e8f0;
-      margin-left: -1px;
-    }
-    .clock-hand.minute {
-      width: 1.5px;
-      height: 19px;
-      background: #cbd5e1;
-      margin-left: -0.75px;
-    }
-    .clock-hand.second {
-      width: 1px;
-      height: 22px;
-      background: #ef4444;
-      margin-left: -0.5px;
-    }
-    .clock-center-pin {
-      position: absolute;
-      width: 4px;
-      height: 4px;
-      background: #0f172a;
-      border: 1px solid #ef4444;
-      border-radius: 50%;
-      z-index: 10;
-    }
   </style>
 </head>
 <body class="relative flex flex-col justify-between min-h-screen selection:bg-amber-500/30 selection:text-amber-200">
@@ -103,49 +40,41 @@
   <!-- Live Time-of-Day Simulator Wallpaper Canvas -->
   <canvas id="oceanCanvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
 
-  <!-- Top Header Bar (Split Layout) -->
+  <!-- Top Header Bar (Split Layout: Logo Left, Clock Right) -->
   <header class="relative z-30 w-full px-4 sm:px-8 pt-6 flex justify-between items-start pointer-events-none">
     
-    <!-- TOP LEFT: Clock & Date -->
-    <div class="glass-pill pointer-events-auto transition-transform hover:scale-105 duration-300 cursor-default">
-      <div class="roman-clock" title="Current Time">
-        <span class="roman-numeral num-12">XII</span>
-        <span class="roman-numeral num-3">III</span>
-        <span class="roman-numeral num-6">VI</span>
-        <span class="roman-numeral num-9">IX</span>
-        <div id="hourHand" class="clock-hand hour"></div>
-        <div id="minuteHand" class="clock-hand minute"></div>
-        <div id="secondHand" class="clock-hand second"></div>
-        <div class="clock-center-pin"></div>
-      </div>
-      <div class="flex flex-col text-left">
-        <span id="liveDate" class="text-sm sm:text-base text-slate-100 font-cinzel tracking-wider font-bold drop-shadow-md">Loading date...</span>
-        <span class="text-[10px] text-amber-300/90 font-bold tracking-[0.15em] uppercase mt-0.5">Local Time</span>
-      </div>
-    </div>
-
-    <!-- TOP RIGHT: Logo, Name & Location -->
+    <!-- TOP LEFT: Logo, Name & Location -->
     <div class="glass-pill pointer-events-auto transition-transform hover:scale-105 duration-300">
-      <div class="text-right hidden sm:block">
-        <h1 class="text-lg sm:text-xl font-bold text-white tracking-widest uppercase drop-shadow-md">Shoaib Akhter</h1>
+      <div class="flex items-center justify-center pr-2">
+        <!-- Using Reference Image 3 for Logo -->
+        <img src="image_1ee93f.png" alt="SHOAIB Logo" class="h-6 sm:h-8 object-contain drop-shadow-lg">
+      </div>
+      <div class="text-left hidden sm:block border-l border-white/20 pl-4">
+        <h1 class="text-base sm:text-lg font-bold text-white tracking-widest uppercase drop-shadow-md leading-tight">Shoaib Akhter</h1>
         <p class="text-[10px] text-amber-300 font-cinzel tracking-[0.2em] font-bold mt-0.5">GHAZIPUR</p>
       </div>
-      <div id="logoContainer" onclick="cycleLogoBg()" title="Click to cycle logo background" class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center p-1.5 cursor-pointer shadow-lg border border-white/20">
-        <svg viewBox="0 0 100 120" class="w-full h-full drop-shadow-md">
-          <path d="M 44,14 C 54,12 68,14 74,25 C 66,28 54,32 48,27 C 45,24 43,18 44,14 Z" fill="#b9ab94" />
-          <path d="M 39,20 C 42,28 36,37 26,38 C 22,31 28,21 39,20 Z" fill="#d1c7b7" />
-          <path d="M 48,34 C 58,34 68,43 73,53 C 63,55 58,46 48,34 Z" fill="#8f7e71" />
-          <path d="M 28,42 C 40,40 50,47 52,57 C 41,56 31,52 28,42 Z" fill="#a39385" />
-        </svg>
+    </div>
+
+    <!-- TOP RIGHT: Digital Clock & Date -->
+    <div class="glass-pill pointer-events-auto transition-transform hover:scale-105 duration-300">
+      <div class="flex flex-col items-center sm:items-end text-center sm:text-right px-2 py-0.5">
+        <span id="digitalTime" class="font-serif-title text-3xl sm:text-4xl font-bold text-white tracking-wide leading-none drop-shadow-md">
+          --:-- <span class="text-xl sm:text-2xl text-slate-300">--</span>
+        </span>
+        <span id="digitalDate" class="text-xs sm:text-sm text-slate-300 font-medium tracking-wide mt-1.5 drop-shadow-sm">
+          Loading date...
+        </span>
       </div>
     </div>
+    
   </header>
 
-  <main class="relative z-10 w-full max-w-5xl mx-auto px-4 flex flex-col items-center justify-center flex-grow py-8 text-center pointer-events-none">
+  <!-- Main Content (Pushed down via pt-[32vh] to ensure Moon is clearly above) -->
+  <main class="relative z-10 w-full max-w-5xl mx-auto px-4 flex flex-col items-center justify-start pt-[32vh] flex-grow pb-12 text-center pointer-events-none">
     
     <!-- Portal Typography -->
     <div class="inline-flex items-center gap-2 px-5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs uppercase tracking-widest font-cinzel mb-4 shadow-lg backdrop-blur-sm pointer-events-auto">
-      <span>✦</span> Student Management Portal <span>✦</span>
+      <span>✦</span> Shoaib Management Portal <span>✦</span>
     </div>
 
     <h2 class="text-5xl sm:text-7xl font-serif-title font-bold text-white tracking-wide mb-3 drop-shadow-2xl">
@@ -174,35 +103,28 @@
   </footer>
 
   <script>
-    const logoColors = ["rgba(255,255,255,0.1)", "#3e342b", "#0d0c18", "transparent"];
-    let logoColorIdx = 0;
-    function cycleLogoBg() {
-      logoColorIdx = (logoColorIdx + 1) % logoColors.length;
-      document.getElementById("logoContainer").style.backgroundColor = logoColors[logoColorIdx];
-    }
-
+    // ---- DIGITAL CLOCK LOGIC ----
     function updateClock() {
       const now = new Date();
-      const sec = now.getSeconds();
-      const min = now.getMinutes();
-      const hr = now.getHours();
+      
+      // Format Time (12-hour format)
+      let hours = now.getHours();
+      let minutes = now.getMinutes();
+      const ampm = hours >= 12 ? 'pm' : 'am';
+      hours = hours % 12;
+      hours = hours ? hours : 12; 
+      minutes = minutes < 10 ? '0' + minutes : minutes;
+      
+      // Update Time HTML
+      const timeStr = `${hours}:${minutes} <span class="text-xl sm:text-2xl text-slate-300">${ampm}</span>`;
+      const timeEl = document.getElementById("digitalTime");
+      if (timeEl) timeEl.innerHTML = timeStr;
 
-      const secDeg = (sec / 60) * 360;
-      const minDeg = ((min + sec / 60) / 60) * 360;
-      const hrDeg = (((hr % 12) + min / 60) / 12) * 360;
-
-      const hourEl = document.getElementById("hourHand");
-      const minEl = document.getElementById("minuteHand");
-      const secEl = document.getElementById("secondHand");
-
-      if (hourEl) hourEl.style.transform = `rotate(${hrDeg}deg)`;
-      if (minEl) minEl.style.transform = `rotate(${minDeg}deg)`;
-      if (secEl) secEl.style.transform = `rotate(${secDeg}deg)`;
-
-      const dateEl = document.getElementById("liveDate");
-      if (dateEl) {
-        dateEl.innerText = now.toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase();
-      }
+      // Format Date (e.g. Saturday, 10 October)
+      const options = { weekday: 'long', day: 'numeric', month: 'long' };
+      const dateStr = now.toLocaleDateString('en-IN', options);
+      const dateEl = document.getElementById("digitalDate");
+      if (dateEl) dateEl.innerText = dateStr;
     }
     setInterval(updateClock, 1000);
     updateClock();
@@ -220,7 +142,7 @@
     
     function generateMoonTexture() {
       const center = mSize / 2;
-      const radius = mSize / 2 - 2; // Slight padding to prevent clipping artifacts
+      const radius = mSize / 2 - 2;
       
       // 1. Base lunar off-white/silver core
       mCtx.fillStyle = '#e2e8f0';
@@ -240,11 +162,8 @@
       mCtx.globalCompositeOperation = 'source-atop';
       mCtx.filter = 'blur(10px)';
       mCtx.fillStyle = 'rgba(20, 25, 35, 0.35)';
-      // Oceanus Procellarum / Mare Imbrium area
       mCtx.beginPath(); mCtx.ellipse(mSize*0.35, mSize*0.4, mSize*0.25, mSize*0.35, 0.5, 0, Math.PI*2); mCtx.fill();
-      // Mare Tranquillitatis area
       mCtx.beginPath(); mCtx.ellipse(mSize*0.7, mSize*0.4, mSize*0.2, mSize*0.25, -0.3, 0, Math.PI*2); mCtx.fill();
-      // Mare Nubium area
       mCtx.beginPath(); mCtx.ellipse(mSize*0.4, mSize*0.75, mSize*0.2, mSize*0.15, 0.1, 0, Math.PI*2); mCtx.fill();
       mCtx.filter = 'none';
 
@@ -252,12 +171,11 @@
       for(let i=0; i<800; i++) {
           let cx = Math.random() * mSize;
           let cy = Math.random() * mSize;
-          let cr = Math.pow(Math.random(), 3) * 4 + 0.5; // Exponential size distribution (many small, few large)
+          let cr = Math.pow(Math.random(), 3) * 4 + 0.5;
           
-          // Only draw inside the moon radius
           if (Math.hypot(cx - center, cy - center) > radius - cr) continue;
 
-          // Impact ejecta rays (bright streaks) for larger craters
+          // Impact ejecta rays
           if (cr > 2.5 && Math.random() > 0.5) {
             const rayGrad = mCtx.createRadialGradient(cx, cy, cr, cx, cy, cr * 4);
             rayGrad.addColorStop(0, 'rgba(255,255,255,0.4)');
@@ -306,7 +224,9 @@
       let skyTop, skyMid, skyBot;
       let isNight = false, isEvening = false, isDay = false;
       let starOpacityMult = 0;
-      let celestialY = canvas.height * 0.35; // Lowered slightly so Welcome Back text isn't blocked
+      
+      // Placed perfectly in the upper quarter to stay completely clear of the text
+      let celestialY = canvas.height * 0.20; 
 
       // Real World Time Logic (India Guidelines)
       if (timeFloat >= 6.0 && timeFloat < 17.5) {
@@ -319,7 +239,7 @@
         isEvening = true;
         skyTop = '#4c1d95'; skyMid = '#be123c'; skyBot = '#f59e0b';
         starOpacityMult = (timeFloat > 18.25) ? 0.6 : 0.1;
-        celestialY = canvas.height * 0.48; // Sun lowering to horizon
+        celestialY = canvas.height * 0.35; // Sun lowering to horizon
       } else {
         // Night Time (7:00 PM - 5:59 AM)
         isNight = true;
@@ -349,7 +269,7 @@
 
       // 3. Draw Celestial Body (Sun or Textured Moon)
       const cX = canvas.width * 0.5;
-      const cRadius = Math.min(canvas.width, canvas.height) * 0.1; // Made slightly larger for detail
+      const cRadius = Math.min(canvas.width, canvas.height) * 0.1; // Moon Size
       const horizonY = canvas.height * 0.55;
 
       ctx.save();
@@ -404,7 +324,7 @@
         ctx.rotate(15 * Math.PI / 180); // reset rotation for shadow
 
         // Apply pitch-black terminator shadow (Phase logic)
-        ctx.fillStyle = 'rgba(2, 6, 23, 0.95)'; // Deep space black to completely hide unlit texture
+        ctx.fillStyle = 'rgba(2, 6, 23, 0.95)'; 
         
         if (phase < 0.5) {
           ctx.beginPath(); ctx.arc(0, 0, cRadius, Math.PI/2, Math.PI*1.5, false); ctx.fill();
@@ -412,7 +332,6 @@
           ctx.beginPath(); ctx.ellipse(0, 0, Math.abs(shadowWidth), cRadius, 0, 0, Math.PI * 2);
           if (phase < 0.25) { 
             ctx.fill(); 
-            // Draw a subtle soft shadow line (Terminator blur)
             ctx.shadowBlur = 10; ctx.shadowColor = 'rgba(2,6,23,1)'; ctx.stroke(); ctx.shadowBlur = 0;
           } else {
             ctx.globalCompositeOperation = 'destination-out'; ctx.fill(); ctx.globalCompositeOperation = 'source-over';
@@ -453,7 +372,7 @@
       ctx.closePath();
       ctx.fill();
 
-      // 5. Rolling Ocean Waves (Adapts strictly to time)
+      // 5. Rolling Ocean Waves
       waveOffset += 0.03;
       const numWaves = 4;
       for (let i = 0; i < numWaves; i++) {
