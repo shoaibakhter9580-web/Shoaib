@@ -11,7 +11,9 @@
     
     body { 
       font-family: 'Plus Jakarta Sans', sans-serif; 
-      background: #020617; 
+      /* Replaced canvas with static background image */
+      background: url('nature-majesty-full-display-by-waters-edge-generative-ai.jpg') no-repeat center center fixed;
+      background-size: cover;
       color: #e5e7eb; 
       min-height: 100vh; 
       overflow-x: hidden; 
@@ -22,32 +24,43 @@
     
     /* Split Glass Cards for Header */
     .glass-pill { 
-      background: rgba(15, 23, 42, 0.45); 
+      background: rgba(15, 23, 42, 0.55); 
       backdrop-filter: blur(24px); 
       -webkit-backdrop-filter: blur(24px); 
-      border: 1px solid rgba(255, 255, 255, 0.1); 
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); 
+      border: 1px solid rgba(255, 255, 255, 0.15); 
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); 
       border-radius: 2rem;
       padding: 0.75rem 1.5rem;
       display: inline-flex;
       align-items: center;
       gap: 1rem;
     }
+
+    /* Dark overlay to ensure text readability against the stormy background */
+    .bg-overlay {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(2, 6, 23, 0.3), rgba(2, 6, 23, 0.8));
+      z-index: 0;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body class="relative flex flex-col justify-between min-h-screen selection:bg-amber-500/30 selection:text-amber-200">
   
-  <!-- Live Time-of-Day Simulator Wallpaper Canvas -->
-  <canvas id="oceanCanvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
+  <!-- Subtle Dark Overlay for contrast -->
+  <div class="bg-overlay"></div>
 
   <!-- Top Header Bar (Split Layout: Logo Left, Clock Right) -->
   <header class="relative z-30 w-full px-4 sm:px-8 pt-6 flex justify-between items-start pointer-events-none">
     
-    <!-- TOP LEFT: Logo, Name & Location -->
+    <!-- TOP LEFT: Fixed Styled Logo, Name & Location -->
     <div class="glass-pill pointer-events-auto transition-transform hover:scale-105 duration-300">
       <div class="flex items-center justify-center pr-2">
-        <!-- Using the New Colorful Script Logo -->
-        <img src="image_4c5e15.png" alt="Shoaib Logo" class="h-10 sm:h-12 object-contain drop-shadow-lg">
+        <!-- Replaced broken image with a sleek CSS-based initial logo -->
+        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-slate-800 to-slate-900 border border-white/20 flex items-center justify-center text-white font-serif-title font-bold text-xl sm:text-2xl shadow-lg">
+          S
+        </div>
       </div>
       <div class="text-left hidden sm:block border-l border-white/20 pl-4">
         <h1 class="text-base sm:text-lg font-bold text-white tracking-widest uppercase drop-shadow-md leading-tight">Shoaib Akhter</h1>
@@ -69,7 +82,7 @@
     
   </header>
 
-  <!-- Main Content (Pushed down via pt-[32vh] to ensure Moon is clearly above) -->
+  <!-- Main Content -->
   <main class="relative z-10 w-full max-w-5xl mx-auto px-4 flex flex-col items-center justify-start pt-[32vh] flex-grow pb-12 text-center pointer-events-none">
     
     <!-- Portal Typography -->
@@ -128,289 +141,6 @@
     }
     setInterval(updateClock, 1000);
     updateClock();
-
-    // ---- ADVANCED REAL-WORLD TIME & ULTRA-REALISTIC TEXTURED MOON ENGINE ----
-    const canvas = document.getElementById('oceanCanvas');
-    const ctx = canvas.getContext('2d');
-
-    // Pre-render a highly realistic textured moon off-screen
-    const moonCanvas = document.createElement('canvas');
-    const mCtx = moonCanvas.getContext('2d');
-    const mSize = 400; // High resolution for texture mapping
-    moonCanvas.width = mSize;
-    moonCanvas.height = mSize;
-    
-    function generateMoonTexture() {
-      const center = mSize / 2;
-      const radius = mSize / 2 - 2;
-      
-      // 1. Base lunar off-white/silver core
-      mCtx.fillStyle = '#e2e8f0';
-      mCtx.beginPath();
-      mCtx.arc(center, center, radius, 0, Math.PI*2);
-      mCtx.fill();
-
-      // 2. Add realistic volumetric shading (brighter center, darker edges)
-      const volGrad = mCtx.createRadialGradient(center - radius*0.3, center - radius*0.3, radius*0.1, center, center, radius);
-      volGrad.addColorStop(0, 'rgba(255, 255, 255, 0.4)');
-      volGrad.addColorStop(0.7, 'rgba(150, 160, 175, 0)');
-      volGrad.addColorStop(1, 'rgba(50, 60, 75, 0.5)');
-      mCtx.fillStyle = volGrad;
-      mCtx.beginPath(); mCtx.arc(center, center, radius, 0, Math.PI*2); mCtx.fill();
-
-      // 3. Draw Lunar Maria (Dark flat plains) - Carefully positioned
-      mCtx.globalCompositeOperation = 'source-atop';
-      mCtx.filter = 'blur(10px)';
-      mCtx.fillStyle = 'rgba(20, 25, 35, 0.35)';
-      mCtx.beginPath(); mCtx.ellipse(mSize*0.35, mSize*0.4, mSize*0.25, mSize*0.35, 0.5, 0, Math.PI*2); mCtx.fill();
-      mCtx.beginPath(); mCtx.ellipse(mSize*0.7, mSize*0.4, mSize*0.2, mSize*0.25, -0.3, 0, Math.PI*2); mCtx.fill();
-      mCtx.beginPath(); mCtx.ellipse(mSize*0.4, mSize*0.75, mSize*0.2, mSize*0.15, 0.1, 0, Math.PI*2); mCtx.fill();
-      mCtx.filter = 'none';
-
-      // 4. Add high-contrast crater impacts (Tycho, Copernicus, etc)
-      for(let i=0; i<800; i++) {
-          let cx = Math.random() * mSize;
-          let cy = Math.random() * mSize;
-          let cr = Math.pow(Math.random(), 3) * 4 + 0.5;
-          
-          if (Math.hypot(cx - center, cy - center) > radius - cr) continue;
-
-          // Impact ejecta rays
-          if (cr > 2.5 && Math.random() > 0.5) {
-            const rayGrad = mCtx.createRadialGradient(cx, cy, cr, cx, cy, cr * 4);
-            rayGrad.addColorStop(0, 'rgba(255,255,255,0.4)');
-            rayGrad.addColorStop(1, 'rgba(255,255,255,0)');
-            mCtx.fillStyle = rayGrad;
-            mCtx.beginPath(); mCtx.arc(cx, cy, cr*4, 0, Math.PI*2); mCtx.fill();
-          }
-
-          // Crater highlight rim (sunlit edge)
-          mCtx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-          mCtx.beginPath(); mCtx.arc(cx - cr*0.2, cy - cr*0.2, cr, 0, Math.PI*2); mCtx.fill();
-          
-          // Crater shadow (deep dark center)
-          mCtx.fillStyle = 'rgba(15, 20, 25, 0.5)';
-          mCtx.beginPath(); mCtx.arc(cx + cr*0.1, cy + cr*0.1, cr, 0, Math.PI*2); mCtx.fill();
-      }
-      mCtx.globalCompositeOperation = 'source-over';
-    }
-    generateMoonTexture();
-
-    function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    }
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
-
-    const stars = Array.from({ length: 200 }, () => ({
-      x: Math.random() * canvas.width,
-      y: Math.random() * (canvas.height * 0.6),
-      radius: Math.random() * 1.5 + 0.2,
-      alpha: Math.random() * 0.8 + 0.2,
-      twinkleSpeed: Math.random() * 0.02 + 0.005
-    }));
-
-    let waveOffset = 0;
-
-    function animateWallpaper() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      const now = new Date();
-      const currentHour = now.getHours();
-      const currentMinute = now.getMinutes();
-      const timeFloat = currentHour + (currentMinute / 60);
-
-      let skyTop, skyMid, skyBot;
-      let isNight = false, isEvening = false, isDay = false;
-      let starOpacityMult = 0;
-      
-      // Placed perfectly in the upper quarter to stay completely clear of the text
-      let celestialY = canvas.height * 0.20; 
-
-      // Real World Time Logic (India Guidelines)
-      if (timeFloat >= 6.0 && timeFloat < 17.5) {
-        // Daylight (6:00 AM - 5:30 PM) -> Invisible Stars
-        isDay = true;
-        skyTop = '#0284c7'; skyMid = '#38bdf8'; skyBot = '#bae6fd';
-        starOpacityMult = 0; 
-      } else if (timeFloat >= 17.5 && timeFloat < 19.0) {
-        // Evening / Sunset (5:30 PM - 7:00 PM)
-        isEvening = true;
-        skyTop = '#4c1d95'; skyMid = '#be123c'; skyBot = '#f59e0b';
-        starOpacityMult = (timeFloat > 18.25) ? 0.6 : 0.1;
-        celestialY = canvas.height * 0.35; // Sun lowering to horizon
-      } else {
-        // Night Time (7:00 PM - 5:59 AM)
-        isNight = true;
-        skyTop = '#020617'; skyMid = '#090d1f'; skyBot = '#111827';
-        starOpacityMult = 1; // Full Stars
-      }
-
-      // 1. Draw Sky Gradient
-      const skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height * 0.6);
-      skyGrad.addColorStop(0, skyTop);
-      skyGrad.addColorStop(0.5, skyMid);
-      skyGrad.addColorStop(1, skyBot);
-      ctx.fillStyle = skyGrad;
-      ctx.fillRect(0, 0, canvas.width, canvas.height * 0.6);
-
-      // 2. Draw Stars (Strictly dependent on time)
-      if (starOpacityMult > 0) {
-        stars.forEach(star => {
-          star.alpha += star.twinkleSpeed;
-          if (star.alpha <= 0.1 || star.alpha >= 0.9) star.twinkleSpeed = -star.twinkleSpeed;
-          ctx.beginPath();
-          ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(255, 255, 255, ${star.alpha * starOpacityMult})`;
-          ctx.fill();
-        });
-      }
-
-      // 3. Draw Celestial Body (Sun or Textured Moon)
-      const cX = canvas.width * 0.5;
-      const cRadius = Math.min(canvas.width, canvas.height) * 0.1; // Moon Size
-      const horizonY = canvas.height * 0.55;
-
-      ctx.save();
-      ctx.translate(cX, celestialY);
-
-      if (isDay || isEvening) {
-        // --- DRAW SUN ---
-        const sunGlow = ctx.createRadialGradient(0, 0, cRadius * 0.5, 0, 0, cRadius * 4);
-        if (isEvening) {
-          sunGlow.addColorStop(0, 'rgba(255, 200, 100, 0.6)');
-          sunGlow.addColorStop(1, 'rgba(245, 158, 11, 0)');
-          ctx.fillStyle = '#f97316';
-        } else {
-          sunGlow.addColorStop(0, 'rgba(255, 255, 220, 0.7)');
-          sunGlow.addColorStop(1, 'rgba(255, 255, 100, 0)');
-          ctx.fillStyle = '#fef08a'; 
-        }
-        ctx.fillStyle = sunGlow;
-        ctx.beginPath();
-        ctx.arc(0, 0, cRadius * 4, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.beginPath();
-        ctx.arc(0, 0, cRadius, 0, Math.PI * 2);
-        ctx.fillStyle = isEvening ? '#ea580c' : '#fef08a';
-        ctx.shadowBlur = 25;
-        ctx.shadowColor = ctx.fillStyle;
-        ctx.fill();
-
-      } else {
-        // --- DRAW ULTRA-REALISTIC TEXTURED MOON ---
-        const cycleDays = 29.53058770576;
-        const knownNewMoon = 1704974220000; // Jan 11, 2024
-        const daysSince = (now.getTime() - knownNewMoon) / (1000 * 60 * 60 * 24);
-        const phase = (daysSince % cycleDays) / cycleDays; 
-
-        // Moon Outer Atmospheric Glow (Subtle)
-        const moonGlow = ctx.createRadialGradient(0, 0, cRadius * 0.8, 0, 0, cRadius * 2);
-        moonGlow.addColorStop(0, 'rgba(220, 235, 255, 0.15)');
-        moonGlow.addColorStop(1, 'rgba(100, 150, 255, 0)');
-        ctx.fillStyle = moonGlow;
-        ctx.beginPath(); ctx.arc(0, 0, cRadius * 2, 0, Math.PI * 2); ctx.fill();
-
-        // Draw the highly textured moon image
-        ctx.beginPath();
-        ctx.arc(0, 0, cRadius, 0, Math.PI * 2);
-        ctx.clip(); 
-        
-        // Tilt the moon slightly for realism
-        ctx.rotate(-15 * Math.PI / 180);
-        ctx.drawImage(moonCanvas, -cRadius, -cRadius, cRadius * 2, cRadius * 2);
-        ctx.rotate(15 * Math.PI / 180); // reset rotation for shadow
-
-        // Apply pitch-black terminator shadow (Phase logic)
-        ctx.fillStyle = 'rgba(2, 6, 23, 0.95)'; 
-        
-        if (phase < 0.5) {
-          ctx.beginPath(); ctx.arc(0, 0, cRadius, Math.PI/2, Math.PI*1.5, false); ctx.fill();
-          const shadowWidth = cRadius - (phase * 2 * cRadius);
-          ctx.beginPath(); ctx.ellipse(0, 0, Math.abs(shadowWidth), cRadius, 0, 0, Math.PI * 2);
-          if (phase < 0.25) { 
-            ctx.fill(); 
-            ctx.shadowBlur = 10; ctx.shadowColor = 'rgba(2,6,23,1)'; ctx.stroke(); ctx.shadowBlur = 0;
-          } else {
-            ctx.globalCompositeOperation = 'destination-out'; ctx.fill(); ctx.globalCompositeOperation = 'source-over';
-          }
-        } else {
-          ctx.beginPath(); ctx.arc(0, 0, cRadius, Math.PI*1.5, Math.PI/2, false); ctx.fill();
-          const phase2 = phase - 0.5;
-          const shadowWidth = cRadius - (phase2 * 2 * cRadius);
-          ctx.beginPath(); ctx.ellipse(0, 0, Math.abs(shadowWidth), cRadius, 0, 0, Math.PI * 2);
-          if (phase2 < 0.25) { 
-            ctx.fill(); 
-            ctx.shadowBlur = 10; ctx.shadowColor = 'rgba(2,6,23,1)'; ctx.stroke(); ctx.shadowBlur = 0;
-          } else {
-            ctx.globalCompositeOperation = 'destination-out'; ctx.fill(); ctx.globalCompositeOperation = 'source-over';
-          }
-        }
-      }
-      ctx.restore();
-
-      // 4. Draw Reflection on Water
-      const reflGrad = ctx.createLinearGradient(cX, horizonY, cX, canvas.height);
-      if (isDay) {
-        reflGrad.addColorStop(0, 'rgba(255, 255, 255, 0.5)');
-        reflGrad.addColorStop(1, 'rgba(255, 255, 200, 0)');
-      } else if (isEvening) {
-        reflGrad.addColorStop(0, 'rgba(255, 200, 100, 0.4)');
-        reflGrad.addColorStop(1, 'rgba(245, 158, 11, 0)');
-      } else {
-        reflGrad.addColorStop(0, 'rgba(220, 235, 255, 0.25)');
-        reflGrad.addColorStop(1, 'rgba(100, 150, 255, 0)');
-      }
-      ctx.fillStyle = reflGrad;
-      ctx.beginPath();
-      ctx.moveTo(cX - 45, horizonY);
-      ctx.lineTo(cX + 45, horizonY);
-      ctx.lineTo(cX + 140, canvas.height);
-      ctx.lineTo(cX - 140, canvas.height);
-      ctx.closePath();
-      ctx.fill();
-
-      // 5. Rolling Ocean Waves
-      waveOffset += 0.03;
-      const numWaves = 4;
-      for (let i = 0; i < numWaves; i++) {
-        ctx.beginPath();
-        let currentY = horizonY + i * 35;
-        ctx.moveTo(0, currentY);
-
-        for (let x = 0; x <= canvas.width; x += 30) {
-          let y = currentY + Math.sin(x * 0.01 + waveOffset + i) * 8 + Math.cos(x * 0.005 - waveOffset * 0.5) * 6;
-          ctx.lineTo(x, y);
-        }
-        ctx.lineTo(canvas.width, canvas.height);
-        ctx.lineTo(0, canvas.height);
-        ctx.closePath();
-
-        const waveGrad = ctx.createLinearGradient(0, currentY, 0, canvas.height);
-        const alphaVal = 0.6 + i * 0.1;
-        
-        if (isDay) {
-          waveGrad.addColorStop(0, `rgba(2, 132, 199, ${alphaVal})`);
-          waveGrad.addColorStop(1, `rgba(8, 47, 73, 0.95)`);
-        } else if (isEvening) {
-          waveGrad.addColorStop(0, `rgba(159, 18, 57, ${alphaVal})`);
-          waveGrad.addColorStop(1, `rgba(76, 5, 25, 0.95)`);
-        } else {
-          waveGrad.addColorStop(0, `rgba(15, 23, 42, ${alphaVal})`);
-          waveGrad.addColorStop(0.5, `rgba(13, 35, 60, ${alphaVal})`);
-          waveGrad.addColorStop(1, `rgba(4, 15, 30, 0.95)`);
-        }
-        
-        ctx.fillStyle = waveGrad;
-        ctx.fill();
-      }
-
-      requestAnimationFrame(animateWallpaper);
-    }
-
-    animateWallpaper();
   </script>
 </body>
 </html>
