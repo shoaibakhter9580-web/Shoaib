@@ -179,12 +179,11 @@
 
     .btn-signout:hover { opacity: 0.8; }
 
-    /* Ultra-Glossy Translucent Main Content - Ocean Effect applied */
+    /* Ultra-Glossy Translucent Main Content */
     .main-wrapper {
       flex: 1;
       padding: 2.25rem 2.5rem;
       max-width: 1200px;
-      /* Deep ocean translucent background */
       background: rgba(4, 15, 33, 0.65);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
@@ -551,7 +550,6 @@
 
     <div id="chipsContainer" class="chips-bar"></div>
     
-    <!-- Hierarchical Breadcrumb for Student Folders (Handwritten & Box-less) -->
     <div id="studentFolderBreadcrumbBar" class="hidden mb-6 flex items-center gap-2 shadow-none" style="font-family: 'Dancing Script', cursive; font-size: 1.6rem; letter-spacing: 1px;">
       <button onclick="renderStudentFoldersHierarchy('')" class="text-sky-300 font-bold hover:text-sky-100 transition flex items-center gap-2 drop-shadow-md">
         <i class="fa-solid fa-house text-lg"></i> Root Folders
@@ -703,7 +701,15 @@
 
       container.innerHTML = filtered.map(file => {
         const sizeFormatted = typeof file.size === 'string' ? file.size : (file.size ? (file.size / 1024).toFixed(1) + ' KB' : 'Document');
-        const dateFormatted = file.time || file.date || 'Recent';
+        
+        // --- DATE FIX APPLIED HERE ---
+        // Checks database for file.time, if unavailable, it converts the unique file ID timestamp directly to a standard short date string.
+        let dateFormatted = file.time || file.date;
+        if (!dateFormatted || dateFormatted === 'Recent' || dateFormatted === 'Just now') {
+            const extractTimestamp = typeof file.id === 'string' && file.id.startsWith('file_') ? parseInt(file.id.split('_')[1]) : Date.now();
+            dateFormatted = new Date(extractTimestamp).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
         const folderTag = file.folder || 'General';
         const safeId = String(file.id).replace(/'/g, "\\'");
 
