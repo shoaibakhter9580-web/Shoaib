@@ -631,6 +631,8 @@
         const folder = activeFolderFilter || (folderDest ? folderDest.value || null : null);
         const tag = tagInput ? tagInput.value.trim() : "";
 
+        const uploadDate = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
         const newRecord = {
           id: "file_" + Date.now(),
           name: title,
@@ -638,7 +640,7 @@
           tag: tag ? (tag.startsWith("#") ? tag : `#${tag}`) : null,
           size: selectedFileSize,
           type: selectedFileType,
-          time: "Just now",
+          time: uploadDate,
           isImportant: impCheck ? impCheck.checked : false,
           isNew: newCheck ? newCheck.checked : true,
           blob: selectedFileBlob
