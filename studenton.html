@@ -512,7 +512,8 @@
         </div>
       </li>
 
-      <a href="quiz.html" class="nav-item">
+      <!-- FIXED QUIZ TAB (Using <li> and onclick instead of <a>) -->
+      <li class="nav-item" onclick="window.location.href='quiz.html'">
         <div class="nav-icon-box">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"></circle>
@@ -524,7 +525,7 @@
           <div class="nav-title">Quiz</div>
           <div class="nav-sub">Classroom tests</div>
         </div>
-      </a>
+      </li>
     </ul>
 
     <div class="sidebar-footer">
@@ -702,8 +703,6 @@
       container.innerHTML = filtered.map(file => {
         const sizeFormatted = typeof file.size === 'string' ? file.size : (file.size ? (file.size / 1024).toFixed(1) + ' KB' : 'Document');
         
-        // --- DATE FIX APPLIED HERE ---
-        // Checks database for file.time, if unavailable, it converts the unique file ID timestamp directly to a standard short date string.
         let dateFormatted = file.time || file.date;
         if (!dateFormatted || dateFormatted === 'Recent' || dateFormatted === 'Just now') {
             const extractTimestamp = typeof file.id === 'string' && file.id.startsWith('file_') ? parseInt(file.id.split('_')[1]) : Date.now();
