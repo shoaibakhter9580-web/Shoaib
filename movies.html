@@ -432,8 +432,8 @@
     // ==========================================
     // API CONFIGURATION
     // ==========================================
-   const API_KEY = "4ac83cb7"; 
-    const BASE_API_URL = "https://www.omdbapi.com/?apikey=" + API_KEY + "&s=";
+  const API_KEY = "98d5955e"; 
+    const BASE_API_URL = "https://www.omdbapi.com/?apikey=" + API_KEY + "&s="; 
 
     function handleSearchInput(event) {
       if (event.key === 'Enter') {
@@ -453,9 +453,14 @@
       try {
         const url = `${BASE_API_URL}${encodeURIComponent(searchQuery)}`;
         const response = await fetch(url);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const data = await response.json();
 
-        // OMDb returns Response: "False" if no movie matches the search
+        // OMDb returns Response: "False" if no movie matches the search or key is invalid
         if (data.Response === "False") {
           container.innerHTML = `<div class="empty-state text-white col-span-full">${data.Error}</div>`;
           return;
@@ -470,7 +475,10 @@
         }
       } catch (error) {
         console.error("API Fetch Error:", error);
-        container.innerHTML = `<div class="empty-state text-white col-span-full text-red-300">Error connecting to the API. Check console.</div>`;
+        container.innerHTML = `<div class="empty-state text-white col-span-full text-red-300">
+          <strong>Error connecting to the API.</strong><br>
+          If you are using an ad-blocker or Brave browser, try turning off shields/blockers for this page.
+        </div>`;
       }
     }
 
