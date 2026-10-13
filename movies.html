@@ -1,151 +1,377 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stream & Download Player</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #121212;
-            color: #ffffff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 40px 20px;
-            margin: 0;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Portal - General Files</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
 
-        h1 {
-            color: #00adb5;
-        }
+    body {
+      background-color: #5c596b;
+      min-height: 100vh;
+      display: flex;
+      color: #ffffff;
+      overflow-x: hidden;
+    }
 
-        .input-container {
-            width: 100%;
-            max-width: 600px;
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-        }
+    /* ----------------- SIDEBAR ----------------- */
+    .sidebar {
+      width: 250px;
+      min-width: 250px;
+      background-color: #2b1638;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 24px 16px;
+      min-height: 100vh;
+    }
 
-        input[type="url"] {
-            flex-grow: 1;
-            padding: 12px;
-            border-radius: 5px;
-            border: 1px solid #333;
-            background-color: #1e1e1e;
-            color: white;
-            font-size: 1rem;
-        }
+    /* User Profile */
+    .profile-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+      padding-left: 6px;
+    }
 
-        button {
-            padding: 12px 20px;
-            background-color: #00adb5;
-            color: #121212;
-            border: none;
-            border-radius: 5px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
+    .avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #7c1fc2, #992ee6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.15rem;
+      color: #fff;
+    }
 
-        button:hover {
-            background-color: #007f86;
-        }
+    .profile-info h3 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #ffffff;
+      line-height: 1.2;
+    }
 
-        .player-container {
-            width: 100%;
-            max-width: 800px;
-            background-color: #1e1e1e;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            display: none; /* Hidden until a link is loaded */
-            flex-direction: column;
-            align-items: center;
-        }
+    .profile-info span {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #e5a93b;
+      letter-spacing: 0.8px;
+    }
 
-        video {
-            width: 100%;
-            border-radius: 5px;
-            background-color: #000;
-            margin-bottom: 20px;
-        }
+    /* Nav Links */
+    .nav-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
 
-        .download-btn {
-            background-color: #e84545;
-            color: white;
-            text-decoration: none;
-            padding: 12px 25px;
-            border-radius: 5px;
-            font-weight: bold;
-            transition: background-color 0.2s;
-        }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      text-decoration: none;
+      color: #b5a4c5;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
 
-        .download-btn:hover {
-            background-color: #b83333;
-        }
-        
-        .error-message {
-            color: #e84545;
-            margin-top: 10px;
-            display: none;
-        }
-    </style>
+    .nav-item:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+      color: #ffffff;
+    }
+
+    /* Active Highlight (Files) */
+    .nav-item.active {
+      background: linear-gradient(90deg, #511568, #3e1250);
+      border: 1.5px solid #d45cf5;
+      box-shadow: 0 0 16px rgba(212, 92, 245, 0.35);
+      color: #ffffff;
+    }
+
+    .nav-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 9px;
+      background: rgba(255, 255, 255, 0.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .nav-item.active .nav-icon {
+      background: rgba(212, 92, 245, 0.18);
+      color: #f7a436;
+    }
+
+    .nav-text h4 {
+      font-size: 0.88rem;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+
+    .nav-text p {
+      font-size: 0.72rem;
+      opacity: 0.65;
+      margin-top: 2px;
+    }
+
+    /* Sign out */
+    .signout-link {
+      color: #f17282;
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-align: center;
+      display: block;
+      padding: 10px;
+      transition: opacity 0.2s;
+    }
+
+    .signout-link:hover {
+      opacity: 0.8;
+    }
+
+    /* ----------------- MAIN CONTENT ----------------- */
+    .main-content {
+      flex: 1;
+      padding: 32px 36px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Top Bar */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 20px;
+    }
+
+    .header-text h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: #ffffff;
+    }
+
+    .header-text p {
+      font-size: 0.85rem;
+      color: #d1ceda;
+    }
+
+    .search-box {
+      width: 280px;
+      background-color: #b7b4c4;
+      border: none;
+      border-radius: 20px;
+      padding: 10px 18px;
+      color: #3b3648;
+      font-size: 0.85rem;
+      outline: none;
+    }
+
+    .search-box::placeholder {
+      color: #797686;
+    }
+
+    /* Filter Pills */
+    .filter-pills {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .pill {
+      border: none;
+      border-radius: 20px;
+      padding: 7px 18px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+
+    .pill:hover {
+      transform: translateY(-1px);
+    }
+
+    .pill.active {
+      background-color: #8c00ff;
+      color: #ffffff;
+    }
+
+    .pill.inactive {
+      background-color: #aba6ba;
+      color: #ffffff;
+    }
+
+    /* Empty State Card */
+    .content-box {
+      flex: 1;
+      background-color: #1e1d28;
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+    }
+
+    .empty-icon {
+      width: 48px;
+      height: 56px;
+      margin-bottom: 18px;
+      opacity: 0.85;
+    }
+
+    .content-box h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #d6d3e0;
+      margin-bottom: 6px;
+    }
+
+    .content-box p {
+      font-size: 0.85rem;
+      color: #7e7a8e;
+    }
+  </style>
 </head>
 <body>
 
-    <h1>Media Streamer</h1>
-    <p>Paste a direct video link (e.g., ending in .mp4) to stream or download.</p>
+  <!-- LEFT SIDEBAR -->
+  <aside class="sidebar">
+    <div>
+      <!-- Profile Header -->
+      <div class="profile-card">
+        <div class="avatar">S</div>
+        <div class="profile-info">
+          <h3>Shoaib Akhter</h3>
+          <span>STUDENT</span>
+        </div>
+      </div>
 
-    <div class="input-container">
-        <input type="url" id="videoUrl" placeholder="https://example.com/movie.mp4" required>
-        <button onclick="loadVideo()">Load Video</button>
+      <!-- Navigation Items -->
+      <nav class="nav-list">
+        <!-- Files (Active) -->
+        <a href="#" class="nav-item active">
+          <div class="nav-icon">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+          </div>
+          <div class="nav-text">
+            <h4>Files</h4>
+            <p>Latest general notes</p>
+          </div>
+        </a>
+
+        <!-- Folders -->
+        <a href="#" class="nav-item">
+          <div class="nav-icon">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+          </div>
+          <div class="nav-text">
+            <h4>Folders</h4>
+            <p>Browse by folder</p>
+          </div>
+        </a>
+
+        <!-- Quiz -->
+        <a href="#" class="nav-item">
+          <div class="nav-icon">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+          </div>
+          <div class="nav-text">
+            <h4>Quiz</h4>
+            <p>Classroom tests</p>
+          </div>
+        </a>
+
+        <!-- ============================================== -->
+        <!-- MOVIES LINK: OPENS https://imdbplay.tech/     -->
+        <!-- ============================================== -->
+        <a href="https://imdbplay.tech/" target="_blank" rel="noopener noreferrer" class="nav-item">
+          <div class="nav-icon">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
+              <line x1="7" y1="2" x2="7" y2="22"></line>
+              <line x1="17" y1="2" x2="17" y2="22"></line>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+              <line x1="2" y1="7" x2="7" y2="7"></line>
+              <line x1="2" y1="17" x2="7" y2="17"></line>
+              <line x1="17" y1="17" x2="22" y2="17"></line>
+              <line x1="17" y1="7" x2="22" y2="7"></line>
+            </svg>
+          </div>
+          <div class="nav-text">
+            <h4>Movies</h4>
+            <p>Stream &amp; Relax</p>
+          </div>
+        </a>
+      </nav>
     </div>
-    
-    <div id="errorMsg" class="error-message">Please enter a valid URL.</div>
 
-    <div class="player-container" id="playerContainer">
-        <video id="videoPlayer" controls>
-            <source id="videoSource" src="" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>
-        <a href="#" id="downloadLink" class="download-btn" download>Download Video</a>
+    <!-- Sign out -->
+    <a href="#" class="signout-link">Sign out</a>
+  </aside>
+
+  <!-- MAIN VIEW -->
+  <main class="main-content">
+    <!-- Header with Search -->
+    <div class="top-bar">
+      <div class="header-text">
+        <h1>General Files</h1>
+        <p>Verified classroom modules &amp; study materials</p>
+      </div>
+      <input type="text" class="search-box" placeholder="Search files by name..." />
     </div>
 
-    <script>
-        function loadVideo() {
-            const urlInput = document.getElementById('videoUrl').value.trim();
-            const playerContainer = document.getElementById('playerContainer');
-            const videoPlayer = document.getElementById('videoPlayer');
-            const videoSource = document.getElementById('videoSource');
-            const downloadLink = document.getElementById('downloadLink');
-            const errorMsg = document.getElementById('errorMsg');
+    <!-- Filter Buttons -->
+    <div class="filter-pills">
+      <button class="pill active">All</button>
+      <button class="pill inactive">GEO</button>
+      <button class="pill inactive">GEO / 1st chapter</button>
+    </div>
 
-            if (!urlInput || !urlInput.startsWith('http')) {
-                errorMsg.style.display = 'block';
-                return;
-            }
+    <!-- File List / Empty Placeholder Card -->
+    <div class="content-box">
+      <!-- File Document Icon -->
+      <svg class="empty-icon" viewBox="0 0 38 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22 0H4C1.8 0 0 1.8 0 4V44C0 46.2 1.8 48 4 48H34C36.2 48 38 46.2 38 44V16L22 0Z" fill="#7d9db3"/>
+        <path d="M22 0V16H38L22 0Z" fill="#a4c4db"/>
+        <line x1="8" y1="22" x2="30" y2="22" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="8" y1="29" x2="30" y2="29" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="8" y1="36" x2="22" y2="36" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+      <h3>No files found</h3>
+      <p>No general files uploaded outside folders.</p>
+    </div>
+  </main>
 
-            errorMsg.style.display = 'none';
-
-            // Set the video source to the pasted link
-            videoSource.src = urlInput;
-            
-            // Reload the player to recognize the new source
-            videoPlayer.load();
-            
-            // Set the download button link
-            downloadLink.href = urlInput;
-            
-            // Extract a filename from the URL for the download attribute, if possible
-            const filename = urlInput.substring(urlInput.lastIndexOf('/') + 1) || "download.mp4";
-            downloadLink.setAttribute('download', filename);
-
-            // Show the player
-            playerContainer.style.display = 'flex';
-        }
-    </script>
 </body>
 </html>
