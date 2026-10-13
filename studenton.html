@@ -8,14 +8,15 @@
     @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&display=swap');
     
     :root {
-      --bg-sidebar: rgba(18, 7, 38, 0.88);
+      /* Made sidebar highly translucent */
+      --bg-sidebar: rgba(18, 7, 38, 0.3);
       --card-bg: rgba(255, 255, 255, 0.65);
       --card-hover: rgba(255, 255, 255, 0.9);
       --accent-purple: #7c3aed;
-      --accent-gold: #f59e0b;
-      --text-main: #1e1b2e;
-      --text-muted: #64748b;
-      --text-sub: #551a8b;
+      --accent-gold: rgba(245, 158, 11, 0.8);
+      --text-main: rgba(30, 27, 46, 0.75);
+      --text-muted: rgba(100, 116, 139, 0.75);
+      --text-sub: rgba(85, 26, 139, 0.75);
     }
 
     * {
@@ -26,7 +27,8 @@
     }
 
     body {
-      background: url('image_99ee14.jpg') no-repeat center center fixed;
+      /* Updated background image */
+      background: url('arctic-ice-svalbard_2.jpg') no-repeat center center fixed;
       background-size: cover;
       color: var(--text-main);
       min-height: 100vh;
@@ -64,7 +66,7 @@
       width: 48px;
       height: 48px;
       border-radius: 50%;
-      background: radial-gradient(circle, #7c3aed 0%, #3b0764 100%);
+      background: radial-gradient(circle, rgba(124, 58, 237, 0.7) 0%, rgba(59, 7, 100, 0.7) 100%);
       border: 1.5px solid rgba(255, 255, 255, 0.4);
       display: flex;
       align-items: center;
@@ -72,16 +74,17 @@
       box-shadow: 0 0 18px rgba(168, 85, 247, 0.4);
     }
 
+    /* Translucent Text Adjustments */
     .brand-logo-letter {
       font-size: 1.3rem;
       font-weight: 800;
-      color: #ffffff;
+      color: rgba(255, 255, 255, 0.75);
     }
 
     .brand-title {
       font-size: 1.15rem;
       font-weight: 700;
-      color: #ffffff;
+      color: rgba(255, 255, 255, 0.75);
       line-height: 1.2;
     }
 
@@ -144,21 +147,21 @@
     .nav-item:not(.active) .nav-icon-box {
       background: rgba(124, 58, 237, 0.18);
       border: 1px solid rgba(124, 58, 237, 0.3);
-      color: #c4b5fd;
+      color: rgba(196, 181, 253, 0.8);
     }
 
     .nav-title {
       font-size: 1rem;
       font-weight: 600;
-      color: #ffffff;
+      color: rgba(255, 255, 255, 0.75);
       line-height: 1.2;
     }
 
-    .nav-item.active .nav-sub { color: #fde68a; }
+    .nav-item.active .nav-sub { color: rgba(253, 230, 138, 0.75); }
 
     .nav-sub {
       font-size: 0.76rem;
-      color: #cbd5e1;
+      color: rgba(203, 213, 225, 0.75);
       margin-top: 2px;
     }
 
@@ -169,7 +172,7 @@
     }
 
     .btn-signout {
-      color: #fca5a5;
+      color: rgba(252, 165, 165, 0.8);
       text-decoration: none;
       font-size: 0.95rem;
       font-weight: 700;
@@ -203,12 +206,12 @@
     .view-heading h2 {
       font-size: 1.85rem;
       font-weight: 800;
-      color: #ffffff;
+      color: rgba(255, 255, 255, 0.8);
       letter-spacing: -0.02em;
     }
 
     .view-heading p {
-      color: #cbd5e1;
+      color: rgba(203, 213, 225, 0.75);
       font-size: 0.88rem;
       margin-top: 0.3rem;
       font-weight: 500;
@@ -227,7 +230,7 @@
       border: 1px solid rgba(255, 255, 255, 0.9);
       border-radius: 16px;
       padding: 0.8rem 1rem 0.8rem 2.6rem;
-      color: #0f172a;
+      color: rgba(15, 23, 42, 0.8);
       font-size: 0.9rem;
       outline: none;
       box-shadow: 0 4px 20px rgba(118, 92, 168, 0.05), inset 0 1px 2px rgba(255, 255, 255, 0.9);
@@ -247,8 +250,7 @@
       transform: translateY(-50%);
       width: 16px;
       height: 16px;
-      fill: #7c3aed;
-      opacity: 0.8;
+      fill: rgba(124, 58, 237, 0.8);
     }
 
     .chips-bar {
@@ -263,7 +265,7 @@
       background: rgba(255, 255, 255, 0.65);
       backdrop-filter: blur(10px);
       border: 1px solid rgba(255, 255, 255, 0.85);
-      color: #334155;
+      color: rgba(51, 65, 85, 0.8);
       padding: 0.5rem 1.1rem;
       border-radius: 9999px;
       font-size: 0.84rem;
@@ -275,9 +277,9 @@
     }
 
     .chip.active, .chip:hover {
-      background: linear-gradient(135deg, #7c3aed, #6d28d9);
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.8), rgba(109, 40, 217, 0.8));
       border-color: transparent;
-      color: #ffffff;
+      color: rgba(255, 255, 255, 0.85);
       box-shadow: 0 6px 18px rgba(124, 58, 237, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4);
       transform: translateY(-1px);
     }
@@ -335,7 +337,7 @@
     .file-name {
       font-size: 0.95rem;
       font-weight: 700;
-      color: #0f172a;
+      color: rgba(15, 23, 42, 0.8);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -344,7 +346,7 @@
     .file-tag {
       display: inline-block;
       font-size: 0.72rem;
-      color: #6d28d9;
+      color: rgba(109, 40, 217, 0.8);
       background: rgba(124, 58, 237, 0.1);
       padding: 0.15rem 0.55rem;
       border-radius: 6px;
@@ -354,7 +356,7 @@
 
     .file-meta {
       font-size: 0.76rem;
-      color: #475569;
+      color: rgba(71, 85, 105, 0.8);
       display: flex;
       justify-content: space-between;
       padding-top: 0.85rem;
@@ -363,8 +365,8 @@
     }
 
     .btn-download {
-      background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
-      color: #ffffff;
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.85) 0%, rgba(109, 40, 217, 0.85) 100%);
+      color: rgba(255, 255, 255, 0.9);
       border: 1px solid rgba(216, 180, 254, 0.4);
       padding: 0.65rem;
       border-radius: 14px;
@@ -416,7 +418,7 @@
 
     .folder-parent-crumb {
       font-size: 0.72rem;
-      color: #7c3aed;
+      color: rgba(124, 58, 237, 0.8);
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.06em;
@@ -426,12 +428,12 @@
     .folder-card-title {
       font-size: 0.98rem;
       font-weight: 800;
-      color: #0f172a;
+      color: rgba(15, 23, 42, 0.8);
     }
 
     .folder-card-count {
       font-size: 0.75rem;
-      color: #475569;
+      color: rgba(71, 85, 105, 0.8);
       margin-top: 3px;
       font-weight: 600;
     }
@@ -439,7 +441,7 @@
     .empty-state {
       text-align: center;
       padding: 4rem 1.5rem;
-      color: #cbd5e1;
+      color: rgba(203, 213, 225, 0.8);
       grid-column: 1 / -1;
       background: rgba(15, 23, 42, 0.45);
       backdrop-filter: blur(10px);
