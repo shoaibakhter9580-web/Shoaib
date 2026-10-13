@@ -432,10 +432,8 @@
     // ==========================================
     // ADD YOUR  KEY & URL HERE
     // ==========================================
-    const API_KEY = "4ac83cb7"; 
-const BASE_API_URL = "https://www.omdbapi.com/?apikey=4ac83cb7&s=";
-    // Example for OMDB: `https://www.omdbapi.com/?apikey=${API_KEY}&s=`
-    // ==========================================
+  const API_KEY = "4ac83cb7"; 
+    const BASE_API_URL = "https://www.omdbapi.com/?apikey=" + API_KEY + "&s="; 
 
     function handleSearchInput(event) {
       if (event.key === 'Enter') {
@@ -449,18 +447,21 @@ const BASE_API_URL = "https://www.omdbapi.com/?apikey=4ac83cb7&s=";
     async function fetchMovies(searchQuery) {
       const container = document.getElementById('moviesContainer');
       
-      // Loading state
+      // Show loading state
       container.innerHTML = `<div class="empty-state text-white col-span-full">Loading...</div>`;
 
       try {
-        // Construct your API URL using the query
         const url = `${BASE_API_URL}${encodeURIComponent(searchQuery)}`;
         const response = await fetch(url);
         const data = await response.json();
 
-        // Check how your specific API returns data. 
-        // For OMDb, it returns an array inside "Search".
-        const moviesList = data.Search || data.results || data; 
+        // OMDb returns Response: "False" if no movie matches the search
+        if (data.Response === "False") {
+          container.innerHTML = `<div class="empty-state text-white col-span-full">${data.Error}</div>`;
+          return;
+        }
+
+        const moviesList = data.Search; 
 
         if (moviesList && moviesList.length > 0) {
           renderMovies(moviesList);
@@ -469,7 +470,7 @@ const BASE_API_URL = "https://www.omdbapi.com/?apikey=4ac83cb7&s=";
         }
       } catch (error) {
         console.error("API Fetch Error:", error);
-        container.innerHTML = `<div class="empty-state text-white col-span-full text-red-300">Error connecting to the API. Check your API key.</div>`;
+        container.innerHTML = `<div class="empty-state text-white col-span-full text-red-300">Error connecting to the API. Check console.</div>`;
       }
     }
 
@@ -477,8 +478,8 @@ const BASE_API_URL = "https://www.omdbapi.com/?apikey=4ac83cb7&s=";
       const container = document.getElementById('moviesContainer');
       
       container.innerHTML = movies.map(movie => {
-        const title = movie.Title || movie.title || "Unknown Title";
-        const year = movie.Year || movie.release_date || "";
+        const title = movie.Title || "Unknown Title";
+        const year = movie.Year || "";
         const poster = movie.Poster && movie.Poster !== "N/A" ? movie.Poster : 'https://via.placeholder.com/300x450?text=No+Poster';
         const imdbId = movie.imdbID || "";
 
