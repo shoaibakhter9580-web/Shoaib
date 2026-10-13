@@ -477,22 +477,23 @@ const BASE_API_URL = "https://www.omdbapi.com/?apikey=4ac83cb7&s=";
       const container = document.getElementById('moviesContainer');
       
       container.innerHTML = movies.map(movie => {
-        // Adjust these variables depending on your API's JSON keys
-        // OMDb uses Title, Poster, Year. TMDB uses title, poster_path, release_date.
         const title = movie.Title || movie.title || "Unknown Title";
         const year = movie.Year || movie.release_date || "";
         const poster = movie.Poster && movie.Poster !== "N/A" ? movie.Poster : 'https://via.placeholder.com/300x450?text=No+Poster';
+        const imdbId = movie.imdbID || "";
 
         return `
-          <div class="movie-card">
+          <div class="movie-card" onclick="window.open('https://www.imdb.com/title/${imdbId}', '_blank')">
             <img src="${poster}" alt="${title}" class="movie-poster" loading="lazy">
             <div class="movie-info">
               <div class="movie-title" title="${title}">${title}</div>
               <div class="movie-year">${year}</div>
+              <div style="font-size: 0.75rem; color: #7c3aed; margin-top: 0.5rem; font-weight: bold;">View on IMDb ↗</div>
             </div>
           </div>
         `;
       }).join('');
+    }
     }
   </script>
 </body>
