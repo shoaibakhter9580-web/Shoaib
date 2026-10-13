@@ -432,8 +432,8 @@
     // ==========================================
     // API CONFIGURATION
     // ==========================================
-    const API_KEY = "4ac83cb7"; 
-    const BASE_API_URL = "https://www.omdbapi.com/apikey.aspx?VERIFYKEY=faa1e523-0e15-44ab-9d0c-d93a042035f1"; 
+   const API_KEY = "4ac83cb7"; 
+    const BASE_API_URL = "https://www.omdbapi.com/?apikey=" + API_KEY + "&s=";
 
     function handleSearchInput(event) {
       if (event.key === 'Enter') {
