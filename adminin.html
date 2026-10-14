@@ -76,7 +76,12 @@
           S
         </div>
         <div>
-          <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">Shoaib Akhter</h1>
+          <div class="flex items-center gap-2">
+            <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">Shoaib Akhter</h1>
+            <span id="cloudSyncBadge" class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-sky-100 text-sky-800 border border-sky-200 flex items-center gap-1">
+              <i class="fa-brands fa-telegram"></i> Cloud Syncing...
+            </span>
+          </div>
           <p class="text-xs text-purple-800 font-bold tracking-wide">Ghazipur • Uttar Pradesh</p>
         </div>
       </div>
@@ -99,6 +104,10 @@
           <span>Upload File</span>
         </button>
 
+        <button onclick="forceRefreshFromTelegram()" title="Sync from Telegram Cloud" class="px-3 py-2 rounded-xl bg-white/80 hover:bg-white text-purple-900 text-xs font-bold border border-white transition shadow-sm flex items-center gap-1">
+          <i class="fa-solid fa-arrows-rotate"></i>
+        </button>
+
         <button onclick="logoutAdmin()" title="Logout" class="px-3.5 py-2 rounded-xl liquid-button text-white text-xs font-semibold flex items-center gap-1.5 transition">
           <i class="fa-brands fa-telegram text-sm text-sky-300"></i>
           <span>Admin: Shoaib</span>
@@ -115,7 +124,7 @@
       <div class="flex items-center justify-between">
         <div>
           <h2 id="filesHeaderTitle" class="text-2xl font-serif-title font-bold text-slate-900">Files</h2>
-          <p id="filesHeaderSubtitle" class="text-xs text-slate-600 mt-0.5">Verified classroom modules</p>
+          <p id="filesHeaderSubtitle" class="text-xs text-slate-600 mt-0.5">Verified classroom modules (Synced across all devices via Telegram DB)</p>
         </div>
         <button onclick="clearFolderFilter()" id="clearFolderFilterBtn" class="hidden px-3.5 py-1.5 liquid-glass text-purple-900 rounded-xl text-xs font-bold hover:bg-white/95 transition shadow-sm">
           <i class="fa-solid fa-arrow-left mr-1.5"></i> Show General Files
@@ -187,10 +196,10 @@
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 class="text-2xl font-serif-title font-bold text-slate-900">Quiz Manager</h2>
-          <p class="text-xs text-slate-600 mt-0.5">Upload English & Hindi MCQ files (.pdf, .txt, .jpeg, .png). Flawless Smart Quiz Scan.</p>
+          <p class="text-xs text-slate-600 mt-0.5">Upload English & Hindi MCQ files (.pdf, .txt). Syncs instantly to all student phones & PCs.</p>
         </div>
         <input type="file" id="quizFileInput" accept=".pdf,.txt,.png,.jpg,.jpeg" class="hidden" onchange="processQuizUpload(event)" />
-        <button onclick="document.getElementById('quizFileInput').click()" class="px-4 py-2.5 rounded-xl liquid-button text-white text-xs font-semibold flex items-center gap-2 transition shadow-md">
+        <button id="uploadQuizBtnLabel" onclick="document.getElementById('quizFileInput').click()" class="px-4 py-2.5 rounded-xl liquid-button text-white text-xs font-semibold flex items-center gap-2 transition shadow-md">
           <i class="fa-solid fa-file-circle-plus text-sm"></i>
           <span>Upload Quiz (Flawless Smart Scan)</span>
         </button>
@@ -215,7 +224,7 @@
   </div>
 
   <footer class="max-w-5xl mx-auto w-full pt-12 pb-4 text-center text-xs text-purple-900/70 font-medium">
-    Shoaib Akhter • Ghazipur, Uttar Pradesh • Protected by Telegram Security Gateway
+    Shoaib Akhter • Ghazipur, Uttar Pradesh • Powered by Telegram Cloud DB
   </footer>
 
   <!-- MODAL: UPLOAD FILE -->
@@ -227,9 +236,9 @@
 
       <div class="mb-4">
         <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-          <i class="fa-solid fa-cloud-arrow-up text-emerald-600"></i> Upload File to Portal
+          <i class="fa-solid fa-cloud-arrow-up text-emerald-600"></i> Upload File to Telegram DB
         </h3>
-        <p class="text-xs text-slate-500">Supports PDF, DOCX, XLSX, Images, Videos, ZIP, Audio</p>
+        <p class="text-xs text-slate-500">Supports PDF, DOCX, XLSX, Images, Videos, ZIP, Audio (Up to 50MB per file)</p>
       </div>
 
       <form onsubmit="handleUploadSubmit(event)" class="space-y-3.5">
@@ -269,8 +278,8 @@
           </label>
         </div>
 
-        <button type="submit" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition shadow-lg shadow-emerald-900/20">
-          Publish File to Portal
+        <button id="submitUploadBtn" type="submit" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition shadow-lg shadow-emerald-900/20">
+          Publish File to All Devices
         </button>
       </form>
     </div>
@@ -305,7 +314,7 @@
         </div>
 
         <button type="submit" class="w-full py-3 rounded-xl liquid-button text-white font-semibold text-xs transition shadow-lg">
-          Create Folder
+          Create Folder & Sync
         </button>
       </form>
     </div>
@@ -318,12 +327,23 @@
       }
     } catch(e) {}
 
-    let db = null;
+    // ============================================================================
+    // TELEGRAM BOT CLOUD DATABASE ENGINE (SHARED BETWEEN ADMIN & STUDENT)
+    // ============================================================================
+    const BOT_TOKEN = "8710019201:AAHTf8nJ609aPzr9_qHtibbQPPY1k10MAo8";
+    const ADMIN_CHAT_ID = "1616921893";
+    const DEFAULT_FOLDERS = ['GEO', 'SuperTET', 'UPSSSC', 'NCERT'];
+
+    let cloudState = {
+      folders: [...DEFAULT_FOLDERS],
+      files: [],
+      quizzes: []
+    };
+
     let currentFilter = 'all';
     let activeFolderFilter = null;
     let activeFolderHierarchyPath = '';
 
-    const DEFAULT_FOLDERS = ['GEO', 'SuperTET', 'UPSSSC', 'NCERT'];
     const FOLDER_COLORS = [
       { bg: 'bg-amber-100/80', text: 'text-amber-700' },
       { bg: 'bg-sky-100/80', text: 'text-sky-700' },
@@ -333,83 +353,204 @@
       { bg: 'bg-rose-100/80', text: 'text-rose-700' }
     ];
 
-    function getStoredFolders() {
-      try {
-        const stored = localStorage.getItem("shoaib_folders_list");
-        if (!stored) {
-          localStorage.setItem("shoaib_folders_list", JSON.stringify(DEFAULT_FOLDERS));
-          return DEFAULT_FOLDERS;
-        }
-        return JSON.parse(stored);
-      } catch (e) {
-        return DEFAULT_FOLDERS;
+    function setSyncBadge(statusText, isSaving = false) {
+      const badge = document.getElementById("cloudSyncBadge");
+      if (!badge) return;
+      if (isSaving) {
+        badge.className = "text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 flex items-center gap-1";
+        badge.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${statusText}`;
+      } else {
+        badge.className = "text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1";
+        badge.innerHTML = `<i class="fa-brands fa-telegram"></i> ${statusText}`;
       }
     }
 
-    function saveStoredFolders(folders) {
+    async function tgApiCall(method, options = {}) {
+      const directUrl = `https://api.telegram.org/bot${BOT_TOKEN}/${method}`;
+      const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(directUrl)}`;
+
       try {
-        localStorage.setItem("shoaib_folders_list", JSON.stringify(folders));
-        renderFolders();
-        populateFolderDropdown();
-      } catch(e) {}
+        const res = await fetch(directUrl, options);
+        if (res.ok) return await res.json();
+      } catch (e) {}
+
+      try {
+        const res2 = await fetch(proxyUrl, options);
+        if (res2.ok) return await res2.json();
+      } catch (e) {}
+
+      return null;
     }
 
-    function initIndexedDB() {
-      return new Promise((resolve) => {
-        try {
-          const req = indexedDB.open("ShoaibPortalDB", 1);
-          req.onupgradeneeded = (e) => {
-            try {
-              const database = e.target.result;
-              if (!database.objectStoreNames.contains("filesStore")) {
-                database.createObjectStore("filesStore", { keyPath: "id" });
-              }
-            } catch(err) {}
-          };
-          req.onsuccess = (e) => { db = e.target.result; resolve(db); };
-          req.onerror = () => resolve(null);
-        } catch(err) { resolve(null); }
-      });
+    async function tgDownloadFileText(filePath) {
+      const directUrl = `https://api.telegram.org/file/bot${BOT_TOKEN}/${filePath}?t=${Date.now()}`;
+      const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(directUrl)}`;
+
+      try {
+        const res = await fetch(directUrl);
+        if (res.ok) return await res.text();
+      } catch (e) {}
+
+      try {
+        const res2 = await fetch(proxyUrl);
+        if (res2.ok) return await res2.text();
+      } catch (e) {}
+
+      return null;
+    }
+
+    // Pull latest DB state from the Pinned Message in Admin's Telegram Bot Chat
+    async function loadDatabaseFromTelegram() {
+      setSyncBadge("Loading Telegram DB...", true);
+      try {
+        const chatRes = await tgApiCall(`getChat?chat_id=${ADMIN_CHAT_ID}`);
+        if (chatRes && chatRes.ok && chatRes.result && chatRes.result.pinned_message && chatRes.result.pinned_message.document) {
+          const doc = chatRes.result.pinned_message.document;
+          const fileRes = await tgApiCall(`getFile?file_id=${doc.file_id}`);
+          if (fileRes && fileRes.ok && fileRes.result && fileRes.result.file_path) {
+            const rawJson = await tgDownloadFileText(fileRes.result.file_path);
+            if (rawJson) {
+              const parsed = JSON.parse(rawJson);
+              cloudState.folders = Array.isArray(parsed.folders) ? parsed.folders : [...DEFAULT_FOLDERS];
+              cloudState.files = Array.isArray(parsed.files) ? parsed.files : [];
+              cloudState.quizzes = Array.isArray(parsed.quizzes) ? parsed.quizzes : [];
+
+              mirrorToLocalCache();
+              setSyncBadge("Telegram Cloud Live", false);
+              return true;
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Telegram DB fetch error:", err);
+      }
+
+      // Fallback to local cache if no pinned message exists yet
+      try {
+        const localFolders = JSON.parse(localStorage.getItem("shoaib_folders_list") || "null");
+        const localQuizzes = JSON.parse(localStorage.getItem("shoaib_all_quizzes") || "null");
+        const localFiles = JSON.parse(localStorage.getItem("shoaib_cloud_files") || "null");
+        if (localFolders) cloudState.folders = localFolders;
+        if (localQuizzes) cloudState.quizzes = localQuizzes;
+        if (localFiles) cloudState.files = localFiles;
+      } catch (e) {}
+
+      setSyncBadge("Ready (Publish to Sync)", false);
+      return false;
+    }
+
+    // Save entire DB state to Telegram Bot & Pin it so all phones/PCs read it
+    async function syncDatabaseToTelegram() {
+      setSyncBadge("Syncing to Telegram...", true);
+      mirrorToLocalCache();
+
+      try {
+        const jsonString = JSON.stringify(cloudState);
+        const blob = new Blob([jsonString], { type: "application/json" });
+        const formData = new FormData();
+        formData.append("chat_id", ADMIN_CHAT_ID);
+        formData.append("document", blob, "portal_cloud_db.json");
+        formData.append("caption", `🔄 Shoaib Portal Cloud Database\n📁 Folders: ${cloudState.folders.length} | 📄 Files: ${cloudState.files.length} | ❓ Quizzes: ${cloudState.quizzes.length}`);
+
+        const sendRes = await tgApiCall("sendDocument", {
+          method: "POST",
+          body: formData
+        });
+
+        if (sendRes && sendRes.ok && sendRes.result) {
+          const msgId = sendRes.result.message_id;
+          await tgApiCall("pinChatMessage", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              chat_id: ADMIN_CHAT_ID,
+              message_id: msgId,
+              disable_notification: true
+            })
+          });
+          setSyncBadge("Synced to All Devices ✓", false);
+          return true;
+        }
+      } catch (err) {
+        console.error("Failed to sync DB to Telegram:", err);
+      }
+      setSyncBadge("Sync Error (Saved Locally)", false);
+      return false;
+    }
+
+    function mirrorToLocalCache() {
+      try {
+        localStorage.setItem("shoaib_folders_list", JSON.stringify(cloudState.folders));
+        localStorage.setItem("shoaib_all_quizzes", JSON.stringify(cloudState.quizzes));
+        localStorage.setItem("shoaib_cloud_files", JSON.stringify(cloudState.files));
+      } catch (e) {}
+    }
+
+    window.forceRefreshFromTelegram = async function() {
+      await loadDatabaseFromTelegram();
+      populateFolderDropdown();
+      renderFilesList();
+      renderFolders();
+      renderQuizManager();
+    };
+
+    function getStoredFolders() {
+      return cloudState.folders;
+    }
+
+    async function saveStoredFolders(folders) {
+      cloudState.folders = folders;
+      renderFolders();
+      populateFolderDropdown();
+      await syncDatabaseToTelegram();
     }
 
     async function getAllFiles() {
-      return new Promise((resolve) => {
-        if (!db) return resolve([]);
-        try {
-          const tx = db.transaction("filesStore", "readonly");
-          const store = tx.objectStore("filesStore");
-          const req = store.getAll();
-          req.onsuccess = () => resolve(req.result || []);
-          req.onerror = () => resolve([]);
-        } catch(e) { resolve([]); }
-      });
+      return cloudState.files;
     }
 
-    async function saveFileRecord(record) {
-      return new Promise((resolve, reject) => {
-        if (!db) return reject(false);
-        try {
-          const tx = db.transaction("filesStore", "readwrite");
-          const store = tx.objectStore("filesStore");
-          const req = store.put(record);
-          req.onsuccess = () => resolve(true);
-          req.onerror = () => reject(false);
-        } catch(e) { reject(false); }
+    // Upload actual file binary to Telegram Bot to get a permanent cross-device file_id
+    async function uploadFileBlobToTelegram(fileBlob, fileName) {
+      const formData = new FormData();
+      formData.append("chat_id", ADMIN_CHAT_ID);
+      formData.append("document", fileBlob, fileName);
+      formData.append("caption", `📄 Portal File Upload: ${fileName}`);
+
+      const res = await tgApiCall("sendDocument", {
+        method: "POST",
+        body: formData
       });
+
+      if (res && res.ok && res.result) {
+        const doc = res.result.document || res.result.video || res.result.audio || (res.result.photo ? res.result.photo[res.result.photo.length - 1] : null);
+        if (doc && doc.file_id) {
+          return doc.file_id;
+        }
+      }
+      throw new Error("Telegram file upload failed. Ensure file is under 50MB.");
     }
 
-    async function deleteFileRecord(id) {
-      return new Promise((resolve) => {
-        if (!db) return resolve(false);
-        try {
-          const tx = db.transaction("filesStore", "readwrite");
-          const store = tx.objectStore("filesStore");
-          const req = store.delete(id);
-          req.onsuccess = () => resolve(true);
-          req.onerror = () => resolve(false);
-        } catch(e) {}
-      });
-    }
+    // Download/Open a file from Telegram using its permanent file_id
+    window.downloadFile = async function(id) {
+      try {
+        const item = cloudState.files.find(f => String(f.id) === String(id));
+        if (!item || !item.tgFileId) return alert("File not found in Telegram Cloud.");
+
+        setSyncBadge("Fetching File...", true);
+        const fileRes = await tgApiCall(`getFile?file_id=${item.tgFileId}`);
+        setSyncBadge("Telegram Cloud Live", false);
+
+        if (fileRes && fileRes.ok && fileRes.result && fileRes.result.file_path) {
+          const directDownloadUrl = `https://api.telegram.org/file/bot${BOT_TOKEN}/${fileRes.result.file_path}`;
+          window.open(directDownloadUrl, "_blank");
+        } else {
+          alert("Could not retrieve download link from Telegram.");
+        }
+      } catch(e) {
+        setSyncBadge("Telegram Cloud Live", false);
+        alert("Download error: " + e.message);
+      }
+    };
 
     window.openCreateFolderModal = function(preselectedParent = '') {
       const parentSelect = document.getElementById("parentFolderSelect");
@@ -429,7 +570,7 @@
       toggleModal('createFolderModal');
     };
 
-    window.handleCreateFolderSubmit = function(e) {
+    window.handleCreateFolderSubmit = async function(e) {
       try {
         e.preventDefault();
         const input = document.getElementById("newFolderNameInput");
@@ -448,9 +589,9 @@
         }
 
         current.push(fullName);
-        saveStoredFolders(current);
         input.value = "";
         toggleModal('createFolderModal');
+        await saveStoredFolders(current);
       } catch(e) {}
     };
 
@@ -466,10 +607,12 @@
         if (confirm(msg)) {
           let current = getStoredFolders();
           current = current.filter(f => f !== folderName && !f.startsWith(folderName + ' / '));
-          saveStoredFolders(current);
+          cloudState.files = cloudState.files.filter(f => f.folder !== folderName && (!f.folder || !f.folder.startsWith(folderName + ' / ')));
           if (activeFolderFilter === folderName) {
             clearFolderFilter();
           }
+          await saveStoredFolders(current);
+          renderFilesList();
         }
       } catch(e) {}
     };
@@ -621,6 +764,11 @@
         e.preventDefault();
         if (!selectedFileBlob) return;
 
+        const submitBtn = document.getElementById("submitUploadBtn");
+        const origText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1.5"></i> Uploading to Telegram Cloud...`;
+
         const titleInput = document.getElementById("fileCustomTitle");
         const folderDest = document.getElementById("fileFolderDest");
         const tagInput = document.getElementById("fileCustomTag");
@@ -630,6 +778,9 @@
         const title = titleInput ? titleInput.value.trim() : "Untitled";
         const folder = activeFolderFilter || (folderDest ? folderDest.value || null : null);
         const tag = tagInput ? tagInput.value.trim() : "";
+
+        // 1. Upload binary file to Telegram Bot
+        const tgFileId = await uploadFileBlobToTelegram(selectedFileBlob, title);
 
         const uploadDate = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
@@ -643,42 +794,38 @@
           time: uploadDate,
           isImportant: impCheck ? impCheck.checked : false,
           isNew: newCheck ? newCheck.checked : true,
-          blob: selectedFileBlob
+          tgFileId: tgFileId
         };
 
-        await saveFileRecord(newRecord);
+        // 2. Add to shared cloud state & sync index to Telegram
+        cloudState.files.unshift(newRecord);
+        await syncDatabaseToTelegram();
+
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = origText;
         toggleModal('uploadModal');
         e.target.reset();
         selectedFileBlob = null;
         renderFilesList();
         renderFolders();
-      } catch(err) {}
+      } catch(err) {
+        alert("Upload Failed: " + err.message);
+        const submitBtn = document.getElementById("submitUploadBtn");
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = "Publish File to All Devices";
+        }
+      }
     };
 
     window.deleteFile = async function(id) {
       try {
-        if (confirm("Permanently delete this file?")) {
-          await deleteFileRecord(id);
+        if (confirm("Permanently delete this file from all devices?")) {
+          cloudState.files = cloudState.files.filter(f => String(f.id) !== String(id));
           renderFilesList();
           renderFolders();
+          await syncDatabaseToTelegram();
         }
-      } catch(e) {}
-    };
-
-    window.downloadFile = async function(id) {
-      try {
-        const all = await getAllFiles();
-        const item = all.find(f => f.id === id);
-        if (!item || !item.blob) return alert("File not found.");
-
-        const url = URL.createObjectURL(item.blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = item.name;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(url), 1500);
       } catch(e) {}
     };
 
@@ -855,7 +1002,7 @@
         const clearBtn = document.getElementById("clearFolderFilterBtn");
 
         if (hTitle) hTitle.innerText = "Files";
-        if (hSub) hSub.innerText = "Verified classroom modules";
+        if (hSub) hSub.innerText = "Verified classroom modules (Synced across all devices via Telegram DB)";
         if (clearBtn) clearBtn.classList.add("hidden");
 
         renderFilesList('all', '');
@@ -903,6 +1050,7 @@
       const negativeMarkingVal = negMarkingSelect ? parseFloat(negMarkingSelect.value) : 0.5;
 
       try {
+        setSyncBadge("Scanning Quiz...", true);
         if ((file.type === "application/pdf" || file.name.endsWith('.pdf')) && typeof pdfjsLib !== 'undefined') {
           const arrayBuffer = await file.arrayBuffer();
           const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
@@ -916,7 +1064,6 @@
               if (!item.str || (!item.str.trim() && item.str !== ' ')) return;
               let y = Math.round(item.transform[5] / 6) * 6;
               if (!linesMap[y]) linesMap[y] = [];
-              // Accurately capture PDF width for gap calculations
               linesMap[y].push({ x: item.transform[4], str: item.str, width: item.width || 0 });
             });
 
@@ -933,7 +1080,6 @@
                   let prevEndX = prev.x + prev.width;
                   let dist = curr.x - prevEndX;
                   
-                  // Use commonsense accurate distance calculation using the specific PDF item width
                   if (dist > 4 || prev.str.endsWith(' ') || curr.str.startsWith(' ')) {
                     lineStr += " " + curr.str.trim();
                   } else {
@@ -953,28 +1099,25 @@
         let questions = parseBilingualMCQ(extractedText);
 
         if (questions.length === 0) {
+          setSyncBadge("Telegram Cloud Live", false);
           alert("Could not detect MCQ format. Please ensure the file contains numbered questions and options (A, B, C, D).");
           return;
         }
 
-        let allQuizzes = JSON.parse(localStorage.getItem("shoaib_all_quizzes") || "[]");
         const todayDateStr = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-        const quizName = `Quiz ${allQuizzes.length + 1} (${file.name}) — ${todayDateStr}`;
+        const quizName = `Quiz ${cloudState.quizzes.length + 1} (${file.name}) — ${todayDateStr}`;
         
-        allQuizzes.push({
+        cloudState.quizzes.push({
           id: Date.now(),
           name: quizName,
           questions: questions,
           negativeMarking: negativeMarkingVal
         });
 
-        localStorage.setItem("shoaib_all_quizzes", JSON.stringify(allQuizzes));
-        localStorage.setItem("classroom_quiz_questions", JSON.stringify(questions));
-        localStorage.setItem("quiz_title", quizName);
-        localStorage.setItem("shoaib_negative_marking", negativeMarkingVal);
-
-        alert(`✅ Success! Scanned ${questions.length} questions. Quiz is now LIVE on student portal!`);
         renderQuizManager();
+        await syncDatabaseToTelegram();
+
+        alert(`✅ Success! Scanned ${questions.length} questions and synced to Telegram Cloud DB. Quiz is now LIVE on all student phones and PCs!`);
       } catch (err) {
         console.error(err);
         alert("Scan Failed: " + err.message);
@@ -984,7 +1127,6 @@
     };
 
     function parseBilingualMCQ(rawText) {
-      // Clean up font layout spacing bugs and duplicate punctuation/symbols
       const cleanText = rawText
         .replace(/[\u200B-\u200D\uFEFF]/g, '')
         .replace(/[•★▪▫]/g, ' ')
@@ -997,7 +1139,6 @@
       for (let line of lines) {
         if (/^(?:RRB|पेज|Page|भाग\s*\d+|सामान्य\s*अध्ययन)/i.test(line)) continue;
 
-        // Match question numbers e.g. "1.", "1 -", "Q1."
         const qMatch = line.match(/^(?:Q\.?|Q\d+|प्रश्न\s*\d+|प्र\s*\d+|\d+)[\.\-\):\s]+(.+)/i);
         if (qMatch && !/^[A-Da-dक-घ1-4][\.\-\)]/.test(line)) {
           if (currentQ && currentQ.options.length >= 2) {
@@ -1011,8 +1152,10 @@
           continue;
         }
 
-        // Properly formatted without layout breaks
-        const optMatch = line.match(/^[\(\[]?([A-Da-dक-घ1-4])[\)\].:\-\s]+\s*(.+)/);         if (optMatch && currentQ) {           let optText = optMatch[2]             .replace(/^[\)\].:\-\s]+/, '')
+        const optMatch = line.match(/^[\(\[]?([A-Da-dक-घ1-4])[\)\].:\-\s]+\s*(.+)/);
+        if (optMatch && currentQ) {
+          let optText = optMatch[2]
+            .replace(/^[\)\].:\-\s]+/, '')
             .replace(/\s{2,}/g, ' ')
             .replace(/[\.@\*•]/g, '')
             .trim();
@@ -1047,12 +1190,12 @@
         const container = document.getElementById("allQuizzesListContainer");
         if (!container) return;
 
-        let allQuizzes = JSON.parse(localStorage.getItem("shoaib_all_quizzes") || "[]");
+        let allQuizzes = cloudState.quizzes;
 
         if (allQuizzes.length === 0) {
           container.innerHTML = `
             <div class="liquid-card p-8 rounded-3xl text-center shadow-sm">
-              <p class="text-xs text-slate-500">No active quizzes uploaded. Upload a document above to publish an AI-scanned MCQ test.</p>
+              <p class="text-xs text-slate-500">No active quizzes uploaded. Upload a document above to publish an AI-scanned MCQ test to all devices.</p>
             </div>
           `;
           return;
@@ -1089,7 +1232,7 @@
                   <h3 class="text-sm font-bold text-slate-900">${quiz.name}</h3>
                   <span class="text-[10px] bg-purple-100 text-purple-900 px-2.5 py-0.5 rounded-full font-bold">Penalty: ${negLabel}</span>
                 </div>
-                <p class="text-xs text-slate-500 mt-0.5">${quiz.questions ? quiz.questions.length : 0} questions • Live on student portal</p>
+                <p class="text-xs text-slate-500 mt-0.5">${quiz.questions ? quiz.questions.length : 0} questions • Live on Telegram Cloud DB</p>
               </div>
               <div class="flex items-center gap-2">
                 <button onclick="deleteSpecificQuiz(${quiz.id})" class="px-3.5 py-1.5 rounded-xl border border-rose-200 bg-rose-50/80 hover:bg-rose-100 text-rose-600 text-xs font-semibold transition shadow-sm">
@@ -1106,24 +1249,20 @@
       } catch(e) {}
     };
 
-    window.deleteSpecificQuiz = function(quizId) {
-      if (confirm("Are you sure you want to delete this quiz?")) {
-        let allQuizzes = JSON.parse(localStorage.getItem("shoaib_all_quizzes") || "[]");
-        allQuizzes = allQuizzes.filter(q => q.id !== quizId);
-        localStorage.setItem("shoaib_all_quizzes", JSON.stringify(allQuizzes));
+    window.deleteSpecificQuiz = async function(quizId) {
+      if (confirm("Are you sure you want to delete this quiz from all devices?")) {
+        cloudState.quizzes = cloudState.quizzes.filter(q => q.id !== quizId);
         renderQuizManager();
+        await syncDatabaseToTelegram();
       }
     };
 
-    window.onload = function() {
-      initIndexedDB().then(() => {
-        try {
-          populateFolderDropdown();
-          renderFilesList();
-          renderFolders();
-          renderQuizManager();
-        } catch(e) {}
-      });
+    window.onload = async function() {
+      await loadDatabaseFromTelegram();
+      populateFolderDropdown();
+      renderFilesList();
+      renderFolders();
+      renderQuizManager();
     };
   </script>
 </body>
