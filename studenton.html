@@ -8,7 +8,6 @@
     @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&display=swap');
     
     :root {
-      /* Made sidebar highly translucent */
       --bg-sidebar: rgba(18, 7, 38, 0.3);
       --card-bg: rgba(255, 255, 255, 0.65);
       --card-hover: rgba(255, 255, 255, 0.9);
@@ -27,7 +26,6 @@
     }
 
     body {
-      /* Added dark fallback color #0f172a so white never shows through */
       background: #0f172a url('arctic-ice-svalbard_2.jpg') no-repeat center center fixed;
       background-size: cover;
       color: var(--text-main);
@@ -75,7 +73,6 @@
       box-shadow: 0 0 18px rgba(168, 85, 247, 0.4);
     }
 
-    /* Translucent Text Adjustments */
     .brand-logo-letter {
       font-size: 1.3rem;
       font-weight: 800;
@@ -183,7 +180,7 @@
 
     .btn-signout:hover { opacity: 0.8; }
 
-    /* Ultra-Glossy Translucent Main Content (Full Width) */
+    /* Full-Width Main Content */
     .main-wrapper {
       flex: 1;
       width: 100%;
@@ -207,7 +204,7 @@
     .view-heading h2 {
       font-size: 1.85rem;
       font-weight: 800;
-      color: rgba(255, 255, 255, 0.8);
+      color: rgba(255, 255, 255, 0.85);
       letter-spacing: -0.02em;
     }
 
@@ -273,7 +270,6 @@
       font-weight: 700;
       cursor: pointer;
       white-space: nowrap;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03), inset 0 1px 1px rgba(255, 255, 255, 0.8);
       transition: all 0.25s ease;
     }
 
@@ -281,7 +277,7 @@
       background: linear-gradient(135deg, rgba(124, 58, 237, 0.8), rgba(109, 40, 217, 0.8));
       border-color: transparent;
       color: rgba(255, 255, 255, 0.85);
-      box-shadow: 0 6px 18px rgba(124, 58, 237, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+      box-shadow: 0 6px 18px rgba(124, 58, 237, 0.3);
       transform: translateY(-1px);
     }
 
@@ -294,14 +290,12 @@
     .file-card {
       background: rgba(255, 255, 255, 0.65);
       backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
       border: 1px solid rgba(255, 255, 255, 0.85);
       border-radius: 22px;
       padding: 1.25rem;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      box-shadow: 0 8px 24px rgba(118, 92, 168, 0.06), inset 0 1px 2px rgba(255, 255, 255, 0.95);
       transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
@@ -309,7 +303,6 @@
       transform: translateY(-3px);
       background: rgba(255, 255, 255, 0.88);
       border-color: rgba(192, 132, 252, 0.6);
-      box-shadow: 0 14px 32px rgba(118, 92, 168, 0.12), inset 0 1px 2px #ffffff;
     }
 
     .file-top {
@@ -330,7 +323,6 @@
       justify-content: center;
       font-size: 1.2rem;
       flex-shrink: 0;
-      box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.8);
     }
 
     .file-info { overflow: hidden; }
@@ -338,7 +330,7 @@
     .file-name {
       font-size: 0.95rem;
       font-weight: 700;
-      color: rgba(15, 23, 42, 0.8);
+      color: rgba(15, 23, 42, 0.85);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -347,7 +339,7 @@
     .file-tag {
       display: inline-block;
       font-size: 0.72rem;
-      color: rgba(109, 40, 217, 0.8);
+      color: rgba(109, 40, 217, 0.85);
       background: rgba(124, 58, 237, 0.1);
       padding: 0.15rem 0.55rem;
       border-radius: 6px;
@@ -367,7 +359,7 @@
 
     .btn-download {
       background: linear-gradient(135deg, rgba(124, 58, 237, 0.85) 0%, rgba(109, 40, 217, 0.85) 100%);
-      color: rgba(255, 255, 255, 0.9);
+      color: rgba(255, 255, 255, 0.95);
       border: 1px solid rgba(216, 180, 254, 0.4);
       padding: 0.65rem;
       border-radius: 14px;
@@ -378,12 +370,10 @@
       align-items: center;
       justify-content: center;
       gap: 0.45rem;
-      box-shadow: 0 4px 14px rgba(124, 58, 237, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.3);
       transition: all 0.2s ease;
     }
 
     .btn-download:hover {
-      box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35), inset 0 1px 2px rgba(255, 255, 255, 0.5);
       transform: translateY(-1px);
     }
 
@@ -396,7 +386,6 @@
     .folder-card {
       background: rgba(255, 255, 255, 0.65);
       backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
       border: 1px solid rgba(255, 255, 255, 0.85);
       border-radius: 22px;
       padding: 1.25rem;
@@ -404,15 +393,12 @@
       display: flex;
       align-items: center;
       gap: 1rem;
-      box-shadow: 0 8px 24px rgba(118, 92, 168, 0.06), inset 0 1px 2px rgba(255, 255, 255, 0.95);
       transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .folder-card:hover {
       background: rgba(255, 255, 255, 0.9);
-      border-color: rgba(192, 132, 252, 0.7);
       transform: translateY(-3px);
-      box-shadow: 0 12px 30px rgba(118, 92, 168, 0.12), inset 0 1px 2px #ffffff;
     }
 
     .folder-icon { font-size: 2.1rem; }
@@ -429,7 +415,7 @@
     .folder-card-title {
       font-size: 0.98rem;
       font-weight: 800;
-      color: rgba(15, 23, 42, 0.8);
+      color: rgba(15, 23, 42, 0.85);
     }
 
     .folder-card-count {
@@ -442,7 +428,7 @@
     .empty-state {
       text-align: center;
       padding: 4rem 1.5rem;
-      color: rgba(203, 213, 225, 0.8);
+      color: rgba(203, 213, 225, 0.85);
       grid-column: 1 / -1;
       background: rgba(15, 23, 42, 0.45);
       backdrop-filter: blur(10px);
@@ -456,6 +442,82 @@
       margin-bottom: 0.75rem;
       opacity: 0.7;
     }
+
+    /* QUIZ SECTION STYLES */
+    .quiz-wrapper {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    .quiz-card-box {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(16px);
+      border-radius: 24px;
+      padding: 1.75rem;
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+      color: #1e293b;
+    }
+
+    .quiz-select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border-radius: 12px;
+      border: 1px solid #cbd5e1;
+      font-weight: 600;
+      font-size: 0.92rem;
+      background: #f8fafc;
+      color: #0f172a;
+      cursor: pointer;
+      margin-bottom: 1.25rem;
+    }
+
+    .quiz-option-label {
+      display: block;
+      padding: 12px 14px;
+      margin: 8px 0;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.95rem;
+      color: #1e293b;
+    }
+
+    .quiz-option-label:hover {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+    }
+
+    .quiz-option-label.correct-choice {
+      background-color: #d1fae5 !important;
+      border-color: #10b981 !important;
+      color: #065f46 !important;
+      font-weight: 700;
+    }
+
+    .quiz-option-label.incorrect-choice {
+      background-color: #fee2e2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+      font-weight: 700;
+    }
+
+    .quiz-nav-btn {
+      background: linear-gradient(135deg, #581c87, #7e22ce);
+      color: #ffffff;
+      border: none;
+      padding: 0.65rem 1.35rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .quiz-nav-btn:hover { opacity: 0.9; }
+    .quiz-skip-btn { background: #64748b; }
 
     @media (max-width: 820px) {
       body { flex-direction: column; }
@@ -515,7 +577,7 @@
         </div>
       </li>
 
-      <li class="nav-item" onclick="window.location.href='quiz.html'">
+      <li id="navQuiz" class="nav-item" onclick="switchTab('quiz')">
         <div class="nav-icon-box">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"></circle>
@@ -529,7 +591,6 @@
         </div>
       </li>
 
-      <!-- DIRECT MOVIES LINK (Opens https://imdbplay.tech/ directly instead of movies.html) -->
       <li class="nav-item" onclick="window.open('https://imdbplay.tech/', '_blank', 'noopener,noreferrer')">
         <div class="nav-icon-box">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -563,7 +624,7 @@
         <p id="viewSubtitle">Verified classroom modules & study materials</p>
       </div>
 
-      <div class="search-box">
+      <div id="searchBoxContainer" class="search-box">
         <svg viewBox="0 0 24 24">
           <path d="M10 18a7.952 7.952 0 0 0 4.897-1.688l4.396 4.396 1.414-1.414-4.396-4.396A7.952 7.952 0 0 0 18 10c0-4.411-3.589-8-8-8s-8 3.589-8 8 3.589 8 8 8zm0-14c3.309 0 6 2.691 6 6s-2.691 6-6 6-6-2.691-6-6 2.691-6 6-6z"/>
         </svg>
@@ -581,8 +642,37 @@
       <span id="studentCurrentBreadcrumbText" class="font-bold text-white drop-shadow-md"></span>
     </div>
 
+    <!-- FILES GRID -->
     <div id="filesContainer" class="file-grid"></div>
+
+    <!-- FOLDERS GRID -->
     <div id="foldersContainer" class="folder-grid" style="display:none;"></div>
+
+    <!-- QUIZ CONTAINER -->
+    <div id="quizSectionContainer" class="quiz-wrapper" style="display:none;">
+      <div id="quizEmptyState" class="empty-state" style="display:none;">
+        <span>&#10067;</span>
+        <h3>No Quizzes Uploaded Yet</h3>
+        <p>Ask the administrator to upload an MCQ quiz from the Admin Portal.</p>
+      </div>
+
+      <div id="quizActiveBox" class="quiz-card-box" style="display:none;">
+        <label for="quizDropdown" class="block text-xs font-bold uppercase tracking-wider text-purple-900 mb-2">
+          Select Active Quiz:
+        </label>
+        <select id="quizDropdown" class="quiz-select" onchange="loadChosenQuiz()"></select>
+
+        <div id="quizQuestionArea"></div>
+
+        <div id="quizControls" class="flex items-center justify-between mt-5 pt-4 border-t border-slate-200" style="display:none;">
+          <button class="quiz-nav-btn" onclick="prevQuestion()">Previous</button>
+          <button class="quiz-nav-btn quiz-skip-btn" onclick="skipQuestion()">Skip</button>
+          <button class="quiz-nav-btn" onclick="nextQuestion()">Next</button>
+        </div>
+
+        <div id="quizResultArea" class="text-center mt-5 p-6 bg-slate-50 rounded-2xl border border-slate-200" style="display:none;"></div>
+      </div>
+    </div>
   </main>
 
   <script>
@@ -592,6 +682,13 @@
     let dbInstance = null;
     let allFiles = [];
     let foldersList = [];
+
+    // Quiz state variables
+    let sortedQuizzes = [];
+    let activeQuizQuestions = [];
+    let activeQuizPenalty = 0.5;
+    let currentQuestionIndex = 0;
+    let userAnswers = {};
 
     function loadTaxonomies() {
       const raw = localStorage.getItem('shoaib_folders_list');
@@ -647,33 +744,245 @@
       currentTab = tab;
       const navFiles = document.getElementById('navFiles');
       const navFolders = document.getElementById('navFolders');
+      const navQuiz = document.getElementById('navQuiz');
+
       const filesContainer = document.getElementById('filesContainer');
       const foldersContainer = document.getElementById('foldersContainer');
+      const quizSectionContainer = document.getElementById('quizSectionContainer');
       const chipsContainer = document.getElementById('chipsContainer');
+      const searchBoxContainer = document.getElementById('searchBoxContainer');
+      const bBar = document.getElementById('studentFolderBreadcrumbBar');
+
       const viewTitle = document.getElementById('viewTitle');
       const viewSubtitle = document.getElementById('viewSubtitle');
 
+      navFiles.classList.remove('active');
+      navFolders.classList.remove('active');
+      navQuiz.classList.remove('active');
+
+      filesContainer.style.display = 'none';
+      foldersContainer.style.display = 'none';
+      quizSectionContainer.style.display = 'none';
+      chipsContainer.style.display = 'none';
+      bBar.classList.add('hidden');
+
       if (tab === 'files') {
         navFiles.classList.add('active');
-        navFolders.classList.remove('active');
         filesContainer.style.display = 'grid';
-        foldersContainer.style.display = 'none';
         chipsContainer.style.display = 'flex';
+        searchBoxContainer.style.display = 'block';
         viewTitle.textContent = activeFilter === 'All' ? "General Files" : `Folder: ${activeFilter}`;
         viewSubtitle.textContent = activeFilter === 'All' ? "Verified general modules & materials" : `Viewing materials inside ${activeFilter}`;
         renderFiles();
-      } else {
+      } else if (tab === 'folders') {
         navFolders.classList.add('active');
-        navFiles.classList.remove('active');
-        filesContainer.style.display = 'none';
         foldersContainer.style.display = 'grid';
-        chipsContainer.style.display = 'none';
+        searchBoxContainer.style.display = 'none';
         viewTitle.textContent = "Class Folders";
         viewSubtitle.textContent = "Organized repository categories & subfolders";
         renderStudentFoldersHierarchy('');
+      } else if (tab === 'quiz') {
+        navQuiz.classList.add('active');
+        quizSectionContainer.style.display = 'block';
+        searchBoxContainer.style.display = 'none';
+        viewTitle.textContent = "Classroom Quiz Portal";
+        viewSubtitle.textContent = "Attempt active MCQ tests with instant answer feedback";
+        initQuizSection();
       }
     }
 
+    // ---- QUIZ LOGIC ----
+    function getAvailableQuizzes() {
+      let quizzes = [];
+      try {
+        quizzes = JSON.parse(localStorage.getItem("shoaib_all_quizzes") || "[]");
+      } catch (e) {
+        quizzes = [];
+      }
+
+      // Fallback if single quiz was stored in classroom_quiz_questions
+      if (quizzes.length === 0) {
+        try {
+          const fallbackQuestions = JSON.parse(localStorage.getItem("classroom_quiz_questions") || "[]");
+          if (fallbackQuestions.length > 0) {
+            quizzes = [{
+              id: Date.now(),
+              name: localStorage.getItem("quiz_title") || "Classroom Quiz",
+              questions: fallbackQuestions,
+              negativeMarking: parseFloat(localStorage.getItem("shoaib_negative_marking") || "0.5")
+            }];
+          }
+        } catch (e) {}
+      }
+
+      return quizzes.sort((a, b) => Number(b.id || 0) - Number(a.id || 0));
+    }
+
+    function initQuizSection() {
+      sortedQuizzes = getAvailableQuizzes();
+      const emptyState = document.getElementById("quizEmptyState");
+      const activeBox = document.getElementById("quizActiveBox");
+      const dropdown = document.getElementById("quizDropdown");
+
+      if (sortedQuizzes.length === 0) {
+        emptyState.style.display = "block";
+        activeBox.style.display = "none";
+        return;
+      }
+
+      emptyState.style.display = "none";
+      activeBox.style.display = "block";
+
+      dropdown.innerHTML = sortedQuizzes.map((q, idx) => `
+        <option value="${idx}">${q.name} (${q.questions ? q.questions.length : 0} Qs)</option>
+      `).join('');
+
+      // Automatically load the latest quiz immediately so it's never blank
+      dropdown.value = "0";
+      loadChosenQuiz();
+    }
+
+    function loadChosenQuiz() {
+      const dropdown = document.getElementById("quizDropdown");
+      const index = parseInt(dropdown.value, 10);
+      if (isNaN(index) || !sortedQuizzes[index]) return;
+
+      const selectedQuiz = sortedQuizzes[index];
+      activeQuizQuestions = selectedQuiz.questions || [];
+      activeQuizPenalty = selectedQuiz.negativeMarking !== undefined ? parseFloat(selectedQuiz.negativeMarking) : 0.5;
+
+      currentQuestionIndex = 0;
+      userAnswers = {};
+      document.getElementById("quizResultArea").style.display = "none";
+
+      if (activeQuizQuestions.length > 0) {
+        document.getElementById("quizControls").style.display = "flex";
+        renderQuizQuestion();
+      } else {
+        document.getElementById("quizControls").style.display = "none";
+        document.getElementById("quizQuestionArea").innerHTML = `<p class="text-sm text-slate-500">This quiz has no questions.</p>`;
+      }
+    }
+
+    function renderQuizQuestion() {
+      const container = document.getElementById("quizQuestionArea");
+      if (currentQuestionIndex >= activeQuizQuestions.length) {
+        showQuizResults();
+        return;
+      }
+
+      const q = activeQuizQuestions[currentQuestionIndex];
+      const isAnswered = userAnswers[currentQuestionIndex] !== undefined && userAnswers[currentQuestionIndex] !== null;
+
+      let optionsHtml = (q.options || []).map((optText, oIdx) => {
+        let extraClass = '';
+        let checkedAttr = (userAnswers[currentQuestionIndex] === oIdx) ? 'checked' : '';
+
+        if (isAnswered) {
+          if (oIdx === q.answer) {
+            extraClass = 'correct-choice';
+          } else if (userAnswers[currentQuestionIndex] === oIdx) {
+            extraClass = 'incorrect-choice';
+          }
+        }
+
+        return `
+          <label class="quiz-option-label ${extraClass}">
+            <input type="radio" name="q_current" value="${oIdx}" ${checkedAttr} ${isAnswered ? 'disabled' : ''} onclick="selectQuizAnswer(${oIdx})" class="mr-2.5">
+            ${String.fromCharCode(65 + oIdx)}) ${optText}
+          </label>
+        `;
+      }).join('');
+
+      container.innerHTML = `
+        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200">
+          <div class="text-xs font-bold text-purple-700 uppercase tracking-wide mb-1">
+            Question ${currentQuestionIndex + 1} of ${activeQuizQuestions.length}
+          </div>
+          <div class="text-base font-bold text-slate-900 mb-3">${q.question}</div>
+          <div>${optionsHtml}</div>
+        </div>
+      `;
+    }
+
+    function selectQuizAnswer(selectedIdx) {
+      if (userAnswers[currentQuestionIndex] !== undefined && userAnswers[currentQuestionIndex] !== null) return;
+      userAnswers[currentQuestionIndex] = selectedIdx;
+      renderQuizQuestion();
+
+      setTimeout(() => {
+        currentQuestionIndex++;
+        renderQuizQuestion();
+      }, 1000);
+    }
+
+    function nextQuestion() {
+      currentQuestionIndex++;
+      renderQuizQuestion();
+    }
+
+    function prevQuestion() {
+      if (currentQuestionIndex > 0) {
+        currentQuestionIndex--;
+        renderQuizQuestion();
+      }
+    }
+
+    function skipQuestion() {
+      if (userAnswers[currentQuestionIndex] === undefined) {
+        userAnswers[currentQuestionIndex] = null;
+      }
+      currentQuestionIndex++;
+      renderQuizQuestion();
+    }
+
+    function showQuizResults() {
+      document.getElementById("quizQuestionArea").innerHTML = "";
+      document.getElementById("quizControls").style.display = "none";
+
+      let correctCount = 0;
+      let incorrectCount = 0;
+      let skippedCount = 0;
+
+      activeQuizQuestions.forEach((q, idx) => {
+        let ans = userAnswers[idx];
+        if (ans === q.answer) {
+          correctCount++;
+        } else if (ans === null || ans === undefined) {
+          skippedCount++;
+        } else {
+          incorrectCount++;
+        }
+      });
+
+      const finalScore = (correctCount * 1) - (incorrectCount * activeQuizPenalty);
+
+      let penaltyDisplay = "-1/2";
+      if (activeQuizPenalty == 1) penaltyDisplay = "-1";
+      else if (activeQuizPenalty == 0.3333) penaltyDisplay = "-1/3";
+      else if (activeQuizPenalty == 0.25) penaltyDisplay = "-1/4";
+      else if (activeQuizPenalty == 0) penaltyDisplay = "0 (None)";
+
+      const resDiv = document.getElementById("quizResultArea");
+      resDiv.style.display = "block";
+      resDiv.innerHTML = `
+        <h3 class="text-xl font-extrabold text-slate-900 mb-2">🎉 Quiz Completed!</h3>
+        <div class="text-sm text-slate-600 space-y-1 mb-4">
+          <p>
+            Correct: <strong class="text-emerald-600">${correctCount}</strong> |
+            Incorrect: <strong class="text-rose-600">${incorrectCount}</strong> |
+            Skipped: <strong>${skippedCount}</strong>
+          </p>
+          <p>Negative Penalty Rate: <strong>${penaltyDisplay}</strong></p>
+        </div>
+        <div class="text-lg font-bold text-slate-800 mb-5">
+          Final Score: <span class="text-purple-800 text-2xl">${finalScore.toFixed(2)}</span> / ${activeQuizQuestions.length}
+        </div>
+        <button class="quiz-nav-btn" onclick="loadChosenQuiz()">Retake Quiz</button>
+      `;
+    }
+
+    // ---- FILES & FOLDERS LOGIC ----
     function renderChips() {
       const container = document.getElementById('chipsContainer');
       const categories = ['All', ...foldersList];
@@ -858,8 +1167,12 @@
         renderChips();
         if (currentTab === 'folders') {
           renderStudentFoldersHierarchy(activeStudentFolderHierarchy);
-        } else {
+        } else if (currentTab === 'files') {
           renderFiles();
+        }
+      } else if (e.key === 'shoaib_all_quizzes' || e.key === 'classroom_quiz_questions') {
+        if (currentTab === 'quiz') {
+          initQuizSection();
         }
       }
     });
@@ -873,6 +1186,8 @@
       } catch (err) {}
       if (currentTab === 'folders') {
         renderStudentFoldersHierarchy('');
+      } else if (currentTab === 'quiz') {
+        initQuizSection();
       } else {
         renderFiles();
       }
