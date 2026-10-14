@@ -545,7 +545,7 @@
       </div>
       <div>
         <div class="brand-title">Shoaib Akhter</div>
-        <div class="brand-subtitle">STUDENT</div>
+        <div class="brand-subtitle">STUDENT • <span id="studentSyncStatus" class="text-sky-300">SYNCING...</span></div>
       </div>
     </div>
 
@@ -624,11 +624,16 @@
         <p id="viewSubtitle">Verified classroom modules & study materials</p>
       </div>
 
-      <div id="searchBoxContainer" class="search-box">
-        <svg viewBox="0 0 24 24">
-          <path d="M10 18a7.952 7.952 0 0 0 4.897-1.688l4.396 4.396 1.414-1.414-4.396-4.396A7.952 7.952 0 0 0 18 10c0-4.411-3.589-8-8-8s-8 3.589-8 8 3.589 8 8 8zm0-14c3.309 0 6 2.691 6 6s-2.691 6-6 6-6-2.691-6-6 2.691-6 6-6z"/>
-        </svg>
-        <input type="text" id="searchInput" placeholder="Search files by name..." oninput="handleSearch()">
+      <div class="flex items-center gap-2">
+        <button onclick="refreshFromTelegramCloud()" title="Refresh from Cloud" class="px-3.5 py-2.5 rounded-2xl bg-white/80 hover:bg-white text-purple-900 text-xs font-bold shadow-sm transition flex items-center gap-1.5">
+          <i class="fa-solid fa-arrows-rotate"></i> Sync
+        </button>
+        <div id="searchBoxContainer" class="search-box">
+          <svg viewBox="0 0 24 24">
+            <path d="M10 18a7.952 7.952 0 0 0 4.897-1.688l4.396 4.396 1.414-1.414-4.396-4.396A7.952 7.952 0 0 0 18 10c0-4.411-3.589-8-8-8s-8 3.589-8 8 3.589 8 8 8zm0-14c3.309 0 6 2.691 6 6s-2.691 6-6 6-6-2.691-6-6 2.691-6 6-6z"/>
+          </svg>
+          <input type="text" id="searchInput" placeholder="Search files by name..." oninput="handleSearch()">
+        </div>
       </div>
     </div>
 
@@ -676,12 +681,18 @@
   </main>
 
   <script>
+    // ============================================================================
+    // SHARED TELEGRAM BOT CLOUD DATABASE ENGINE
+    // ============================================================================
+    const BOT_TOKEN = "8710019201:AAHTf8nJ609aPzr9_qHtibbQPPY1k10MAo8";
+    const ADMIN_CHAT_ID = "1616921893";
+
     let currentTab = 'files';
     let activeFilter = 'All';
     let activeStudentFolderHierarchy = '';
-    let dbInstance = null;
     let allFiles = [];
-    let foldersList = [];
+    let foldersList = ['GEO', 'SuperTET', 'UPSSSC', 'NCERT'];
+    let cloudQuizzes = [];
 
     // Quiz state variables
     let sortedQuizzes = [];
@@ -690,55 +701,92 @@
     let currentQuestionIndex = 0;
     let userAnswers = {};
 
-    function loadTaxonomies() {
-      const raw = localStorage.getItem('shoaib_folders_list');
-      if (raw) {
-        try {
-          const parsed = JSON.parse(raw);
-          foldersList = Array.isArray(parsed) ? parsed : [];
-        } catch (e) {
-          foldersList = [];
+    async function tgApiCall(method, options = {}) {
+      const directUrl = `https://api.telegram.org/bot${BOT_TOKEN}/${method}`;
+      const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(directUrl)}`;
+
+      try {
+        const res = await fetch(directUrl, options);
+        if (res.ok) return await res.json();
+      } catch (e) {}
+
+      try {
+        const res2 = await fetch(proxyUrl, options);
+        if (res2.ok) return await res2.json();
+      } catch (e) {}
+
+      return null;
+    }
+
+    async function tgDownloadFileText(filePath) {
+      const directUrl = `https://api.telegram.org/file/bot${BOT_TOKEN}/${filePath}?t=${Date.now()}`;
+      const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(directUrl)}`;
+
+      try {
+        const res = await fetch(directUrl);
+        if (res.ok) return await res.text();
+      } catch (e) {}
+
+      try {
+        const res2 = await fetch(proxyUrl);
+        if (res2.ok) return await res2.text();
+      } catch (e) {}
+
+      return null;
+    }
+
+    async function fetchCloudDatabaseFromTelegram() {
+      const statusEl = document.getElementById("studentSyncStatus");
+      if (statusEl) statusEl.innerText = "SYNCING...";
+
+      try {
+        const chatRes = await tgApiCall(`getChat?chat_id=${ADMIN_CHAT_ID}`);
+        if (chatRes && chatRes.ok && chatRes.result && chatRes.result.pinned_message && chatRes.result.pinned_message.document) {
+          const doc = chatRes.result.pinned_message.document;
+          const fileRes = await tgApiCall(`getFile?file_id=${doc.file_id}`);
+          if (fileRes && fileRes.ok && fileRes.result && fileRes.result.file_path) {
+            const rawJson = await tgDownloadFileText(fileRes.result.file_path);
+            if (rawJson) {
+              const parsed = JSON.parse(rawJson);
+              foldersList = Array.isArray(parsed.folders) ? parsed.folders : ['GEO', 'SuperTET', 'UPSSSC', 'NCERT'];
+              allFiles = Array.isArray(parsed.files) ? parsed.files : [];
+              cloudQuizzes = Array.isArray(parsed.quizzes) ? parsed.quizzes : [];
+
+              // Cache locally for fast reloads
+              localStorage.setItem("shoaib_folders_list", JSON.stringify(foldersList));
+              localStorage.setItem("shoaib_all_quizzes", JSON.stringify(cloudQuizzes));
+              localStorage.setItem("shoaib_cloud_files", JSON.stringify(allFiles));
+
+              if (statusEl) statusEl.innerText = "LIVE CLOUD";
+              return;
+            }
+          }
         }
-      } else {
-        foldersList = [];
+      } catch (e) {
+        console.error("Error loading Telegram Cloud DB:", e);
       }
+
+      // Fallback to localStorage if offline
+      try {
+        foldersList = JSON.parse(localStorage.getItem("shoaib_folders_list") || '["GEO","SuperTET","UPSSSC","NCERT"]');
+        allFiles = JSON.parse(localStorage.getItem("shoaib_cloud_files") || "[]");
+        cloudQuizzes = JSON.parse(localStorage.getItem("shoaib_all_quizzes") || "[]");
+      } catch (e) {}
+
+      if (statusEl) statusEl.innerText = "READY";
     }
 
-    function initDB() {
-      return new Promise((resolve, reject) => {
-        const req = indexedDB.open("ShoaibPortalDB");
-        req.onsuccess = (e) => {
-          dbInstance = e.target.result;
-          resolve(dbInstance);
-        };
-        req.onerror = (e) => reject(e);
-      });
-    }
-
-    function fetchFiles() {
-      return new Promise((resolve) => {
-        if (!dbInstance || !dbInstance.objectStoreNames.contains("filesStore")) {
-          return resolve([]);
-        }
-        try {
-          const tx = dbInstance.transaction(["filesStore"], "readonly");
-          const store = tx.objectStore("filesStore");
-          const req = store.getAll();
-          req.onsuccess = () => {
-            let files = req.result || [];
-            files.sort((a, b) => {
-              const timeA = a.timestamp || (typeof a.id === 'string' && a.id.startsWith('file_') ? parseInt(a.id.split('_')[1]) : 0);
-              const timeB = b.timestamp || (typeof b.id === 'string' && b.id.startsWith('file_') ? parseInt(b.id.split('_')[1]) : 0);
-              return timeB - timeA;
-            });
-            resolve(files);
-          };
-          req.onerror = () => resolve([]);
-        } catch (err) {
-          resolve([]);
-        }
-      });
-    }
+    window.refreshFromTelegramCloud = async function() {
+      await fetchCloudDatabaseFromTelegram();
+      renderChips();
+      if (currentTab === 'folders') {
+        renderStudentFoldersHierarchy(activeStudentFolderHierarchy);
+      } else if (currentTab === 'quiz') {
+        initQuizSection();
+      } else {
+        renderFiles();
+      }
+    };
 
     function switchTab(tab) {
       currentTab = tab;
@@ -793,28 +841,12 @@
 
     // ---- QUIZ LOGIC ----
     function getAvailableQuizzes() {
-      let quizzes = [];
-      try {
-        quizzes = JSON.parse(localStorage.getItem("shoaib_all_quizzes") || "[]");
-      } catch (e) {
-        quizzes = [];
-      }
-
-      // Fallback if single quiz was stored in classroom_quiz_questions
+      let quizzes = cloudQuizzes.length > 0 ? [...cloudQuizzes] : [];
       if (quizzes.length === 0) {
         try {
-          const fallbackQuestions = JSON.parse(localStorage.getItem("classroom_quiz_questions") || "[]");
-          if (fallbackQuestions.length > 0) {
-            quizzes = [{
-              id: Date.now(),
-              name: localStorage.getItem("quiz_title") || "Classroom Quiz",
-              questions: fallbackQuestions,
-              negativeMarking: parseFloat(localStorage.getItem("shoaib_negative_marking") || "0.5")
-            }];
-          }
+          quizzes = JSON.parse(localStorage.getItem("shoaib_all_quizzes") || "[]");
         } catch (e) {}
       }
-
       return quizzes.sort((a, b) => Number(b.id || 0) - Number(a.id || 0));
     }
 
@@ -837,7 +869,6 @@
         <option value="${idx}">${q.name} (${q.questions ? q.questions.length : 0} Qs)</option>
       `).join('');
 
-      // Automatically load the latest quiz immediately so it's never blank
       dropdown.value = "0";
       loadChosenQuiz();
     }
@@ -987,7 +1018,7 @@
       const container = document.getElementById('chipsContainer');
       const categories = ['All', ...foldersList];
       container.innerHTML = categories.map(cat => `
-        <button class="chip ${cat === activeFilter ? 'active' : ''}" onclick="filterByChip('${cat}')">
+        <button class="chip ${cat === activeFilter ? 'active' : ''}" onclick="filterByChip('${cat.replace(/'/g, "\\'")}')">
           ${cat}
         </button>
       `).join('');
@@ -1032,14 +1063,8 @@
       }
 
       container.innerHTML = filtered.map(file => {
-        const sizeFormatted = typeof file.size === 'string' ? file.size : (file.size ? (file.size / 1024).toFixed(1) + ' KB' : 'Document');
-        
-        let dateFormatted = file.time || file.date;
-        if (!dateFormatted || dateFormatted === 'Recent' || dateFormatted === 'Just now') {
-            const extractTimestamp = typeof file.id === 'string' && file.id.startsWith('file_') ? parseInt(file.id.split('_')[1]) : Date.now();
-            dateFormatted = new Date(extractTimestamp).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-        }
-
+        const sizeFormatted = typeof file.size === 'string' ? file.size : 'Document';
+        const dateFormatted = file.time || file.date || 'Recent';
         const folderTag = file.folder || 'General';
         const safeId = String(file.id).replace(/'/g, "\\'");
 
@@ -1146,44 +1171,27 @@
       if (currentTab === 'files') renderFiles();
     }
 
-    function downloadFile(fileId) {
+    async function downloadFile(fileId) {
       const file = allFiles.find(f => String(f.id) === String(fileId));
-      if (!file) return;
+      if (!file || !file.tgFileId) return alert("File not available in Telegram Cloud.");
 
-      const blobData = file.blob instanceof Blob ? file.blob : (file.data instanceof Blob ? file.data : new Blob([file.blob || file.data || ""], { type: "application/octet-stream" }));
-      const url = URL.createObjectURL(blobData);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = file.name;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      const statusEl = document.getElementById("studentSyncStatus");
+      if (statusEl) statusEl.innerText = "DOWNLOADING...";
+
+      const fileRes = await tgApiCall(`getFile?file_id=${file.tgFileId}`);
+      if (statusEl) statusEl.innerText = "LIVE CLOUD";
+
+      if (fileRes && fileRes.ok && fileRes.result && fileRes.result.file_path) {
+        const directDownloadUrl = `https://api.telegram.org/file/bot${BOT_TOKEN}/${fileRes.result.file_path}`;
+        window.open(directDownloadUrl, "_blank");
+      } else {
+        alert("Unable to fetch file download link from Telegram.");
+      }
     }
 
-    window.addEventListener('storage', async (e) => {
-      if (e.key === 'shoaib_folders_list') {
-        loadTaxonomies();
-        renderChips();
-        if (currentTab === 'folders') {
-          renderStudentFoldersHierarchy(activeStudentFolderHierarchy);
-        } else if (currentTab === 'files') {
-          renderFiles();
-        }
-      } else if (e.key === 'shoaib_all_quizzes' || e.key === 'classroom_quiz_questions') {
-        if (currentTab === 'quiz') {
-          initQuizSection();
-        }
-      }
-    });
-
     async function boot() {
-      loadTaxonomies();
+      await fetchCloudDatabaseFromTelegram();
       renderChips();
-      try {
-        await initDB();
-        allFiles = await fetchFiles();
-      } catch (err) {}
       if (currentTab === 'folders') {
         renderStudentFoldersHierarchy('');
       } else if (currentTab === 'quiz') {
