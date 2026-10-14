@@ -45,7 +45,7 @@
     <h1>Online Quiz Portal</h1>
 
     <div class="select-box" id="selectBoxContainer">
-        <label for="quizDropdown" style="font-size: 0.85rem; font-weight: bold; color: #475569; display: block; margin-bottom: 5px;">Select Quiz to Attempt:</label>
+        <label for="quizDropdown" id="quizSyncLabel" style="font-size: 0.85rem; font-weight: bold; color: #475569; display: block; margin-bottom: 5px;">Syncing Quizzes from Telegram Cloud...</label>
         <select id="quizDropdown" onchange="loadChosenQuiz()">
             <option value="">-- Choose Uploaded Quiz --</option>
         </select>
@@ -63,23 +63,78 @@
 </div>
 
 <script>
+    const BOT_TOKEN = "8710019201:AAHTf8nJ609aPzr9_qHtibbQPPY1k10MAo8";
+    const ADMIN_CHAT_ID = "1616921893";
+
+    let allCloudQuizzes = [];
     let activeQuizQuestions = [];
     let activeQuizPenalty = 0.5;
     let currentIndex = 0;
     let userAnswers = {};
 
-    window.onload = function() {
-        populateQuizSelector();
+    async function tgApiCall(method) {
+        const directUrl = `https://api.telegram.org/bot${BOT_TOKEN}/${method}`;
+        const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(directUrl)}`;
+        try {
+            const res = await fetch(directUrl);
+            if (res.ok) return await res.json();
+        } catch (e) {}
+        try {
+            const res2 = await fetch(proxyUrl);
+            if (res2.ok) return await res2.json();
+        } catch (e) {}
+        return null;
+    }
+
+    async function tgDownloadFileText(filePath) {
+        const directUrl = `https://api.telegram.org/file/bot${BOT_TOKEN}/${filePath}?t=${Date.now()}`;
+        const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(directUrl)}`;
+        try {
+            const res = await fetch(directUrl);
+            if (res.ok) return await res.text();
+        } catch (e) {}
+        try {
+            const res2 = await fetch(proxyUrl);
+            if (res2.ok) return await res2.text();
+        } catch (e) {}
+        return null;
+    }
+
+    window.onload = async function() {
+        await populateQuizSelector();
     };
 
-    function populateQuizSelector() {
-        let quizzes = JSON.parse(localStorage.getItem("shoaib_all_quizzes") || "[]");
-        quizzes.sort((a, b) => new Date(b.id || 0) - new Date(a.id || 0));
+    async function populateQuizSelector() {
+        const label = document.getElementById("quizSyncLabel");
+        try {
+            const chatRes = await tgApiCall(`getChat?chat_id=${ADMIN_CHAT_ID}`);
+            if (chatRes && chatRes.ok && chatRes.result && chatRes.result.pinned_message && chatRes.result.pinned_message.document) {
+                const doc = chatRes.result.pinned_message.document;
+                const fileRes = await tgApiCall(`getFile?file_id=${doc.file_id}`);
+                if (fileRes && fileRes.ok && fileRes.result && fileRes.result.file_path) {
+                    const rawJson = await tgDownloadFileText(fileRes.result.file_path);
+                    if (rawJson) {
+                        const parsed = JSON.parse(rawJson);
+                        if (Array.isArray(parsed.quizzes)) {
+                            allCloudQuizzes = parsed.quizzes;
+                            localStorage.setItem("shoaib_all_quizzes", JSON.stringify(allCloudQuizzes));
+                        }
+                    }
+                }
+            }
+        } catch (e) {}
+
+        if (allCloudQuizzes.length === 0) {
+            allCloudQuizzes = JSON.parse(localStorage.getItem("shoaib_all_quizzes") || "[]");
+        }
+
+        allCloudQuizzes.sort((a, b) => new Date(b.id || 0) - new Date(a.id || 0));
+        if (label) label.textContent = "Select Quiz to Attempt:";
 
         const dropdown = document.getElementById("quizDropdown");
         dropdown.innerHTML = '<option value="">-- Choose Uploaded Quiz --</option>';
 
-        quizzes.forEach((quiz, index) => {
+        allCloudQuizzes.forEach((quiz, index) => {
             let opt = document.createElement("option");
             opt.value = index;
             opt.textContent = quiz.name;
@@ -99,8 +154,7 @@
 
         document.getElementById("selectBoxContainer").style.display = "none";
 
-        let quizzes = JSON.parse(localStorage.getItem("shoaib_all_quizzes") || "[]");
-        const selectedQuiz = quizzes[index];
+        const selectedQuiz = allCloudQuizzes[index];
         activeQuizQuestions = selectedQuiz.questions;
         activeQuizPenalty = selectedQuiz.negativeMarking !== undefined ? parseFloat(selectedQuiz.negativeMarking) : 0.5;
 
