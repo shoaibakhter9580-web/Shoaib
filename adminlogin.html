@@ -32,9 +32,9 @@
 
     <div class="space-y-3">
       <button onclick="sendTelegramAuthButtons()" id="btnSendAuth" 
-              class="w-full py-3.5 rounded-xl bg-purple-900 hover:bg-purple-800 text-white font-semibold text-xs transition shadow-md shadow-purple-900/10 flex items-center justify-center gap-2">
-        <i class="fa-solid fa-paper-plane text-xs"></i>
-        <span>Send Approve & Deny to Telegram</span>
+              class="w-full py-3.5 rounded-xl bg-purple-900 hover:bg-purple-800 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-purple-900 text-white font-semibold text-xs transition shadow-md shadow-purple-900/10 flex items-center justify-center gap-2">
+        <i id="btnSendIcon" class="fa-solid fa-paper-plane text-xs"></i>
+        <span id="btnSendText">Send Approve & Deny to Telegram</span>
       </button>
 
       <p id="tgAuthStatus" class="text-xs text-center font-medium min-h-[1.5rem] text-slate-500 pt-1">
@@ -49,8 +49,13 @@
 
   <script>
     const BOT_TOKEN = "8710019201:AAHTf8nJ609aPzr9_qHtibbQPPY1k10MAo8";
-    const ADMIN_CHAT_ID = "1616921893" ;
+    const ADMIN_CHAT_ID = "1616921893";
     let pollingInterval = null;
+    let cooldownInterval = null;
+    let cooldownRemaining = 0;
+    let isSendingRequest = false;
+    let isPollingUpdate = false;
+    let isAuthResolved = false;
     let lastUpdateId = 0;
 
     async function callTelegram(method, data = null) {
@@ -75,82 +80,141 @@
       }
     }
 
+    function startButtonCooldown(seconds) {
+      const btn = document.getElementById("btnSendAuth");
+      const btnIcon = document.getElementById("btnSendIcon");
+      const btnText = document.getElementById("btnSendText");
+
+      if (cooldownInterval) clearInterval(cooldownInterval);
+      cooldownRemaining = seconds;
+      btn.disabled = true;
+      btnIcon.className = "fa-solid fa-clock text-xs";
+      btnText.innerText = `Wait ${cooldownRemaining}s to Resend`;
+
+      cooldownInterval = setInterval(() => {
+        cooldownRemaining--;
+        if (isAuthResolved) {
+          clearInterval(cooldownInterval);
+          return;
+        }
+        if (cooldownRemaining <= 0) {
+          clearInterval(cooldownInterval);
+          cooldownInterval = null;
+          btn.disabled = false;
+          btnIcon.className = "fa-solid fa-paper-plane text-xs";
+          btnText.innerText = "Send Approve & Deny to Telegram";
+        } else {
+          btnText.innerText = `Wait ${cooldownRemaining}s to Resend`;
+        }
+      }, 1000);
+    }
+
     async function sendTelegramAuthButtons() {
+      // Prevent duplicate clicks while sending or during the 10-second cooldown
+      if (isSendingRequest || cooldownRemaining > 0 || isAuthResolved) return;
+      isSendingRequest = true;
+
+      // Immediately lock the button for 10 seconds
+      startButtonCooldown(10);
+
       const status = document.getElementById("tgAuthStatus");
       status.className = "text-xs text-center font-medium text-purple-700";
-      status.innerText = "Notification sent! Tap 'Approve Access' on your Telegram...";
+      status.innerText = "Sending request to Telegram...";
 
-      const latest = await callTelegram("getUpdates?offset=-1");
-      if (latest && latest.result && latest.result.length > 0) {
-        lastUpdateId = latest.result[0].update_id + 1;
-      }
+      try {
+        const latest = await callTelegram("getUpdates?offset=-1");
+        if (latest && latest.result && latest.result.length > 0) {
+          lastUpdateId = latest.result[0].update_id + 1;
+        }
 
-      const payload = {
-        chat_id: ADMIN_CHAT_ID,
-        text: `🔐 *Shoaib Akhter Portal Access Request*\n\n📍 *Campus:* Ghazipur, Uttar Pradesh\n👤 *Admin:* Shoaib (@shoaib9580)\n\n_Do you approve management access?_`,
-        parse_mode: "Markdown",
-        reply_markup: {
-          inline_keyboard: [
-            [
-              { text: "✅ Approve Access", callback_data: "auth_approve" },
-              { text: "❌ Deny", callback_data: "auth_deny" }
+        const payload = {
+          chat_id: ADMIN_CHAT_ID,
+          text: `🔐 *Shoaib Akhter Portal Access Request*\n\n📍 *Campus:* Ghazipur, Uttar Pradesh\n👤 *Admin:* Shoaib (@shoaib9580)\n\n_Do you approve management access?_`,
+          parse_mode: "Markdown",
+          reply_markup: {
+            inline_keyboard: [
+              [
+                { text: "✅ Approve Access", callback_data: "auth_approve" },
+                { text: "❌ Deny", callback_data: "auth_deny" }
+              ]
             ]
-          ]
-        }
-      };
-
-      const sendRes = await callTelegram("sendMessage", payload);
-      if (!sendRes || !sendRes.ok) {
-        status.className = "text-xs text-center font-medium text-amber-600";
-        status.innerText = "Bot offline or connection blocked. Please start @Shoaib_login on Telegram.";
-        return;
-      }
-
-      if (pollingInterval) clearInterval(pollingInterval);
-
-      pollingInterval = setInterval(async () => {
-        const updates = await callTelegram(`getUpdates?offset=${lastUpdateId}`);
-        if (!updates || !updates.ok || !updates.result) return;
-
-        for (const up of updates.result) {
-          lastUpdateId = up.update_id + 1;
-
-          if (up.callback_query) {
-            const cq = up.callback_query;
-            if (cq.data === "auth_approve") {
-              await callTelegram("answerCallbackQuery", {
-                callback_query_id: cq.id,
-                text: "✅ Access Approved! Welcome Shoaib."
-              });
-
-              await callTelegram("sendMessage", {
-                chat_id: ADMIN_CHAT_ID,
-                text: `✅ *Shoaib Akhter Management Login Alert*\nAdministrator authorized successfully.\nCampus: Ghazipur, Uttar Pradesh.`,
-                parse_mode: "Markdown"
-              });
-
-              clearInterval(pollingInterval);
-              sessionStorage.setItem("shoaib_admin_auth", "true");
-              status.className = "text-xs text-center font-bold text-emerald-600";
-              status.innerText = "Access Approved! Redirecting...";
-              setTimeout(() => {
-                window.location.href = "adminin.html";
-              }, 700);
-              return;
-            } else if (cq.data === "auth_deny") {
-              await callTelegram("answerCallbackQuery", {
-                callback_query_id: cq.id,
-                text: "❌ Access Denied."
-              });
-
-              clearInterval(pollingInterval);
-              status.className = "text-xs text-center font-medium text-rose-600";
-              status.innerText = "Access denied by Telegram administrator.";
-              return;
-            }
           }
+        };
+
+        const sendRes = await callTelegram("sendMessage", payload);
+        if (!sendRes || !sendRes.ok) {
+          status.className = "text-xs text-center font-medium text-amber-600";
+          status.innerText = "Bot offline or connection blocked. Please start @Shoaib_login on Telegram.";
+          return;
         }
-      }, 1500);
+
+        status.className = "text-xs text-center font-medium text-purple-700";
+        status.innerText = "Notification sent! Tap 'Approve Access' on your Telegram...";
+
+        if (pollingInterval) clearInterval(pollingInterval);
+        isPollingUpdate = false;
+
+        pollingInterval = setInterval(async () => {
+          // Prevent overlapping getUpdates requests from firing duplicate approvals
+          if (isPollingUpdate || isAuthResolved) return;
+          isPollingUpdate = true;
+
+          try {
+            const updates = await callTelegram(`getUpdates?offset=${lastUpdateId}`);
+            if (!updates || !updates.ok || !updates.result) return;
+
+            for (const up of updates.result) {
+              lastUpdateId = up.update_id + 1;
+
+              if (up.callback_query && !isAuthResolved) {
+                const cq = up.callback_query;
+                if (cq.data === "auth_approve") {
+                  isAuthResolved = true;
+                  clearInterval(pollingInterval);
+                  if (cooldownInterval) clearInterval(cooldownInterval);
+
+                  await callTelegram("answerCallbackQuery", {
+                    callback_query_id: cq.id,
+                    text: "✅ Access Approved! Welcome Shoaib."
+                  });
+
+                  await callTelegram("sendMessage", {
+                    chat_id: ADMIN_CHAT_ID,
+                    text: `✅ *Shoaib Akhter Management Login Alert*\nAdministrator authorized successfully.\nCampus: Ghazipur, Uttar Pradesh.`,
+                    parse_mode: "Markdown"
+                  });
+
+                  sessionStorage.setItem("shoaib_admin_auth", "true");
+                  status.className = "text-xs text-center font-bold text-emerald-600";
+                  status.innerText = "Access Approved! Redirecting...";
+                  setTimeout(() => {
+                    window.location.href = "adminin.html";
+                  }, 700);
+                  return;
+                } else if (cq.data === "auth_deny") {
+                  isAuthResolved = true;
+                  clearInterval(pollingInterval);
+
+                  await callTelegram("answerCallbackQuery", {
+                    callback_query_id: cq.id,
+                    text: "❌ Access Denied."
+                  });
+
+                  status.className = "text-xs text-center font-medium text-rose-600";
+                  status.innerText = "Access denied by Telegram administrator.";
+                  // Allow retry once the current 10-second cooldown finishes
+                  isAuthResolved = false;
+                  return;
+                }
+              }
+            }
+          } finally {
+            isPollingUpdate = false;
+          }
+        }, 1500);
+      } finally {
+        isSendingRequest = false;
+      }
     }
   </script>
 </body>
