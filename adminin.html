@@ -328,9 +328,6 @@
       }
     } catch(e) {}
 
-    // ============================================================================
-    // TELEGRAM BOT CLOUD DATABASE ENGINE (USING NEW DATABASE BOT)
-    // ============================================================================
     const BOT_TOKEN = window.TG_DB_CONFIG.BOT_TOKEN;
     const ADMIN_CHAT_ID = window.TG_DB_CONFIG.ADMIN_CHAT_ID;
     const DEFAULT_FOLDERS = window.TG_DB_CONFIG.DEFAULT_FOLDERS;
@@ -362,4 +359,10 @@
         badge.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${statusText}`;
       } else {
         badge.className = "text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1";
-        
+        badge.innerHTML = `<i class="fa-brands fa-telegram"></i> ${statusText}`;
+      }
+    }
+
+    async function tgApiCall(method, options = {}) {
+      const directUrl = `https://api.telegram.org/bot${BOT_TOKEN}/${method}`;
+      const prox
