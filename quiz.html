@@ -62,9 +62,10 @@
     <div id="result-container" style="display:none;"></div>
 </div>
 
+<script src="database.html"></script>
 <script>
-    const BOT_TOKEN = "8710019201:AAHTf8nJ609aPzr9_qHtibbQPPY1k10MAo8";
-    const ADMIN_CHAT_ID = "1616921893";
+    const BOT_TOKEN = window.TG_DB_CONFIG.BOT_TOKEN;
+    const ADMIN_CHAT_ID = window.TG_DB_CONFIG.ADMIN_CHAT_ID;
 
     let allCloudQuizzes = [];
     let activeQuizQuestions = [];
