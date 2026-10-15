@@ -1,1 +1,121 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Shoaib Portal — Central Telegram Database Engine</title>
+</head>
+<body>
+  <script>
+    // ============================================================================
+    // DEDICATED TELEGRAM DATABASE CONFIGURATION & ENGINE
+    // ============================================================================
+    window.TG_DB_CONFIG = {
+      BOT_TOKEN: "8776758933:AAEycdNQakPODbngj-4d2ZbYl_CGrhnjR58",
+      ADMIN_CHAT_ID: "1616921893",
+      DEFAULT_FOLDERS: ['GEO', 'SuperTET', 'UPSSSC', 'NCERT']
+    };
+
+    window.CloudDatabase = {
+      async callApi(method, options = {}) {
+        const directUrl = `https://api.telegram.org/bot${window.TG_DB_CONFIG.BOT_TOKEN}/${method}`;
+        const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(directUrl)}`;
+
+        try {
+          const res = await fetch(directUrl, options);
+          if (res.ok) return await res.json();
+        } catch (e) {}
+
+        try {
+          const res2 = await fetch(proxyUrl, options);
+          if (res2.ok) return await res2.json();
+        } catch (e) {}
+
+        return null;
+      },
+
+      async downloadText(filePath) {
+        const directUrl = `https://api.telegram.org/file/bot${window.TG_DB_CONFIG.BOT_TOKEN}/${filePath}?t=${Date.now()}`;
+        const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(directUrl)}`;
+
+        try {
+          const res = await fetch(directUrl);
+          if (res.ok) return await res.text();
+        } catch (e) {}
+
+        try {
+          const res2 = await fetch(proxyUrl);
+          if (res2.ok) return await res2.text();
+        } catch (e) {}
+
+        return null;
+      },
+
+      async load() {
+        try {
+          const chatRes = await this.callApi(`getChat?chat_id=${window.TG_DB_CONFIG.ADMIN_CHAT_ID}`);
+          if (chatRes && chatRes.ok && chatRes.result && chatRes.result.pinned_message && chatRes.result.pinned_message.document) {
+            const doc = chatRes.result.pinned_message.document;
+            const fileRes = await this.callApi(`getFile?file_id=${doc.file_id}`);
+            if (fileRes && fileRes.ok && fileRes.result && fileRes.result.file_path) {
+              const rawJson = await this.downloadText(fileRes.result.file_path);
+              if (rawJson) {
+                const parsed = JSON.parse(rawJson);
+                return {
+                  folders: Array.isArray(parsed.folders) ? parsed.folders : [...window.TG_DB_CONFIG.DEFAULT_FOLDERS],
+                  files: Array.isArray(parsed.files) ? parsed.files : [],
+                  quizzes: Array.isArray(parsed.quizzes) ? parsed.quizzes : []
+                };
+              }
+            }
+          }
+        } catch (e) {}
+
+        // Fallback to localStorage if offline
+        return {
+          folders: JSON.parse(localStorage.getItem("shoaib_folders_list") || JSON.stringify(window.TG_DB_CONFIG.DEFAULT_FOLDERS)),
+          files: JSON.parse(localStorage.getItem("shoaib_cloud_files") || "[]"),
+          quizzes: JSON.parse(localStorage.getItem("shoaib_all_quizzes") || "[]")
+        };
+      },
+
+      async save(state) {
+        try {
+          localStorage.setItem("shoaib_folders_list", JSON.stringify(state.folders));
+          localStorage.setItem("shoaib_all_quizzes", JSON.stringify(state.quizzes));
+          localStorage.setItem("shoaib_cloud_files", JSON.stringify(state.files));
+
+          const jsonString = JSON.stringify(state);
+          const blob = new Blob([jsonString], { type: "application/json" });
+          const formData = new FormData();
+          formData.append("chat_id", window.TG_DB_CONFIG.ADMIN_CHAT_ID);
+          formData.append("document", blob, "portal_cloud_db.json");
+          formData.append("caption", `🔄 Shoaib Portal Dedicated DB\n📁 Folders: ${state.folders.length} | 📄 Files: ${state.files.length} | ❓ Quizzes: ${state.quizzes.length}`);
+
+          const sendRes = await this.callApi("sendDocument", {
+            method: "POST",
+            body: formData
+          });
+
+          if (sendRes && sendRes.ok && sendRes.result) {
+            const msgId = sendRes.result.message_id;
+            await this.callApi("pinChatMessage", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                chat_id: window.TG_DB_CONFIG.ADMIN_CHAT_ID,
+                message_id: msgId,
+                disable_notification: true
+              })
+            });
+            return true;
+          }
+        } catch (err) {
+          console.error("Database sync error:", err);
+        }
+        return false;
+      }
+    };
+  </script>
+</body>
+</html>
