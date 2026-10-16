@@ -16,7 +16,6 @@
   </style>
 </head>
 <body class="flex items-center justify-center p-4 min-h-screen">
-  <!-- Modal Card matching Image 3 -->
   <div class="bg-white w-full max-w-sm rounded-3xl p-6 relative border border-purple-100 shadow-2xl text-slate-900">
     <a href="nitrence.html" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 transition">
       <i class="fa-solid fa-xmark text-lg"></i>
@@ -48,6 +47,7 @@
   </div>
 
   <script>
+    // Using old login bot for authentication
     const BOT_TOKEN = "8710019201:AAHTf8nJ609aPzr9_qHtibbQPPY1k10MAo8";
     const ADMIN_CHAT_ID = "1616921893";
     let pollingInterval = null;
@@ -110,11 +110,9 @@
     }
 
     async function sendTelegramAuthButtons() {
-      // Prevent duplicate clicks while sending or during the 10-second cooldown
       if (isSendingRequest || cooldownRemaining > 0 || isAuthResolved) return;
       isSendingRequest = true;
 
-      // Immediately lock the button for 10 seconds
       startButtonCooldown(10);
 
       const status = document.getElementById("tgAuthStatus");
@@ -144,7 +142,7 @@
         const sendRes = await callTelegram("sendMessage", payload);
         if (!sendRes || !sendRes.ok) {
           status.className = "text-xs text-center font-medium text-amber-600";
-          status.innerText = "Bot offline or connection blocked. Please start @Shoaib_login on Telegram.";
+          status.innerText = "Bot offline or connection blocked.";
           return;
         }
 
@@ -155,7 +153,6 @@
         isPollingUpdate = false;
 
         pollingInterval = setInterval(async () => {
-          // Prevent overlapping getUpdates requests from firing duplicate approvals
           if (isPollingUpdate || isAuthResolved) return;
           isPollingUpdate = true;
 
@@ -202,7 +199,6 @@
 
                   status.className = "text-xs text-center font-medium text-rose-600";
                   status.innerText = "Access denied by Telegram administrator.";
-                  // Allow retry once the current 10-second cooldown finishes
                   isAuthResolved = false;
                   return;
                 }
