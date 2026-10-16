@@ -320,7 +320,6 @@
     </div>
   </div>
 
-  <script src="database.html"></script>
   <script>
     try {
       if (typeof pdfjsLib !== 'undefined') {
@@ -328,9 +327,12 @@
       }
     } catch(e) {}
 
-    const BOT_TOKEN = window.TG_DB_CONFIG.BOT_TOKEN;
-    const ADMIN_CHAT_ID = window.TG_DB_CONFIG.ADMIN_CHAT_ID;
-    const DEFAULT_FOLDERS = window.TG_DB_CONFIG.DEFAULT_FOLDERS;
+    // ============================================================================
+    // DEDICATED TELEGRAM DATABASE BOT CONFIGURATION (NEW DB BOT)
+    // ============================================================================
+    const BOT_TOKEN = "8776758933:AAEycdNQakPODbngj-4d2ZbYl_CGrhnjR58";
+    const ADMIN_CHAT_ID = "1616921893";
+    const DEFAULT_FOLDERS = ['GEO', 'SuperTET', 'UPSSSC', 'NCERT'];
 
     let cloudState = {
       folders: [...DEFAULT_FOLDERS],
@@ -397,6 +399,7 @@
       return null;
     }
 
+    // Pull latest DB state from the Pinned Message in Admin's Telegram Bot Chat
     async function loadDatabaseFromTelegram() {
       setSyncBadge("Loading Telegram DB...", true);
       try {
@@ -422,6 +425,7 @@
         console.error("Telegram DB fetch error:", err);
       }
 
+      // Fallback to local cache if no pinned message exists yet
       try {
         const localFolders = JSON.parse(localStorage.getItem("shoaib_folders_list") || "null");
         const localQuizzes = JSON.parse(localStorage.getItem("shoaib_all_quizzes") || "null");
@@ -435,6 +439,7 @@
       return false;
     }
 
+    // Save entire DB state to Telegram Bot & Pin it so all phones/PCs read it
     async function syncDatabaseToTelegram() {
       setSyncBadge("Syncing to Telegram...", true);
       mirrorToLocalCache();
@@ -504,6 +509,7 @@
       return cloudState.files;
     }
 
+    // Upload actual file binary to Telegram Bot to get a permanent cross-device file_id
     async function uploadFileBlobToTelegram(fileBlob, fileName) {
       const formData = new FormData();
       formData.append("chat_id", ADMIN_CHAT_ID);
@@ -521,9 +527,10 @@
           return doc.file_id;
         }
       }
-      throw new Error("Telegram file upload failed. Ensure file is under 50MB.");
+      throw new Error("Telegram file upload failed. Make sure you pressed /start on your new DB Bot and the file is under 50MB.");
     }
 
+    // Download/Open a file from Telegram using its permanent file_id
     window.downloadFile = async function(id) {
       try {
         const item = cloudState.files.find(f => String(f.id) === String(id));
@@ -772,7 +779,9 @@
         const folder = activeFolderFilter || (folderDest ? folderDest.value || null : null);
         const tag = tagInput ? tagInput.value.trim() : "";
 
+        // 1. Upload binary file to Telegram Bot
         const tgFileId = await uploadFileBlobToTelegram(selectedFileBlob, title);
+
         const uploadDate = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
         const newRecord = {
@@ -788,6 +797,7 @@
           tgFileId: tgFileId
         };
 
+        // 2. Add to shared cloud state & sync index to Telegram
         cloudState.files.unshift(newRecord);
         await syncDatabaseToTelegram();
 
@@ -1142,7 +1152,10 @@
           continue;
         }
 
-        const optMatch = line.match(/^[\(\[]?([A-Da-dक-घ1-4])[\)\].:\-\s]+\s*(.+)/); if (optMatch && currentQ) { let optText = optMatch[2] .replace(/^[\)\].:\-\s]+/, '')
+        const optMatch = line.match(/^[\(\[]?([A-Da-dक-घ1-4])[\)\].:\-\s]+\s*(.+)/);
+        if (optMatch && currentQ) {
+          let optText = optMatch[2]
+            .replace(/^[\)\].:\-\s]+/, '')
             .replace(/\s{2,}/g, ' ')
             .replace(/[\.@\*•]/g, '')
             .trim();
@@ -1244,13 +1257,20 @@
       }
     };
 
-    window.onload = async function() {
+    window.addEventListener("DOMContentLoaded", async function() {
+      // Render immediately so UI is responsive right away
+      populateFolderDropdown();
+      renderFilesList();
+      renderFolders();
+      renderQuizManager();
+
+      // Then sync latest state from Telegram Cloud DB
       await loadDatabaseFromTelegram();
       populateFolderDropdown();
       renderFilesList();
       renderFolders();
       renderQuizManager();
-    };
+    });
   </script>
 </body>
 </html>
